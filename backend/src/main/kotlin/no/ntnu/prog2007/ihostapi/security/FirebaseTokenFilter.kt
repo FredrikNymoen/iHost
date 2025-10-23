@@ -17,7 +17,7 @@ import java.util.logging.Logger
  */
 @Component
 class FirebaseTokenFilter(private val firebaseAuth: FirebaseAuth) : OncePerRequestFilter() {
-    private val logger = Logger.getLogger(FirebaseTokenFilter::class.java.name)
+    private val log = Logger.getLogger(FirebaseTokenFilter::class.java.name)
 
     /**
      * Filter requests to validate Firebase JWT tokens
@@ -45,7 +45,7 @@ class FirebaseTokenFilter(private val firebaseAuth: FirebaseAuth) : OncePerReque
                 // Set authentication in security context
                 SecurityContextHolder.getContext().authentication = authentication
             } catch (e: Exception) {
-                logger.warning("Token verification failed: ${e.message}")
+                log.warning("Token verification failed: ${e.message}")
             }
         }
 
