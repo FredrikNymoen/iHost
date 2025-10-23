@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.logging.Logger
 
 @RestController
@@ -109,14 +110,18 @@ class AuthController(
             }
 
             // Create User model instance
+            val now = LocalDateTime.now()
+            val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+            val timestamp = now.format(formatter)
+
             val user = User(
                 uid = uid,
                 email = request.email,
                 displayName = request.displayName,
                 phoneNumber = request.phoneNumber,
                 photoUrl = request.photoUrl,
-                createdAt = LocalDateTime.now(),
-                updatedAt = LocalDateTime.now(),
+                createdAt = timestamp,
+                updatedAt = timestamp,
                 isEmailVerified = userRecord.isEmailVerified
             )
 

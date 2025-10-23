@@ -1,13 +1,13 @@
 package no.ntnu.prog2007.ihostapi.model
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
-import java.time.LocalDateTime
 
 /**
  * User model representing a user in the system
  * Stored in both Firebase Auth and Firestore
+ *
+ * Timestamps are stored as ISO-8601 strings in Firestore to avoid serialization issues
  */
 data class User(
     @field:NotBlank(message = "UID is required")
@@ -24,11 +24,9 @@ data class User(
 
     val photoUrl: String? = null,
 
-    @JsonIgnore
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+    val createdAt: String? = null,
 
-    @JsonIgnore
-    val updatedAt: LocalDateTime = LocalDateTime.now(),
+    val updatedAt: String? = null,
 
     val isEmailVerified: Boolean = false
 )
