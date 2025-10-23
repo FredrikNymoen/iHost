@@ -1,12 +1,17 @@
 package no.ntnu.prog2007.ihost.ui.screens.addevent
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -127,7 +132,7 @@ fun AddEventScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp),
+                .padding(top = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button(
@@ -143,16 +148,39 @@ fun AddEventScreen(
                 },
                 modifier = Modifier
                     .weight(1f)
-                    .height(50.dp),
-                enabled = title.isNotEmpty() && eventDate.isNotEmpty() && !uiState.isLoading
+                    .height(60.dp),
+                enabled = title.isNotEmpty() && eventDate.isNotEmpty() && !uiState.isLoading,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFFFC107),
+                    contentColor = Color(0xFF001D3D),
+                    disabledContainerColor = Color(0xFFB8860B),
+                    disabledContentColor = Color(0xFF001D3D)
+                ),
+                shape = RoundedCornerShape(12.dp),
+                elevation = ButtonDefaults.buttonElevation(
+                    defaultElevation = 12.dp,
+                    pressedElevation = 6.dp
+                )
             ) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
+                        modifier = Modifier.size(28.dp),
+                        color = Color(0xFF001D3D),
+                        strokeWidth = 3.dp
                     )
                 } else {
-                    Text("Opprett event")
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Create Event",
+                        modifier = Modifier
+                            .size(28.dp)
+                            .padding(end = 8.dp)
+                    )
+                    Text(
+                        "Opprett event",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
