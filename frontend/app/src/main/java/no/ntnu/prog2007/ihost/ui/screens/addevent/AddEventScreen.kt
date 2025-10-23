@@ -5,6 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import java.time.LocalDate
@@ -30,62 +31,88 @@ fun AddEventScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        Text(
-            text = "Nytt event",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 32.dp)
-        )
 
         OutlinedTextField(
             value = title,
             onValueChange = { title = it },
-            label = { Text("Event tittel") },
+            label = { Text("Event tittel", color = Color.White) },
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(top = 32.dp)
                 .padding(bottom = 16.dp),
-            enabled = !uiState.isLoading
+            enabled = !uiState.isLoading,
+            textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color(0xFFFFC107),
+                unfocusedBorderColor = Color(0xFFFFC107),
+                cursorColor = Color(0xFFFFC107)
+            )
         )
 
         OutlinedTextField(
             value = description,
             onValueChange = { description = it },
-            label = { Text("Beskrivelse (valgfritt)") },
+            label = { Text("Beskrivelse (valgfritt)", color = Color.White) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
                 .heightIn(min = 80.dp),
             minLines = 3,
-            enabled = !uiState.isLoading
+            enabled = !uiState.isLoading,
+            textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color(0xFFFFC107),
+                unfocusedBorderColor = Color(0xFFFFC107),
+                cursorColor = Color(0xFFFFC107)
+            )
         )
 
         OutlinedTextField(
             value = eventDate,
             onValueChange = { eventDate = it },
-            label = { Text("Dato (YYYY-MM-DD)") },
+            label = { Text("Dato (YYYY-MM-DD)", color = Color.White) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
-            enabled = !uiState.isLoading
+            enabled = !uiState.isLoading,
+            textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color(0xFFFFC107),
+                unfocusedBorderColor = Color(0xFFFFC107),
+                cursorColor = Color(0xFFFFC107)
+            )
         )
 
         OutlinedTextField(
             value = eventTime,
             onValueChange = { eventTime = it },
-            label = { Text("Tid (HH:mm) (valgfritt)") },
+            label = { Text("Tid (HH:mm) (valgfritt)", color = Color.White) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
-            enabled = !uiState.isLoading
+            enabled = !uiState.isLoading,
+            textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color(0xFFFFC107),
+                unfocusedBorderColor = Color(0xFFFFC107),
+                cursorColor = Color(0xFFFFC107)
+            )
         )
 
         OutlinedTextField(
             value = location,
             onValueChange = { location = it },
-            label = { Text("Sted (valgfritt)") },
+            label = { Text("Sted (valgfritt)", color = Color.White) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
-            enabled = !uiState.isLoading
+            enabled = !uiState.isLoading,
+            textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color(0xFFFFC107),
+                unfocusedBorderColor = Color(0xFFFFC107),
+                cursorColor = Color(0xFFFFC107)
+            )
         )
 
         if (uiState.errorMessage != null) {

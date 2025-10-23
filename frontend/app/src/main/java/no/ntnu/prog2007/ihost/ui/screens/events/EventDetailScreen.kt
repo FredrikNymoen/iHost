@@ -68,14 +68,18 @@ fun EventDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Event Details") },
+                title = { Text("Event Details", color = Color(0xFFFFC107)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color(0xFFFFC107))
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
+                )
             )
-        }
+        },
+        containerColor = Color.Transparent
     ) { padding ->
         if (event != null && currentUserId != null) {
             Column(
@@ -112,7 +116,7 @@ fun EventDetailScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(
-                                color = Color(0xFFF5F5F5),
+                                color = Color(0xFF0C5CA7),
                                 shape = RoundedCornerShape(8.dp)
                             )
                             .padding(12.dp),
@@ -122,12 +126,13 @@ fun EventDetailScreen(
                         Icon(
                             imageVector = Icons.Default.LocationOn,
                             contentDescription = "Location",
-                            tint = Color(0xFF6B5B95),
+                            tint = Color(0xFFFFC107),
                             modifier = Modifier.size(20.dp)
                         )
                         Text(
                             text = event.location,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.White
                         )
                     }
 
@@ -140,10 +145,11 @@ fun EventDetailScreen(
                     Text(
                         text = event.description,
                         style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White,
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(
-                                color = Color(0xFFF5F5F5),
+                                color = Color(0xFF0C5CA7),
                                 shape = RoundedCornerShape(8.dp)
                             )
                             .padding(12.dp)
@@ -167,7 +173,7 @@ fun EventDetailScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = Color(0xFFF5F5F5),
+                            color = Color(0xFF0C5CA7),
                             shape = RoundedCornerShape(8.dp)
                         )
                         .padding(12.dp),
@@ -189,7 +195,8 @@ fun EventDetailScreen(
                             Text(
                                 text = attendeeNames[attendeeId] ?: attendeeId,
                                 style = MaterialTheme.typography.bodySmall,
-                                fontSize = 11.sp
+                                fontSize = 11.sp,
+                                color = Color.White
                             )
                         }
                     }
@@ -374,6 +381,7 @@ fun SectionTitle(title: String) {
         style = MaterialTheme.typography.titleSmall,
         fontWeight = FontWeight.Bold,
         fontSize = 14.sp,
+        color = Color.White,
         modifier = Modifier.padding(bottom = 8.dp)
     )
 }
@@ -384,7 +392,7 @@ fun EventDetailItem(label: String, value: String) {
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = Color(0xFFF5F5F5),
+                color = Color(0xFF0C5CA7),
                 shape = RoundedCornerShape(8.dp)
             )
             .padding(12.dp),
@@ -394,13 +402,14 @@ fun EventDetailItem(label: String, value: String) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = Color.Gray,
+            color = Color(0xFFB0B0B0),
             fontSize = 12.sp
         )
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            color = Color.White
         )
     }
 }

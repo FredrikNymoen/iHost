@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -16,6 +18,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -23,7 +27,9 @@ import com.google.firebase.FirebaseApp
 import no.ntnu.prog2007.ihost.ui.components.BottomNavigationBar
 import no.ntnu.prog2007.ihost.ui.navigation.NavigationGraph
 import no.ntnu.prog2007.ihost.ui.navigation.Screen
+import no.ntnu.prog2007.ihost.ui.theme.DarkBlue
 import no.ntnu.prog2007.ihost.ui.theme.IHostTheme
+import no.ntnu.prog2007.ihost.ui.theme.LightBlue
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 
@@ -85,37 +91,49 @@ fun IHostApp() {
                            currentRoute != Screen.SignUp.route &&
                            currentRoute?.startsWith("event_detail") != true
 
-    Scaffold(
-        topBar = {
-            if (shouldShowTopBar) {
-                TopAppBar(
-                    title = {
-                        Text(
-                            bottomNavScreens.find { it.route == currentRoute }?.title ?: ""
+    val gradientBrush = Brush.verticalGradient(
+        colors = listOf(LightBlue, DarkBlue)
+    )
+
+    androidx.compose.foundation.layout.Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(gradientBrush)
+    ) {
+        Scaffold(
+            topBar = {
+                if (shouldShowTopBar) {
+                    TopAppBar(
+                        title = {
+                            Text(
+                                bottomNavScreens.find { it.route == currentRoute }?.title ?: "",
+                                color = Color(0xFFFFC107)
+                            )
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = DarkBlue
                         )
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
-                )
-            }
-        },
-        bottomBar = {
-            if (shouldShowBottomNav) {
-                BottomNavigationBar(
-                    navController = navController,
-                    screens = bottomNavScreens,
-                    currentRoute = currentRoute
-                )
-            }
+                }
+            },
+            bottomBar = {
+                if (shouldShowBottomNav) {
+                    BottomNavigationBar(
+                        navController = navController,
+                        screens = bottomNavScreens,
+                        currentRoute = currentRoute
+                    )
+                }
+            },
+            containerColor = Color.Transparent
+        ) { padding ->
+            NavigationGraph(
+                navController = navController,
+                authViewModel = authViewModel,
+                eventViewModel = eventViewModel,
+                modifier = Modifier.padding(padding),
+                startDestination = startDestination
+            )
         }
-    ) { padding ->
-        NavigationGraph(
-            navController = navController,
-            authViewModel = authViewModel,
-            eventViewModel = eventViewModel,
-            modifier = Modifier.padding(padding),
-            startDestination = startDestination
-        )
     }
 }

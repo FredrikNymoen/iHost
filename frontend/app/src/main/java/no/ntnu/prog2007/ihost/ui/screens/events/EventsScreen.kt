@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import no.ntnu.prog2007.ihost.ui.screens.events.components.EventItem
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
@@ -35,13 +36,13 @@ fun EventsScreen(
             ) {
                 Icon(Icons.Default.Refresh, contentDescription = "Refresh")
             }
-        }
+        },
+        containerColor = Color.Transparent
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
         ) {
             when {
                 uiState.isLoading -> {
@@ -67,14 +68,16 @@ fun EventsScreen(
                     val sortedEvents = uiState.events.sortedWith(
                         compareBy({ it.eventDate }, { it.eventTime ?: "" })
                     )
-                    LazyColumn {
+                    LazyColumn(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         items(sortedEvents) { event ->
                             EventItem(
                                 event = event,
                                 authViewModel = authViewModel,
                                 onClick = { onEventClick(event.id) }
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
                 }

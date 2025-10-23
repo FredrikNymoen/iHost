@@ -2,6 +2,13 @@ package no.ntnu.prog2007.ihost.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+// Primary colors
+val DarkBlue = Color(0xFF001D3D)
+val MediumBlue = Color(0xFF0C5CA7)
+val LightBlue = Color(0xFF5EC6F5)
+val Gold = Color(0xFFFFC107)
+
+// Legacy colors (kept for compatibility)
 val Purple80 = Color(0xFFD0BCFF)
 val PurpleGrey80 = Color(0xFFCCC2DC)
 val Pink80 = Color(0xFFEFB8C8)

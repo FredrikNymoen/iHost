@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.ntnu.prog2007.ihost.data.model.Event
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
+import no.ntnu.prog2007.ihost.ui.theme.MediumBlue
+import no.ntnu.prog2007.ihost.ui.theme.Gold
 
 @Composable
 fun EventItem(
@@ -32,12 +34,6 @@ fun EventItem(
     val currentUserId = authUiState.currentUser?.uid
     val isAttending = currentUserId != null && event.attendees.contains(currentUserId)
     val isPending = currentUserId != null && !event.attendees.contains(currentUserId)
-    val gradientBrush = Brush.linearGradient(
-        colors = listOf(
-            Color(0xFF6B5B95),
-            Color(0xFF4A3F7F)
-        )
-    )
 
     Card(
         modifier = Modifier
@@ -50,7 +46,7 @@ fun EventItem(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(gradientBrush)
+                .background(MediumBlue)
         ) {
             Row(
                 modifier = Modifier
