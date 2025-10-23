@@ -1,7 +1,6 @@
 package no.ntnu.prog2007.ihost.data.model
 
 import com.google.gson.annotations.SerializedName
-import java.time.LocalDateTime
 
 data class Event(
     @SerializedName("id")
@@ -14,7 +13,7 @@ data class Event(
     val description: String? = null,
 
     @SerializedName("eventDate")
-    val eventDate: String, // ISO format
+    val eventDate: String, // ISO format YYYY-MM-DD
 
     @SerializedName("eventTime")
     val eventTime: String? = null, // HH:mm format
@@ -32,10 +31,10 @@ data class Event(
     val attendees: List<String> = emptyList(),
 
     @SerializedName("createdAt")
-    val createdAt: LocalDateTime? = null,
+    val createdAt: String? = null, // ISO 8601 format
 
     @SerializedName("updatedAt")
-    val updatedAt: LocalDateTime? = null
+    val updatedAt: String? = null // ISO 8601 format
 )
 
 data class CreateEventRequest(

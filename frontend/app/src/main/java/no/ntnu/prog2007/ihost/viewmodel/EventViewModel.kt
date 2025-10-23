@@ -26,8 +26,13 @@ class EventViewModel(
     private val _uiState = MutableStateFlow(EventUiState())
     val uiState: StateFlow<EventUiState> = _uiState.asStateFlow()
 
-    init {
-        loadEvents()
+    private var eventsLoaded = false
+
+    fun ensureEventsLoaded() {
+        if (!eventsLoaded) {
+            loadEvents()
+            eventsLoaded = true
+        }
     }
 
     fun loadEvents() {

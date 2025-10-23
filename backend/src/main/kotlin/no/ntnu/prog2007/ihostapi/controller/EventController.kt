@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.logging.Logger
 
@@ -111,6 +112,10 @@ class EventController(
                 "Anonymous"
             }
 
+            val now = LocalDateTime.now()
+            val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+            val timestamp = now.format(formatter)
+
             val event = Event(
                 id = UUID.randomUUID().toString(),
                 title = request.title,
@@ -121,8 +126,8 @@ class EventController(
                 creatorUid = uid,
                 creatorName = creatorName,
                 attendees = listOf(uid), // Creator is automatically an attendee
-                createdAt = LocalDateTime.now(),
-                updatedAt = LocalDateTime.now()
+                createdAt = timestamp,
+                updatedAt = timestamp
             )
 
             firestore.collection(EVENTS_COLLECTION)
@@ -181,6 +186,10 @@ class EventController(
                     .body(ErrorResponse("FORBIDDEN", "Only the creator can update this event"))
             }
 
+            val now = LocalDateTime.now()
+            val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+            val timestamp = now.format(formatter)
+
             // Update only non-null fields
             val updatedEvent = event.copy(
                 title = request.title ?: event.title,
@@ -188,7 +197,7 @@ class EventController(
                 eventDate = request.eventDate ?: event.eventDate,
                 eventTime = request.eventTime ?: event.eventTime,
                 location = request.location ?: event.location,
-                updatedAt = LocalDateTime.now()
+                updatedAt = timestamp
             )
 
             firestore.collection(EVENTS_COLLECTION)
@@ -285,9 +294,13 @@ class EventController(
                     .body(ErrorResponse("ALREADY_ATTENDING", "Already attending this event"))
             }
 
+            val now = LocalDateTime.now()
+            val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+            val timestamp = now.format(formatter)
+
             val updatedEvent = event.copy(
                 attendees = event.attendees + uid,
-                updatedAt = LocalDateTime.now()
+                updatedAt = timestamp
             )
 
             firestore.collection(EVENTS_COLLECTION)
@@ -337,9 +350,13 @@ class EventController(
                     .body(ErrorResponse("NOT_ATTENDING", "Not attending this event"))
             }
 
+            val now = LocalDateTime.now()
+            val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+            val timestamp = now.format(formatter)
+
             val updatedEvent = event.copy(
                 attendees = event.attendees.filterNot { it == uid },
-                updatedAt = LocalDateTime.now()
+                updatedAt = timestamp
             )
 
             firestore.collection(EVENTS_COLLECTION)

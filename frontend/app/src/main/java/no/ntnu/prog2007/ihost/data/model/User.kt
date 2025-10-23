@@ -1,7 +1,6 @@
 package no.ntnu.prog2007.ihost.data.model
 
 import com.google.gson.annotations.SerializedName
-import java.time.LocalDateTime
 
 data class User(
     @SerializedName("uid")
@@ -20,10 +19,10 @@ data class User(
     val photoUrl: String? = null,
 
     @SerializedName("createdAt")
-    val createdAt: LocalDateTime? = null,
+    val createdAt: String? = null, // ISO 8601 format
 
     @SerializedName("updatedAt")
-    val updatedAt: LocalDateTime? = null,
+    val updatedAt: String? = null, // ISO 8601 format
 
     @SerializedName("isEmailVerified")
     val isEmailVerified: Boolean = false

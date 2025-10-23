@@ -1,8 +1,6 @@
 package no.ntnu.prog2007.ihostapi.model
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.validation.constraints.NotBlank
-import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -14,29 +12,27 @@ data class Event(
     val id: String = UUID.randomUUID().toString(),
 
     @field:NotBlank(message = "Title is required")
-    val title: String,
+    val title: String = "",
 
     val description: String? = null,
 
     @field:NotBlank(message = "Event date is required")
-    val eventDate: String, // ISO format YYYY-MM-DD
+    val eventDate: String = "", // ISO format YYYY-MM-DD
 
     val eventTime: String? = null, // HH:mm format
 
     val location: String? = null,
 
     @field:NotBlank(message = "Creator UID is required")
-    val creatorUid: String,
+    val creatorUid: String = "",
 
     val creatorName: String? = null,
 
     val attendees: List<String> = emptyList(),
 
-    @JsonIgnore
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+    val createdAt: String? = null,
 
-    @JsonIgnore
-    val updatedAt: LocalDateTime = LocalDateTime.now()
+    val updatedAt: String? = null
 )
 
 /**
