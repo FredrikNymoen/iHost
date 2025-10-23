@@ -17,6 +17,11 @@ interface ApiService {
     @GET("api/auth/verify")
     suspend fun verifyAuth(): User
 
+    @GET("api/auth/user/{uid}")
+    suspend fun getUserByUid(
+        @Path("uid") uid: String
+    ): User
+
     // Event endpoints
     @GET("api/events")
     suspend fun getAllEvents(): List<Event>

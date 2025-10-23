@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -70,6 +71,41 @@ class AuthController(
             logger.warning("Error verifying token: ${e.message}")
             ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(ErrorResponse("UNAUTHORIZED", "Token verification failed"))
+        }
+    }
+
+    /**
+     * Get user by UID
+     * Used to retrieve user information (like display name) for a specific UID
+     * Public endpoint - does not require authentication
+     */
+    @GetMapping("/user/{uid}")
+    fun getUserByUid(@PathVariable uid: String): ResponseEntity<Any> {
+        return try {
+            val userDoc = firestore.collection(USERS_COLLECTION)
+                .document(uid)
+                .get()
+                .get()
+
+            if (!userDoc.exists()) {
+                logger.warning("User document not found in Firestore for UID: $uid")
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ErrorResponse("NOT_FOUND", "Bruker ikke funnet"))
+            }
+
+            val user = userDoc.toObject(User::class.java)
+
+            if (user != null) {
+                logger.info("Retrieved user information for UID: $uid")
+                ResponseEntity.ok(user)
+            } else {
+                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ErrorResponse("ERROR", "Could not parse user data"))
+            }
+        } catch (e: Exception) {
+            logger.warning("Error retrieving user $uid: ${e.message}")
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ErrorResponse("ERROR", "Could not retrieve user"))
         }
     }
 

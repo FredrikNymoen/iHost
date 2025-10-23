@@ -12,11 +12,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import no.ntnu.prog2007.ihost.ui.screens.events.components.EventItem
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
+import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventsScreen(
     viewModel: EventViewModel,
+    authViewModel: AuthViewModel,
     onEventClick: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -62,10 +64,14 @@ fun EventsScreen(
                     }
                 }
                 else -> {
+                    val sortedEvents = uiState.events.sortedWith(
+                        compareBy({ it.eventDate }, { it.eventTime ?: "" })
+                    )
                     LazyColumn {
-                        items(uiState.events) { event ->
+                        items(sortedEvents) { event ->
                             EventItem(
                                 event = event,
+                                authViewModel = authViewModel,
                                 onClick = { onEventClick(event.id) }
                             )
                             Spacer(modifier = Modifier.height(8.dp))

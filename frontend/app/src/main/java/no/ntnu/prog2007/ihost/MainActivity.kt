@@ -81,7 +81,9 @@ fun IHostApp() {
 
     // Check if we should show bottom navigation
     val shouldShowBottomNav = currentRoute in bottomNavScreens.map { it.route }
-    val shouldShowTopBar = currentRoute != Screen.Login.route && currentRoute != Screen.SignUp.route
+    val shouldShowTopBar = currentRoute != Screen.Login.route &&
+                           currentRoute != Screen.SignUp.route &&
+                           currentRoute?.startsWith("event_detail") != true
 
     Scaffold(
         topBar = {
