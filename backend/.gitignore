@@ -42,3 +42,5 @@ out/
 CLAUDE.md
 
 firebase-key.json
+
+.env

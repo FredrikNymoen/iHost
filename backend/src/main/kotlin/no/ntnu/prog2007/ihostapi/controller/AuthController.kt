@@ -36,6 +36,8 @@ class AuthController(
     /**
      * Verify that the user is authenticated and return user data
      * Requires valid Firebase JWT token in Authorization header
+     *
+     * BRUKES IKKE AKKURAT NÅ, KANSKJE FJERNES?
      */
     @GetMapping("/verify")
     fun verifyToken(): ResponseEntity<Any> {
