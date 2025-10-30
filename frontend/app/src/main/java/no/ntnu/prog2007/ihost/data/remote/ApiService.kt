@@ -4,6 +4,7 @@ import no.ntnu.prog2007.ihost.data.model.AuthResponse
 import no.ntnu.prog2007.ihost.data.model.CreateEventRequest
 import no.ntnu.prog2007.ihost.data.model.CreateUserRequest
 import no.ntnu.prog2007.ihost.data.model.Event
+import no.ntnu.prog2007.ihost.data.model.KeysResponse
 import no.ntnu.prog2007.ihost.data.model.User
 import retrofit2.http.*
 
@@ -14,8 +15,8 @@ interface ApiService {
         @Body request: CreateUserRequest
     ): AuthResponse
 
-    @GET("api/auth/verify")
-    suspend fun verifyAuth(): User
+    //@GET("api/auth/verify")
+    //suspend fun verifyAuth(): User
 
     @GET("api/auth/user/{uid}")
     suspend fun getUserByUid(
@@ -50,4 +51,8 @@ interface ApiService {
     suspend fun leaveEvent(
         @Path("id") id: String
     ): Event
+
+    @GET("api/stripe/keys")
+    suspend fun getKeys(): KeysResponse
+
 }

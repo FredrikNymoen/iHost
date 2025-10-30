@@ -193,7 +193,7 @@ fun EventDetailScreen(
                                 modifier = Modifier.size(16.dp)
                             )
                             Text(
-                                text = attendeeNames[attendeeId] ?: attendeeId,
+                                text = attendeeNames[attendeeId] ?: "",
                                 style = MaterialTheme.typography.bodySmall,
                                 fontSize = 11.sp,
                                 color = Color.White
