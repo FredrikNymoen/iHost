@@ -100,9 +100,14 @@ class StripePaymentService(
                 ephemeralKeySecret = paymentIntentResponse.ephemeralKey
             )
             val configuration = PaymentSheet.Configuration(
-                merchantDisplayName = "iHost Events",
+                merchantDisplayName = "iHost",
                 customer = customerConfig,
-                allowsDelayedPaymentMethods = false
+                allowsDelayedPaymentMethods = false,
+                defaultBillingDetails = PaymentSheet.BillingDetails(
+                    address = PaymentSheet.Address(
+                        country = "NO" // Set default country to Norway
+                    )
+                )
             )
 
             // 5) Present payment sheet

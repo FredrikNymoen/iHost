@@ -34,8 +34,6 @@ import no.ntnu.prog2007.ihost.data.model.Event
 import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
-import no.ntnu.prog2007.ihost.service.StripePaymentService
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +41,7 @@ fun EventDetailScreen(
     eventId: String,
     viewModel: EventViewModel,
     authViewModel: AuthViewModel,
+    stripeViewModel: no.ntnu.prog2007.ihost.viewmodel.StripeViewModel,
     onBack: () -> Unit,
     onEdit: (String) -> Unit
 ) {
@@ -58,8 +57,9 @@ fun EventDetailScreen(
 
     // State to hold attendee names mapping
     var attendeeNames by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
-    var isProcessingPayment by remember { mutableStateOf(false) }
-    var paymentError by remember { mutableStateOf<String?>(null) }
+
+    // Stripe state
+    val stripeUiState by stripeViewModel.uiState.collectAsState()
 
     // Fetch attendee names
     LaunchedEffect(event?.attendees) {
@@ -244,7 +244,7 @@ fun EventDetailScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Show payment error if any
-                paymentError?.let { error ->
+                stripeUiState.paymentError?.let { error ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -343,7 +343,6 @@ fun EventDetailScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(48.dp),
-                            enabled = !isProcessingPayment,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0xFF4CAF50)
                             )
@@ -369,59 +368,29 @@ fun EventDetailScreen(
                                     return@Button
                                 }
 
-                                isProcessingPayment = true
-                                paymentError = null
-
-                                scope.launch {
-                                    try {
-                                        val service = StripePaymentService(
-                                            RetrofitClient.apiService,
-                                            activity
-                                        )
-                                        service.initiatePayment(
-                                            eventId = eventId,
-                                            onComplete = {
-                                                // Payment successful - join event
-                                                scope.launch {
-                                                    viewModel.joinEvent(eventId)
-                                                    Toast.makeText(
-                                                        context,
-                                                        "Payment successful! You've joined the event.",
-                                                        Toast.LENGTH_LONG
-                                                    ).show()
-                                                }
-                                                isProcessingPayment = false
-                                            },
-                                            onFailed = { errorMsg ->
-                                                paymentError = errorMsg
-                                                isProcessingPayment = false
-                                                Toast.makeText(
-                                                    context,
-                                                    "Payment failed: $errorMsg",
-                                                    Toast.LENGTH_LONG
-                                                ).show()
-                                            }
-                                        )
-                                    } catch (e: Exception) {
-                                        paymentError = e.message
-                                        isProcessingPayment = false
+                                stripeViewModel.initiatePayment(
+                                    activity = activity,
+                                    eventId = eventId,
+                                    onPaymentComplete = {
+                                        // Payment successful - join event
+                                        viewModel.joinEvent(eventId)
                                         Toast.makeText(
                                             context,
-                                            "Error: ${e.message}",
+                                            "Payment successful! You've joined the event.",
                                             Toast.LENGTH_LONG
                                         ).show()
                                     }
-                                }
+                                )
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(48.dp),
-                            enabled = !isProcessingPayment,
+                            enabled = !stripeUiState.isProcessingPayment,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0xFF9C27B0)
                             )
                         ) {
-                            if (isProcessingPayment) {
+                            if (stripeUiState.isProcessingPayment) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(20.dp),
                                     color = Color.White,

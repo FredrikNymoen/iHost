@@ -33,6 +33,7 @@ import no.ntnu.prog2007.ihost.ui.theme.IHostTheme
 import no.ntnu.prog2007.ihost.ui.theme.LightBlue
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
+import no.ntnu.prog2007.ihost.viewmodel.StripeViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,6 +61,7 @@ fun IHostApp() {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = viewModel()
     val eventViewModel: EventViewModel = viewModel { EventViewModel(authViewModel) }
+    val stripeViewModel: StripeViewModel = viewModel()
 
     val authUiState by authViewModel.uiState.collectAsState()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -136,6 +138,7 @@ fun IHostApp() {
                 navController = navController,
                 authViewModel = authViewModel,
                 eventViewModel = eventViewModel,
+                stripeViewModel = stripeViewModel,
                 modifier = Modifier.padding(padding),
                 startDestination = startDestination
             )
