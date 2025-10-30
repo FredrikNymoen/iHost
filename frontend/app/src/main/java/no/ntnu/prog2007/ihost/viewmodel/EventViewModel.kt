@@ -64,7 +64,9 @@ class EventViewModel(
         description: String?,
         eventDate: String,
         eventTime: String?,
-        location: String?
+        location: String?,
+        free: Boolean = true,
+        price: Double = 0.0
     ) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
@@ -74,7 +76,9 @@ class EventViewModel(
                     description = description,
                     eventDate = eventDate,
                     eventTime = eventTime,
-                    location = location
+                    location = location,
+                    free = free,
+                    price = price
                 )
                 val newEvent = RetrofitClient.apiService.createEvent(request)
                 _uiState.update { state ->

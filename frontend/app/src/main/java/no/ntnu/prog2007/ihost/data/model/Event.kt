@@ -30,6 +30,12 @@ data class Event(
     @SerializedName("attendees")
     val attendees: List<String> = emptyList(),
 
+    @SerializedName("free")
+    val free: Boolean = true,
+
+    @SerializedName("price")
+    val price: Double = 0.0,
+
     @SerializedName("createdAt")
     val createdAt: String? = null, // ISO 8601 format
 
@@ -51,5 +57,11 @@ data class CreateEventRequest(
     val eventTime: String? = null, // HH:mm format
 
     @SerializedName("location")
-    val location: String? = null
+    val location: String? = null,
+
+    @SerializedName("free")
+    val free: Boolean = true,
+
+    @SerializedName("price")
+    val price: Double = 0.0
 )

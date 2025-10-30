@@ -28,6 +28,8 @@ fun AddEventScreen(
     var eventTime by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
     var showDatePicker by remember { mutableStateOf(false) }
+    var isFree by remember { mutableStateOf(true) }
+    var price by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -120,6 +122,43 @@ fun AddEventScreen(
             )
         )
 
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text("Gratis event", color = Color.White)
+            Switch(
+                checked = isFree,
+                onCheckedChange = { isFree = it },
+                enabled = !uiState.isLoading,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+
+        if (!isFree) {
+            OutlinedTextField(
+                value = price,
+                onValueChange = { price = it },
+                label = { Text("Pris (kr)", color = Color.White) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                enabled = !uiState.isLoading,
+                textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFFFFC107),
+                    unfocusedBorderColor = Color(0xFFFFC107),
+                    cursorColor = Color(0xFFFFC107)
+                ),
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                    keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
+                )
+            )
+        }
+
         if (uiState.errorMessage != null) {
             Text(
                 text = uiState.errorMessage!!,
@@ -137,12 +176,19 @@ fun AddEventScreen(
         ) {
             Button(
                 onClick = {
+                    val priceValue = if (!isFree && price.isNotEmpty()) {
+                        price.toDoubleOrNull() ?: 0.0
+                    } else {
+                        0.0
+                    }
                     viewModel.createEvent(
                         title = title,
                         description = description.ifEmpty { null },
                         eventDate = eventDate,
                         eventTime = eventTime.ifEmpty { null },
-                        location = location.ifEmpty { null }
+                        location = location.ifEmpty { null },
+                        free = isFree,
+                        price = priceValue
                     )
                     onEventCreated()
                 },
