@@ -24,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.FirebaseApp
+import no.ntnu.prog2007.ihost.service.StripePaymentService
 import no.ntnu.prog2007.ihost.ui.components.BottomNavigationBar
 import no.ntnu.prog2007.ihost.ui.navigation.NavigationGraph
 import no.ntnu.prog2007.ihost.ui.navigation.Screen
@@ -40,6 +41,10 @@ class MainActivity : ComponentActivity() {
 
         // Initialize Firebase
         FirebaseApp.initializeApp(this)
+
+        // Initialize Stripe PaymentSheet BEFORE setContent
+        // Dette er KRITISK - må gjøres i onCreate() før aktiviteten blir RESUMED
+        StripePaymentService.initializePaymentSheet(this)
 
         setContent {
             IHostTheme {

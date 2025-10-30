@@ -19,7 +19,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,6 +34,7 @@ import no.ntnu.prog2007.ihost.data.model.Event
 import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
+import no.ntnu.prog2007.ihost.service.StripePaymentService
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,9 +50,16 @@ fun EventDetailScreen(
     val authUiState by authViewModel.uiState.collectAsState()
     val event = uiState.events.find { it.id == eventId }
     val currentUserId = authUiState.currentUser?.uid
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    // Get the ComponentActivity from context
+    val activity = context as? ComponentActivity
 
     // State to hold attendee names mapping
     var attendeeNames by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+    var isProcessingPayment by remember { mutableStateOf(false) }
+    var paymentError by remember { mutableStateOf<String?>(null) }
 
     // Fetch attendee names
     LaunchedEffect(event?.attendees) {
@@ -58,7 +70,7 @@ fun EventDetailScreen(
                     val user = RetrofitClient.apiService.getUserByUid(attendeeId)
                     names[attendeeId] = user.displayName
                 } catch (e: Exception) {
-                    names[attendeeId] = attendeeId // Fallback to UID if fetch fails
+                    names[attendeeId] = "User" // Fallback if fetch fails
                 }
             }
             attendeeNames = names
@@ -139,6 +151,25 @@ fun EventDetailScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
+                // Price Section
+                if (!event.free) {
+                    SectionTitle("Price")
+                    EventDetailItem(
+                        label = "Cost",
+                        value = "${String.format("%.2f", event.price)} NOK"
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                } else {
+                    SectionTitle("Price")
+                    EventDetailItem(
+                        label = "Cost",
+                        value = "Free"
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
                 // Description Section
                 if (event.description != null) {
                     SectionTitle("Description")
@@ -179,30 +210,57 @@ fun EventDetailScreen(
                         .padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    event.attendees.forEach { attendeeId ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Attending",
-                                tint = Color(0xFF4CAF50),
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Text(
-                                text = attendeeNames[attendeeId] ?: "",
-                                style = MaterialTheme.typography.bodySmall,
-                                fontSize = 11.sp,
-                                color = Color.White
-                            )
+                    if (event.attendees.isEmpty()) {
+                        Text(
+                            text = "No attendees yet",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontSize = 12.sp,
+                            color = Color(0xFFB0B0B0)
+                        )
+                    } else {
+                        event.attendees.forEach { attendeeId ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Attending",
+                                    tint = Color(0xFF4CAF50),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = attendeeNames[attendeeId] ?: "Loading...",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontSize = 11.sp,
+                                    color = Color.White
+                                )
+                            }
                         }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
+
+                // Show payment error if any
+                paymentError?.let { error ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFFD32F2F)
+                        )
+                    ) {
+                        Text(
+                            text = error,
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(12.dp)
+                        )
+                    }
+                }
 
                 // Action Buttons
                 val isCreator = event.creatorUid == currentUserId
@@ -211,8 +269,7 @@ fun EventDetailScreen(
                 if (isCreator) {
                     // Creator buttons - Edit and Delete
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Button(
@@ -227,10 +284,9 @@ fun EventDetailScreen(
                             Icon(
                                 imageVector = Icons.Default.Edit,
                                 contentDescription = "Edit",
-                                modifier = Modifier
-                                    .size(18.dp)
-                                    .padding(end = 8.dp)
+                                modifier = Modifier.size(18.dp)
                             )
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text("Edit")
                         }
 
@@ -249,10 +305,9 @@ fun EventDetailScreen(
                             Icon(
                                 imageVector = Icons.Default.Delete,
                                 contentDescription = "Delete",
-                                modifier = Modifier
-                                    .size(18.dp)
-                                    .padding(end = 8.dp)
+                                modifier = Modifier.size(18.dp)
                             )
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text("Delete")
                         }
                     }
@@ -272,33 +327,116 @@ fun EventDetailScreen(
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = "Leave",
-                            modifier = Modifier
-                                .size(18.dp)
-                                .padding(end = 8.dp)
+                            modifier = Modifier.size(18.dp)
                         )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text("Leave Event", color = Color.Black, fontWeight = FontWeight.Bold)
                     }
                 } else {
-                    // Not attending - Join button
-                    Button(
-                        onClick = {
-                            viewModel.joinEvent(eventId)
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF4CAF50)
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.PersonAdd,
-                            contentDescription = "Join",
+                    // Not attending - Join or Buy & Join button
+                    if (event.free) {
+                        // Free event - Join button
+                        Button(
+                            onClick = {
+                                viewModel.joinEvent(eventId)
+                            },
                             modifier = Modifier
-                                .size(18.dp)
-                                .padding(end = 8.dp)
-                        )
-                        Text("Join Event")
+                                .fillMaxWidth()
+                                .height(48.dp),
+                            enabled = !isProcessingPayment,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF4CAF50)
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PersonAdd,
+                                contentDescription = "Join",
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Join Event")
+                        }
+                    } else {
+                        // Paid event - Buy & Join button
+                        Button(
+                            onClick = {
+                                if (activity == null) {
+                                    Toast.makeText(
+                                        context,
+                                        "Cannot process payment - activity not available",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    return@Button
+                                }
+
+                                isProcessingPayment = true
+                                paymentError = null
+
+                                scope.launch {
+                                    try {
+                                        val service = StripePaymentService(
+                                            RetrofitClient.apiService,
+                                            activity
+                                        )
+                                        service.initiatePayment(
+                                            eventId = eventId,
+                                            onComplete = {
+                                                // Payment successful - join event
+                                                scope.launch {
+                                                    viewModel.joinEvent(eventId)
+                                                    Toast.makeText(
+                                                        context,
+                                                        "Payment successful! You've joined the event.",
+                                                        Toast.LENGTH_LONG
+                                                    ).show()
+                                                }
+                                                isProcessingPayment = false
+                                            },
+                                            onFailed = { errorMsg ->
+                                                paymentError = errorMsg
+                                                isProcessingPayment = false
+                                                Toast.makeText(
+                                                    context,
+                                                    "Payment failed: $errorMsg",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            }
+                                        )
+                                    } catch (e: Exception) {
+                                        paymentError = e.message
+                                        isProcessingPayment = false
+                                        Toast.makeText(
+                                            context,
+                                            "Error: ${e.message}",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp),
+                            enabled = !isProcessingPayment,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF9C27B0)
+                            )
+                        ) {
+                            if (isProcessingPayment) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    color = Color.White,
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.PersonAdd,
+                                    contentDescription = "Buy & Join",
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Buy & Join (${String.format("%.2f", event.price)} NOK)")
+                            }
+                        }
                     }
                 }
 
@@ -306,11 +444,10 @@ fun EventDetailScreen(
             }
         } else {
             Box(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = Color(0xFFFFC107))
             }
         }
     }
@@ -354,7 +491,7 @@ fun EventDetailHeader(event: Event) {
                     )
                     if (event.eventTime != null) {
                         Text(
-                            text = event.eventTime,
+                            text = "• ${event.eventTime}",
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.White,
                             fontSize = 12.sp

@@ -65,3 +65,22 @@ data class CreateEventRequest(
     @SerializedName("price")
     val price: Double = 0.0
 )
+
+data class PaymentIntentRequest(
+    @SerializedName("eventId")
+    val eventId: String
+)
+
+data class PaymentIntentResponse(
+    @SerializedName("paymentIntent")
+    val paymentIntent: String,
+
+    @SerializedName("ephemeralKey")
+    val ephemeralKey: String,
+
+    @SerializedName("customer")
+    val customer: String,
+
+    @SerializedName("publishableKey")
+    val publishableKey: String?
+)

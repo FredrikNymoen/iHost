@@ -5,6 +5,8 @@ import no.ntnu.prog2007.ihost.data.model.CreateEventRequest
 import no.ntnu.prog2007.ihost.data.model.CreateUserRequest
 import no.ntnu.prog2007.ihost.data.model.Event
 import no.ntnu.prog2007.ihost.data.model.KeysResponse
+import no.ntnu.prog2007.ihost.data.model.PaymentIntentRequest
+import no.ntnu.prog2007.ihost.data.model.PaymentIntentResponse
 import no.ntnu.prog2007.ihost.data.model.User
 import retrofit2.http.*
 
@@ -54,5 +56,10 @@ interface ApiService {
 
     @GET("api/stripe/keys")
     suspend fun getKeys(): KeysResponse
+
+    @POST("api/stripe/payment-intent")
+    suspend fun createPaymentIntent(
+        @Body request: PaymentIntentRequest
+    ): PaymentIntentResponse
 
 }
