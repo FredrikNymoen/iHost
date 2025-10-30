@@ -1,7 +1,9 @@
 package no.ntnu.prog2007.ihostapi.controller
 
+import com.google.cloud.firestore.Firestore
 import no.ntnu.prog2007.ihostapi.config.StripeConfig
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
@@ -16,11 +18,12 @@ import com.stripe.param.EphemeralKeyCreateParams
 import com.stripe.param.PaymentIntentCreateParams
 import com.stripe.exception.SignatureVerificationException
 import com.stripe.net.Webhook
+import no.ntnu.prog2007.ihostapi.model.Event
 import java.util.logging.Logger
 import java.util.logging.Level
 
 data class PaymentIntentRequest(
-    val orderId: String
+    val eventId: String
 )
 
 data class PaymentIntentResponse(
@@ -34,32 +37,51 @@ data class WebhookResponse(
     val received: Boolean
 )
 
+data class KeysResponse(
+    val publishableKey: String?
+)
+
 @RestController
 @RequestMapping("/api/stripe")
 class StripeController(
-    private val stripeConfig: StripeConfig
+    private val stripeConfig: StripeConfig,
+    private val firestore: Firestore
 ) {
+
+    companion object {
+        const val EVENTS_COLLECTION = "events"
+    }
 
     private val logger = Logger.getLogger(StripeController::class.java.name)
 
     @PostMapping("/payment-intent")
     fun createPaymentIntent(@RequestBody request: PaymentIntentRequest): ResponseEntity<Any> {
         return try {
-            val orderId = request.orderId
-            logger.info("Creating payment intent for order: $orderId")
+            val eventId = request.eventId
+            logger.info("Creating payment intent for event: $eventId")
 
-            // TODO: Fetch order items from database
-            // val orderItems = db.select().from(orderItemsTable)
-            //     .where(eq(orderItemsTable.orderId, orderId))
+            // TODO: Fetch events from database
+            val document = firestore.collection(EVENTS_COLLECTION).document(eventId).get().get()
 
-            // TODO: Calculate total sum of order items (price * quantity)
-            // val total = orderItems.sumOf { it.price * it.quantity }
+            val event = if (document.exists()) {
+                document.toObject(Event::class.java)
+            } else {
+                null
+            }
+
+            if (event == null) {
+                logger.warning("Event not found: $eventId")
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(mapOf("message" to "Event not found"))
+            }
+
+            val total = event.price
 
             // Placeholder amount for testing (10.00 USD)
-            val total = 10.00
             val amount = (total * 100).toLong()
 
-            if (amount <= 0L) {
+
+            if (amount <= 0) {
                 logger.warning("Invalid order amount: $amount")
                 return ResponseEntity.badRequest()
                     .body(mapOf("message" to "Order total must be greater than 0"))
@@ -70,7 +92,6 @@ class StripeController(
                 // TODO: Add customer email and other info when available
                 // .setEmail(userEmail)
                 // .setName(userName)
-                .putMetadata("orderId", orderId)
                 .build()
             val customer = Customer.create(customerParams)
             logger.info("Created customer: ${customer.id}")
@@ -87,9 +108,9 @@ class StripeController(
             // Create payment intent
             val paymentIntentParams = PaymentIntentCreateParams.builder()
                 .setAmount(amount)
-                .setCurrency("usd")
+                .setCurrency("nok")
                 .setCustomer(customer.id)
-                .putMetadata("orderId", orderId)
+                .putMetadata("eventId", eventId)
                 // Optional: Add automatic payment methods
                 .setAutomaticPaymentMethods(
                     PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
@@ -117,6 +138,21 @@ class StripeController(
             logger.log(Level.SEVERE, "Error creating payment intent", e)
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(mapOf("error" to (e.message ?: "Unknown error")))
+        }
+    }
+
+    @GetMapping("/keys")
+    fun getKeys(): ResponseEntity<KeysResponse> {
+        return try {
+            logger.info("Fetching Stripe keys")
+            val response = KeysResponse(
+                publishableKey = stripeConfig.stripePublishableKey
+            )
+            ResponseEntity.ok(response)
+        } catch (e: Exception) {
+            logger.log(Level.SEVERE, "Error fetching Stripe keys", e)
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(KeysResponse(publishableKey = null))
         }
     }
 

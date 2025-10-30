@@ -126,6 +126,8 @@ class EventController(
                 creatorUid = uid,
                 creatorName = creatorName,
                 attendees = listOf(uid), // Creator is automatically an attendee
+                free = request.free,
+                price = request.price,
                 createdAt = timestamp,
                 updatedAt = timestamp
             )
