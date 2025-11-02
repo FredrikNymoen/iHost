@@ -40,7 +40,10 @@ data class Event(
     val createdAt: String? = null, // ISO 8601 format
 
     @SerializedName("updatedAt")
-    val updatedAt: String? = null // ISO 8601 format
+    val updatedAt: String? = null, // ISO 8601 format
+
+    @SerializedName("shareCode")
+    val shareCode: String = "" // Share code for sharing events
 )
 
 data class CreateEventRequest(
