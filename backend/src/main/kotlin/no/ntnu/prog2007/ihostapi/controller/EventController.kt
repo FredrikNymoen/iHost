@@ -377,6 +377,10 @@ class EventController(
         }
     }
 
+    /**
+     * Find event by share code
+     * Returns event matching the share code, or 404 if event is not found
+     */
     @GetMapping("/by-code/{shareCode}")
     fun findEventByCode(
         @PathVariable shareCode: String
