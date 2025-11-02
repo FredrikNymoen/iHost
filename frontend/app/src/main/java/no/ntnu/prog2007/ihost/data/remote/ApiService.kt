@@ -62,4 +62,8 @@ interface ApiService {
         @Body request: PaymentIntentRequest
     ): PaymentIntentResponse
 
+    @GET("api/events/by-code/{shareCode}")
+    suspend fun getEventByCode(
+        @Path("shareCode") shareCode: String
+    ): Event
 }
