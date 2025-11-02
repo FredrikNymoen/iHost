@@ -36,7 +36,9 @@ data class Event(
 
     val createdAt: String? = null,
 
-    val updatedAt: String? = null
+    val updatedAt: String? = null,
+
+    val shareCode: String = "" // Unique code for sharing event with other people
 )
 
 /**
