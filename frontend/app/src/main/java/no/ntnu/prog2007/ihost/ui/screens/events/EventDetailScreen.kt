@@ -1,5 +1,9 @@
 package no.ntnu.prog2007.ihost.ui.screens.events
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -23,6 +27,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +39,11 @@ import no.ntnu.prog2007.ihost.data.model.Event
 import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -267,7 +277,88 @@ fun EventDetailScreen(
                 val isAttending = event.attendees.contains(currentUserId)
 
                 if (isCreator) {
-                    // Creator buttons - Edit and Delete
+                    // Show Share button
+                    SectionTitle("Share Event")
+
+                    Surface(
+                        color = Color.Blue,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                "Share Code: ${event.shareCode}",
+                                color = Color.White,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                "Use this code to invite others to your event. Share it with friends!",
+                                color = Color.White,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontSize = 12.sp
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                val shareMessage = "Join my event '${event.title}' on iHost! Use the share code: ${event.shareCode}"
+                                // Copy button
+                                Button(
+                                    onClick = { // Copy to clipboard
+                                        // Get clipboard manager from context
+                                        // (https://stackoverflow.com/questions/79692173/how-to-resolve-deprecated-clipboardmanager-in-jetpack-compose)
+                                        // and (https://stackoverflow.com/questions/45255755/failed-to-use-android-context-clipboardmanager-to-clip-a-phone-number)
+                                        // Apparently, they deprecated the WAY EASIER TO USE old ClipboardManager in favor of this bullshit..
+                                        val clipBoardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                        // Create clip data
+                                        val clipData = ClipData.newPlainText("Event share", shareMessage)
+                                        // Set primary clip
+                                        clipBoardManager.setPrimaryClip(clipData)
+                                        // Show toast
+                                        Toast.makeText(context, "Share code copied to clipboard", Toast.LENGTH_SHORT).show()
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xFF1976D2)
+                                    )
+                                ) {
+                                    Text("Copy invite message")
+                                }
+
+                                // Share button
+                                Button(
+                                    onClick = {
+                                        val intent = Intent(Intent.ACTION_SEND).apply {
+                                            type = "text/plain"
+                                            putExtra(Intent.EXTRA_TEXT, shareMessage)
+                                        }
+                                        context.startActivity(Intent.createChooser(intent, "Share event code"))
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xFFFFC107),
+                                        contentColor = Color(0xFF001D3D)
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Share,
+                                        contentDescription = "Share",
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Share Event")
+                                }
+                            }
+                        }
+                    }
+
+                    // Edit and Delete
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
