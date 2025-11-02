@@ -386,30 +386,35 @@ class EventController(
         @PathVariable shareCode: String
     ): ResponseEntity<Any> {
         return try {
+            // Find uid from token in security context
             val uid = SecurityContextHolder.getContext().authentication.principal as? String
                 ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
 
+            // Query Firestore for event with matching share code
             val query = firestore.collection(EVENTS_COLLECTION)
                 .whereEqualTo("shareCode", shareCode)
                 .limit(1)
                 .get()
                 .get()
 
+            // If no documents found, return 404
             if (query.documents.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ErrorResponse("NOT_FOUND", "No event found with code: $shareCode"))
             }
 
+            // Parse event from document
             val event = query.documents[0].toObject(Event::class.java)
                 ?: return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ErrorResponse("ERROR", "Could not parse event data"))
 
-             logger.info("Event found by code $shareCode; ${event.id} for user: $uid")
+            // log and return event
+            logger.info("Event found by code $shareCode; ${event.id} for user: $uid")
             ResponseEntity.ok(event)
-        } catch (e: Exception) {
-            logger.warning("Error finding event by code $shareCode: ${e.message}")
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        } catch (e: Exception) { // Catch any errors
+            logger.warning("Error finding event by code $shareCode: ${e.message}") // Log warning
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR) // Return 500
                 .body(ErrorResponse("ERROR", "Could not retrieve event by code"))
     }
 }
