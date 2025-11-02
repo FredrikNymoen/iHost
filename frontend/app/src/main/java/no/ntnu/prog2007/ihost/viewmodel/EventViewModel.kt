@@ -176,6 +176,45 @@ class EventViewModel(
         }
     }
 
+    /**
+     * Fetch an event by its share code and add it to the list of events if not already present.
+     * Calls onSuccess callback with the fetched event upon successful retrieval.
+     * @param shareCode The share code of the event to fetch.
+     * @param onSuccess Callback invoked with the fetched Event on success.
+     */
+    fun getEventByCode(shareCode: String, onSuccess: (Event) -> Unit) {
+        viewModelScope.launch { // Launch coroutine for network call
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) } // Set loading state
+            try { // Try to fetch event
+                // Fetch event by share code
+                val event = RetrofitClient.apiService.getEventByCode(shareCode)
+                _uiState.update { state ->
+                    // Only add event if not already present
+                    val updatedEvents = if (state.events.any { it.id == event.id }) { // Event already exists
+                        state.events // No change
+                    } else { // Event didnt already exist
+                        state.events + event // Add new event
+                    }
+                    state.copy( // Update state with new event
+                        events = updatedEvents,
+                        isLoading = false
+                    )
+                }
+                // Success callback and log it
+                onSuccess(event)
+                Log.d("EventViewModel", "Fetched event '${event.title}' by code: $shareCode")
+            } catch (e: Exception) { // Handle errors
+                Log.e("EventViewModel", "Error fetching event by code: ${e.message}", e)
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Feil ved henting av event: ${e.localizedMessage}"
+                    )
+                }
+            }
+        }
+    }
+
     fun clearError() {
         _uiState.update { it.copy(errorMessage = null) }
     }
