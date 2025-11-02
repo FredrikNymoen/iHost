@@ -406,8 +406,6 @@ class EventController(
 
             // Parse event from document
             val event = query.documents[0].toObject(Event::class.java)
-                ?: return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ErrorResponse("ERROR", "Could not parse event data"))
 
             // log and return event
             logger.info("Event found by code $shareCode; ${event.id} for user: $uid")
@@ -416,6 +414,7 @@ class EventController(
             logger.warning("Error finding event by code $shareCode: ${e.message}") // Log warning
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR) // Return 500
                 .body(ErrorResponse("ERROR", "Could not retrieve event by code"))
+        }
     }
 }
 
