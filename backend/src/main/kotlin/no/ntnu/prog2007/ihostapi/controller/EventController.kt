@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -129,7 +130,8 @@ class EventController(
                 free = request.free,
                 price = request.price,
                 createdAt = timestamp,
-                updatedAt = timestamp
+                updatedAt = timestamp,
+                shareCode = generateShareCode() // Generate unique share code, see function below
             )
 
             firestore.collection(EVENTS_COLLECTION)
@@ -374,4 +376,53 @@ class EventController(
                 .body(ErrorResponse("ERROR", "Could not leave event"))
         }
     }
+
+    @GetMapping("/by-code/{shareCode}")
+    fun findEventByCode(
+        @PathVariable shareCode: String
+    ): ResponseEntity<Any> {
+        return try {
+            val uid = SecurityContextHolder.getContext().authentication.principal as? String
+                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
+
+            val query = firestore.collection(EVENTS_COLLECTION)
+                .whereEqualTo("shareCode", shareCode)
+                .limit(1)
+                .get()
+                .get()
+
+            if (query.documents.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ErrorResponse("NOT_FOUND", "No event found with code: $shareCode"))
+            }
+
+            val event = query.documents[0].toObject(Event::class.java)
+                ?: return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ErrorResponse("ERROR", "Could not parse event data"))
+
+             logger.info("Event found by code $shareCode; ${event.id} for user: $uid")
+            ResponseEntity.ok(event)
+        } catch (e: Exception) {
+            logger.warning("Error finding event by code $shareCode: ${e.message}")
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ErrorResponse("ERROR", "Could not retrieve event by code"))
+    }
+}
+
+/**
+ * Function to generate a unique share code for a specific event
+ * Format is PREFIX-SUFFIX where Prefix is "IH" for IHost
+ * and suffix is a 5 character long random combination of uppercase letters and digits
+ * i.e. IH-A1B2C
+ * @return generated share code
+ */
+private fun generateShareCode(): String {
+    val charPool = ('A'..'Z') + ('0'..'9') // Uppercase letters and digits
+    val suffix = (1..5) // Generate 5 characters
+        .map { kotlin.random.Random.nextInt(0, charPool.size) } // Random indices
+        .map(charPool::get) // Map each index to random character from pool
+        .joinToString("") // Join characters to form suffix
+
+    return "IH-$suffix" // Return prefix-suffix for the full code
 }
