@@ -30,9 +30,15 @@ data class Event(
 
     val attendees: List<String> = emptyList(),
 
+    val free: Boolean = true,
+
+    val price: Double = 0.0,
+
     val createdAt: String? = null,
 
-    val updatedAt: String? = null
+    val updatedAt: String? = null,
+
+    val shareCode: String = "" // Unique code for sharing event with other people
 )
 
 /**
@@ -49,7 +55,11 @@ data class CreateEventRequest(
 
     val eventTime: String? = null, // HH:mm format
 
-    val location: String? = null
+    val location: String? = null,
+
+    val free: Boolean = true,
+
+    val price: Double = 0.0,
 )
 
 /**

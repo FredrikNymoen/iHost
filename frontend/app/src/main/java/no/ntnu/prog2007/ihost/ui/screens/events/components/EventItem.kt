@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.WatchLater
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -84,53 +85,86 @@ fun EventItem(
                     }
 
                     // Status badge
-                    if (isAttending) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            modifier = Modifier
-                                .background(
-                                    color = Color(0xFF4CAF50).copy(alpha = 0.3f),
-                                    shape = RoundedCornerShape(4.dp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        if (isAttending) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier = Modifier
+                                    .background(
+                                        color = Color(0xFF4CAF50).copy(alpha = 0.3f),
+                                        shape = RoundedCornerShape(4.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Accepted",
+                                    tint = Color(0xFF4CAF50),
+                                    modifier = Modifier.size(14.dp)
                                 )
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Accepted",
-                                tint = Color(0xFF4CAF50),
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Text(
-                                text = "accepted",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color(0xFF4CAF50),
-                                fontSize = 10.sp
-                            )
+                                Text(
+                                    text = "accepted",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color(0xFF4CAF50),
+                                    fontSize = 10.sp
+                                )
+                            }
+                        } else if (isPending) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier = Modifier
+                                    .background(
+                                        color = Color(0xFFFFC107).copy(alpha = 0.3f),
+                                        shape = RoundedCornerShape(4.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.WatchLater,
+                                    contentDescription = "Pending",
+                                    tint = Color(0xFFFFC107),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Text(
+                                    text = "pending",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color(0xFFFFC107),
+                                    fontSize = 10.sp
+                                )
+                            }
                         }
-                    } else if (isPending) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            modifier = Modifier
-                                .background(
-                                    color = Color(0xFFFFC107).copy(alpha = 0.3f),
-                                    shape = RoundedCornerShape(4.dp)
+
+                        // Price indicator
+                        if (!event.free) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier = Modifier
+                                    .background(
+                                        color = Color(0xFF9C27B0),
+                                        shape = RoundedCornerShape(4.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AttachMoney,
+                                    contentDescription = "Paid event",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(14.dp)
                                 )
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.WatchLater,
-                                contentDescription = "Pending",
-                                tint = Color(0xFFFFC107),
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Text(
-                                text = "pending",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color(0xFFFFC107),
-                                fontSize = 10.sp
-                            )
+                                Text(
+                                    text = "${String.format("%.2f", event.price)} NOK",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color.White,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
 

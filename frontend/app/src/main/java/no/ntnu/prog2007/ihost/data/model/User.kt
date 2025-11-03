@@ -49,3 +49,9 @@ data class AuthResponse(
     @SerializedName("message")
     val message: String? = null
 )
+
+
+data class KeysResponse(
+    @SerializedName("publishableKey")
+    val publishableKey: String
+)

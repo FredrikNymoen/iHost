@@ -39,6 +39,11 @@ out/
 ### Kotlin ###
 .kotlin
 
+### Mac ###
+.DS_Store
+
 CLAUDE.md
 
 firebase-key.json
+
+.env

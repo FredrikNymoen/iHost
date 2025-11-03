@@ -30,11 +30,20 @@ data class Event(
     @SerializedName("attendees")
     val attendees: List<String> = emptyList(),
 
+    @SerializedName("free")
+    val free: Boolean = true,
+
+    @SerializedName("price")
+    val price: Double = 0.0,
+
     @SerializedName("createdAt")
     val createdAt: String? = null, // ISO 8601 format
 
     @SerializedName("updatedAt")
-    val updatedAt: String? = null // ISO 8601 format
+    val updatedAt: String? = null, // ISO 8601 format
+
+    @SerializedName("shareCode")
+    val shareCode: String = "" // Share code for sharing events
 )
 
 data class CreateEventRequest(
@@ -51,5 +60,30 @@ data class CreateEventRequest(
     val eventTime: String? = null, // HH:mm format
 
     @SerializedName("location")
-    val location: String? = null
+    val location: String? = null,
+
+    @SerializedName("free")
+    val free: Boolean = true,
+
+    @SerializedName("price")
+    val price: Double = 0.0
+)
+
+data class PaymentIntentRequest(
+    @SerializedName("eventId")
+    val eventId: String
+)
+
+data class PaymentIntentResponse(
+    @SerializedName("paymentIntent")
+    val paymentIntent: String,
+
+    @SerializedName("ephemeralKey")
+    val ephemeralKey: String,
+
+    @SerializedName("customer")
+    val customer: String,
+
+    @SerializedName("publishableKey")
+    val publishableKey: String?
 )

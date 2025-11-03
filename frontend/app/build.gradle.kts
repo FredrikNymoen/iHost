@@ -84,4 +84,8 @@ dependencies {
 
     // Icons
     implementation("androidx.compose.material:material-icons-extended")
+
+    // Stripe
+    implementation("com.stripe:stripe-android:20.49.0")
+
 }

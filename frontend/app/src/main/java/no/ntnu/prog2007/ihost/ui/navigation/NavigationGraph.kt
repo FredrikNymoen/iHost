@@ -15,12 +15,14 @@ import no.ntnu.prog2007.ihost.ui.screens.addevent.AddEventScreen
 import no.ntnu.prog2007.ihost.ui.screens.profile.ProfileScreen
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
+import no.ntnu.prog2007.ihost.viewmodel.StripeViewModel
 
 @Composable
 fun NavigationGraph(
     navController: NavHostController,
     authViewModel: AuthViewModel,
     eventViewModel: EventViewModel,
+    stripeViewModel: StripeViewModel,
     modifier: Modifier = Modifier,
     startDestination: String = Screen.Login.route
 ) {
@@ -70,6 +72,7 @@ fun NavigationGraph(
                 eventId = eventId,
                 viewModel = eventViewModel,
                 authViewModel = authViewModel,
+                stripeViewModel = stripeViewModel,
                 onBack = {
                     navController.popBackStack()
                 },

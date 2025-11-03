@@ -24,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.FirebaseApp
+import no.ntnu.prog2007.ihost.service.StripePaymentService
 import no.ntnu.prog2007.ihost.ui.components.BottomNavigationBar
 import no.ntnu.prog2007.ihost.ui.navigation.NavigationGraph
 import no.ntnu.prog2007.ihost.ui.navigation.Screen
@@ -32,6 +33,7 @@ import no.ntnu.prog2007.ihost.ui.theme.IHostTheme
 import no.ntnu.prog2007.ihost.ui.theme.LightBlue
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
+import no.ntnu.prog2007.ihost.viewmodel.StripeViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,6 +42,10 @@ class MainActivity : ComponentActivity() {
 
         // Initialize Firebase
         FirebaseApp.initializeApp(this)
+
+        // Initialize Stripe PaymentSheet BEFORE setContent
+        // Dette er KRITISK - må gjøres i onCreate() før aktiviteten blir RESUMED
+        StripePaymentService.initializePaymentSheet(this)
 
         setContent {
             IHostTheme {
@@ -55,6 +61,7 @@ fun IHostApp() {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = viewModel()
     val eventViewModel: EventViewModel = viewModel { EventViewModel(authViewModel) }
+    val stripeViewModel: StripeViewModel = viewModel()
 
     val authUiState by authViewModel.uiState.collectAsState()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -131,6 +138,7 @@ fun IHostApp() {
                 navController = navController,
                 authViewModel = authViewModel,
                 eventViewModel = eventViewModel,
+                stripeViewModel = stripeViewModel,
                 modifier = Modifier.padding(padding),
                 startDestination = startDestination
             )
