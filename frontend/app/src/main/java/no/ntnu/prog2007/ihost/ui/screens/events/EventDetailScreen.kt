@@ -4,8 +4,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.util.Log
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -29,10 +29,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.registerForActivityResult
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
@@ -46,11 +42,15 @@ import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.ui.platform.ClipEntry
-import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
-import kotlinx.coroutines.launch
+import androidx.compose.ui.text.style.TextAlign
+
+import coil3.compose.AsyncImage
+import kotlinx.coroutines.delay
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalAmount
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,10 +97,21 @@ fun EventDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Event Details", color = Color(0xFFFFC107)) },
+                title = {
+                    Text(
+                        event?.title ?: "Event Details",
+                        color = Color(0xFFFFC107),
+                        fontSize = 36.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color(0xFFFFC107))
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color(0xFFFFC107)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -207,7 +218,7 @@ fun EventDetailScreen(
                 }
 
                 // Creator Info
-                SectionTitle("Creator")
+                SectionTitle("Host")
                 EventDetailItem(
                     label = "Name",
                     value = event.creatorName ?: "Anonymous"
@@ -316,7 +327,8 @@ fun EventDetailScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                val shareMessage = "Join my event '${event.title}' on iHost! Use the share code: ${event.shareCode}"
+                                val shareMessage =
+                                    "Join my event '${event.title}' on iHost! Use the share code: ${event.shareCode}"
                                 // Copy button
                                 Button(
                                     onClick = { // Copy to clipboard
@@ -324,13 +336,19 @@ fun EventDetailScreen(
                                         // (https://stackoverflow.com/questions/79692173/how-to-resolve-deprecated-clipboardmanager-in-jetpack-compose)
                                         // and (https://stackoverflow.com/questions/45255755/failed-to-use-android-context-clipboardmanager-to-clip-a-phone-number)
                                         // Apparently, they deprecated the WAY EASIER TO USE old ClipboardManager in favor of this bullshit..
-                                        val clipBoardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                        val clipBoardManager =
+                                            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                         // Create clip data
-                                        val clipData = ClipData.newPlainText("Event share", shareMessage)
+                                        val clipData =
+                                            ClipData.newPlainText("Event share", shareMessage)
                                         // Set primary clip
                                         clipBoardManager.setPrimaryClip(clipData)
                                         // Show toast
-                                        Toast.makeText(context, "Share code copied to clipboard", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            context,
+                                            "Share code copied to clipboard",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     },
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = Color(0xFF1976D2)
@@ -346,7 +364,12 @@ fun EventDetailScreen(
                                             type = "text/plain"
                                             putExtra(Intent.EXTRA_TEXT, shareMessage)
                                         }
-                                        context.startActivity(Intent.createChooser(intent, "Share event code"))
+                                        context.startActivity(
+                                            Intent.createChooser(
+                                                intent,
+                                                "Share event code"
+                                            )
+                                        )
                                     },
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = Color(0xFFFFC107),
@@ -522,57 +545,42 @@ fun EventDetailScreen(
 
 @Composable
 fun EventDetailHeader(event: Event) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(120.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Box(
+    if (event.imageUrl == null) //TODO: CHANGE TO (event.imageUrl!=null) after firebase storege created
+    {
+        Card(
             modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    brush = androidx.compose.ui.graphics.Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFF6B5B95),
-                            Color(0xFF4A3F7F)
-                        )
-                    )
-                )
-                .padding(16.dp)
+                .fillMaxWidth()
+                .height(250.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            shape = RoundedCornerShape(12.dp)
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = event.eventDate,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.White,
-                        fontSize = 12.sp
-                    )
-                    if (event.eventTime != null) {
-                        Text(
-                            text = "• ${event.eventTime}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.White,
-                            fontSize = 12.sp
-                        )
-                    }
-                }
+            EventTimer(event.eventDate, event.eventTime)
 
-                Text(
-                    text = event.title,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = Color(0xFFFFC107),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 24.sp
-                )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = androidx.compose.ui.graphics.Brush.linearGradient(
+                            colors = listOf(
+                                Color(0xFF6B5B95),
+                                Color(0xFF4A3F7F)
+                            )
+                        )
+                    )
+                    .padding(16.dp)
+            ) {
+
+
+                AsyncImage(
+                    model = "22,",
+                    contentDescription = "Selected event image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(400.dp)
+                        .background(Color.Black),
+
+                    )
+
             }
         }
     }
@@ -603,12 +611,7 @@ fun EventDetailItem(label: String, value: String) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = Color(0xFFB0B0B0),
-            fontSize = 12.sp
-        )
+
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
@@ -618,3 +621,53 @@ fun EventDetailItem(label: String, value: String) {
     }
 }
 
+@Composable
+fun EventTimer(eventDate: String?, eventTime: String?) {
+    var timeRemaining by remember { mutableStateOf("") }
+    var checkedTime="00:00"
+    if(!eventTime.isNullOrBlank()){
+        checkedTime = eventTime
+
+    }
+    LaunchedEffect(eventDate, checkedTime) {
+        while (true) {
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+            val targetDateTime = LocalDateTime.parse("$eventDate $checkedTime", formatter)
+            val currentDateTime = LocalDateTime.now()
+
+            val diffMillis = ChronoUnit.MILLIS.between(currentDateTime, targetDateTime)
+
+            timeRemaining = if (diffMillis > 0) {
+                val days = diffMillis / (1000 * 60 * 60 * 24)
+                val hours = (diffMillis % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+                val minutes = (diffMillis % (1000 * 60 * 60)) / (1000 * 60)
+                val seconds = (diffMillis % (1000 * 60)) / 1000
+                if (days > 2) {
+                    String.format("%02d days", days)
+                } else if (hours < 12 && days < 1) {
+                    String.format("%02d:%02d:%02d", hours, minutes, seconds)
+                } else {
+                    String.format("%02d:%02d", hours, minutes)
+                }
+            } else if(diffMillis<1000*60*60*24){
+                "Event Started!"
+            }
+            else{
+                "Event ended!"
+            }
+
+            delay(1000) // Update every second
+        }
+    }
+
+    Text(
+        text = timeRemaining,
+        fontSize = 40.sp,
+        fontWeight = FontWeight.Bold,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+
+    )
+}
