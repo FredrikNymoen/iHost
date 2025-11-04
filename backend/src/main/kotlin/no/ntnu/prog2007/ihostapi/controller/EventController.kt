@@ -131,7 +131,8 @@ class EventController(
                 price = request.price,
                 createdAt = timestamp,
                 updatedAt = timestamp,
-                shareCode = generateShareCode() // Generate unique share code, see function below
+                shareCode = generateShareCode(), // Generate unique share code, see function below
+                imageUrl = request.imageUrl
             )
 
             firestore.collection(EVENTS_COLLECTION)
@@ -201,6 +202,7 @@ class EventController(
                 eventDate = request.eventDate ?: event.eventDate,
                 eventTime = request.eventTime ?: event.eventTime,
                 location = request.location ?: event.location,
+                imageUrl = request.imageUrl ?: event.imageUrl,
                 updatedAt = timestamp
             )
 
