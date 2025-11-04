@@ -43,7 +43,11 @@ data class Event(
     val updatedAt: String? = null, // ISO 8601 format
 
     @SerializedName("shareCode")
-    val shareCode: String = "" // Share code for sharing events
+    val shareCode: String = "", // Share code for sharing events
+
+    @SerializedName("imageUrl")
+    val imageUrl: String? = "" // Share code for sharing events
+
 )
 
 data class CreateEventRequest(
@@ -66,7 +70,10 @@ data class CreateEventRequest(
     val free: Boolean = true,
 
     @SerializedName("price")
-    val price: Double = 0.0
+    val price: Double = 0.0,
+
+    @SerializedName("image")
+    val imageUrl: String?
 )
 
 data class PaymentIntentRequest(

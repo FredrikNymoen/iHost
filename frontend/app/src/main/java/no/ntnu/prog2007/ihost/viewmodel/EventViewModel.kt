@@ -11,12 +11,16 @@ import kotlinx.coroutines.launch
 import no.ntnu.prog2007.ihost.data.model.CreateEventRequest
 import no.ntnu.prog2007.ihost.data.model.Event
 import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
+import androidx.activity.result.registerForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 
 data class EventUiState(
     val events: List<Event> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val selectedEvent: Event? = null
+
 )
 
 class EventViewModel(
@@ -42,8 +46,7 @@ class EventViewModel(
                 val events = RetrofitClient.apiService.getAllEvents()
                 _uiState.update {
                     it.copy(
-                        events = events,
-                        isLoading = false
+                        events = events, isLoading = false
                     )
                 }
                 Log.d("EventViewModel", "Loaded ${events.size} events")
@@ -66,7 +69,8 @@ class EventViewModel(
         eventTime: String?,
         location: String?,
         free: Boolean = true,
-        price: Double = 0.0
+        price: Double = 0.0,
+        imageUrl: String?
     ) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
@@ -78,13 +82,13 @@ class EventViewModel(
                     eventTime = eventTime,
                     location = location,
                     free = free,
-                    price = price
+                    price = price,
+                    imageUrl = imageUrl
                 )
                 val newEvent = RetrofitClient.apiService.createEvent(request)
                 _uiState.update { state ->
                     state.copy(
-                        events = state.events + newEvent,
-                        isLoading = false
+                        events = state.events + newEvent, isLoading = false
                     )
                 }
                 Log.d("EventViewModel", "Event created: ${newEvent.title}")
@@ -133,8 +137,7 @@ class EventViewModel(
                     state.copy(
                         events = state.events.map { event ->
                             if (event.id == eventId) updatedEvent else event
-                        },
-                        isLoading = false
+                        }, isLoading = false
                     )
                 }
                 Log.d("EventViewModel", "Joined event: $eventId")
@@ -159,8 +162,7 @@ class EventViewModel(
                     state.copy(
                         events = state.events.map { event ->
                             if (event.id == eventId) updatedEvent else event
-                        },
-                        isLoading = false
+                        }, isLoading = false
                     )
                 }
                 Log.d("EventViewModel", "Left event: $eventId")
@@ -190,14 +192,14 @@ class EventViewModel(
                 val event = RetrofitClient.apiService.getEventByCode(shareCode)
                 _uiState.update { state ->
                     // Only add event if not already present
-                    val updatedEvents = if (state.events.any { it.id == event.id }) { // Event already exists
-                        state.events // No change
-                    } else { // Event didnt already exist
-                        state.events + event // Add new event
-                    }
+                    val updatedEvents =
+                        if (state.events.any { it.id == event.id }) { // Event already exists
+                            state.events // No change
+                        } else { // Event didnt already exist
+                            state.events + event // Add new event
+                        }
                     state.copy( // Update state with new event
-                        events = updatedEvents,
-                        isLoading = false
+                        events = updatedEvents, isLoading = false
                     )
                 }
                 // Success callback and log it
@@ -214,6 +216,8 @@ class EventViewModel(
             }
         }
     }
+
+
 
     fun clearError() {
         _uiState.update { it.copy(errorMessage = null) }

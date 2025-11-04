@@ -10,6 +10,7 @@ import kotlinx.coroutines.withContext
 import no.ntnu.prog2007.ihost.data.model.PaymentIntentRequest
 import no.ntnu.prog2007.ihost.data.remote.ApiService
 
+
 class StripePaymentService(
     private val apiService: ApiService,
     private val activity: ComponentActivity

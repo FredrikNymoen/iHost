@@ -40,7 +40,8 @@ class EventRepository(
         description: String? = null,
         eventDate: String,
         eventTime: String? = null,
-        location: String? = null
+        location: String? = null,
+        imageUrl: String?= null
     ): Result<Event> = try {
         val token = getAuthToken() ?: return Result.failure(Exception("Not authenticated"))
         val request = CreateEventRequest(
@@ -48,7 +49,8 @@ class EventRepository(
             description = description,
             eventDate = eventDate,
             eventTime = eventTime,
-            location = location
+            location = location,
+            imageUrl =imageUrl
         )
         val event = apiService.createEvent(request)
         Result.success(event)

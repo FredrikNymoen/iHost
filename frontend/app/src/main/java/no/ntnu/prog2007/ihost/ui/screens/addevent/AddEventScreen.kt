@@ -1,11 +1,27 @@
 package no.ntnu.prog2007.ihost.ui.screens.addevent
 
+import coil3.compose.AsyncImage
+import android.net.Uri
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,13 +47,105 @@ fun AddEventScreen(
     var isFree by remember { mutableStateOf(true) }
     var price by remember { mutableStateOf("") }
 
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            selectedImageUri = uri
+            Log.d("PhotoPicker", "Selected URI: $uri")
+        }
+    }
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
+        Box(
+            modifier = Modifier
+                .width(300.dp)
+                .height(150.dp)
+                .background(
+                    color = Color(0xFF4A90E2),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .border(
+                    width = 2.dp,
+                    color = Color(0xFFFFC107),
+                    shape = RoundedCornerShape(12.dp)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (selectedImageUri != null) {
+                AsyncImage(
+                    model = selectedImageUri,
+                    contentDescription = "Selected event image",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            color = Color(0xFF4A90E2),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .border(
+                            width = 2.dp,
+                            color = Color(0xFFFFC107),
+                            shape = RoundedCornerShape(12.dp)
+                        ),
+                )
+                IconButton(
+                    onClick = { selectedImageUri = null },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .background(Color.Red, RoundedCornerShape(50))
+                ) {
+                    Icon(
+                        Icons.Default.Close,
+                        contentDescription = "Remove image",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+            } else {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable(
+                            onClick =
+                                {
+                                    galleryLauncher.launch(
+                                        PickVisualMediaRequest(
+                                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                                        )
+                                    )
+                                })
+                ) {
+
+                    Icon(
+                        Icons.Default.CloudUpload,
+                        contentDescription = "Upload image",
+                        modifier = Modifier.size(40.dp),
+                        tint = Color(0xFFFFC107)
+                    )
+
+                    Text(
+                        "Tap to select image",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White
+                    )
+                }
+            }
+        }
 
         OutlinedTextField(
             value = title,
@@ -188,7 +296,9 @@ fun AddEventScreen(
                         eventTime = eventTime.ifEmpty { null },
                         location = location.ifEmpty { null },
                         free = isFree,
-                        price = priceValue
+                        price = priceValue,
+                        imageUrl = ""
+
                     )
                     onEventCreated()
                 },

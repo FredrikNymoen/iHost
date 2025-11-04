@@ -3,6 +3,7 @@ package no.ntnu.prog2007.ihost.ui.screens.events.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -20,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import no.ntnu.prog2007.ihost.data.model.Event
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.ui.theme.MediumBlue
@@ -192,24 +194,42 @@ fun EventItem(
                     }
                 }
 
+
                 // Right side - Attendees count
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(start = 16.dp)
                 ) {
-                    Text(
-                        text = "${event.attendees.size}",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp
-                    )
-                    Text(
-                        text = "deltakere",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.White,
-                        fontSize = 10.sp
-                    )
+                    if (!event.imageUrl.isNullOrEmpty()) {
+                        Text(
+                            text = "${event.attendees.size}",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp
+                        )
+                        Text(
+                            text = "deltakere",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White,
+                            fontSize = 10.sp
+                        )
+                    }
+                    else{
+                        Box(
+
+                        ){
+                            AsyncImage(
+                                model = "22,",
+                                contentDescription = "Selected event image",
+                                modifier = Modifier
+                                    .width(100.dp)
+                                    .height(100.dp)
+                                    .background(Color.Black, shape= CircleShape),
+
+                            )
+                        }
+                    }
                 }
             }
         }
