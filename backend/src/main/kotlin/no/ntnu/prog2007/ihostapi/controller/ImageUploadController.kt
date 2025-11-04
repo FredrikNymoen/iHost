@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.UUID
 import java.util.logging.Logger
 
 /**
@@ -40,30 +39,26 @@ class ImageUploadController(
     @PostMapping("/upload")
     fun uploadImage(
         @RequestParam("file") file: MultipartFile,
-        @RequestParam("eventId", required = false) eventId: String?
+        @RequestParam("eventId") eventId: String
     ): ResponseEntity<Any> {
         return try {
-            val uid = SecurityContextHolder.getContext().authentication.principal as? String
-                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
+            if (SecurityContextHolder.getContext().authentication.principal !is String) return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
 
-            logger.info("User $uid uploading image: ${file.originalFilename}")
+            logger.info("Uploading image for event: $eventId")
 
             // Upload to Cloudinary
             val imageUrl = cloudinaryService.uploadImage(file)
 
-            // Create metadata document
+            // Create metadata document with only required fields
             val now = LocalDateTime.now()
             val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
             val timestamp = now.format(formatter)
 
             val imageMetadata = mapOf(
-                "id" to UUID.randomUUID().toString(),
                 "path" to imageUrl,
-                "eventId" to (eventId ?: ""),
-                "uploadedBy" to uid,
-                "createdAt" to timestamp,
-                "originalFilename" to (file.originalFilename ?: "unknown")
+                "eventId" to eventId,
+                "createdAt" to timestamp
             )
 
             // Store in Firestore
@@ -72,15 +67,14 @@ class ImageUploadController(
 
             docRef.set(imageMetadata).get()
 
-            logger.info("Image uploaded and metadata stored: ${imageMetadata["id"]}")
+            logger.info("Image uploaded and metadata stored for event: $eventId")
 
             ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(mapOf(
                     "message" to "Image uploaded successfully",
                     "imageUrl" to imageUrl,
-                    "documentId" to docRef.id,
-                    "metadata" to imageMetadata
+                    "eventId" to eventId
                 ))
         } catch (e: IllegalArgumentException) {
             logger.warning("Invalid image upload request: ${e.message}")
@@ -140,7 +134,7 @@ class ImageUploadController(
         @PathVariable documentId: String
     ): ResponseEntity<Any> {
         return try {
-            val uid = SecurityContextHolder.getContext().authentication.principal as? String
+            SecurityContextHolder.getContext().authentication.principal as? String
                 ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
 
@@ -152,12 +146,6 @@ class ImageUploadController(
             if (!imageDoc.exists()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ErrorResponse("NOT_FOUND", "Image not found"))
-            }
-
-            val uploadedBy = imageDoc.getString("uploadedBy")
-            if (uploadedBy != uid) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ErrorResponse("FORBIDDEN", "Only the uploader can delete this image"))
             }
 
             // Extract public ID from Cloudinary URL to delete from Cloudinary
@@ -175,7 +163,7 @@ class ImageUploadController(
                 .delete()
                 .get()
 
-            logger.info("Image deleted: $documentId by user: $uid")
+            logger.info("Image deleted: $documentId")
             ResponseEntity.ok(mapOf("message" to "Image deleted successfully"))
         } catch (e: Exception) {
             logger.warning("Error deleting image $documentId: ${e.message}")

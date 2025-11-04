@@ -37,14 +37,19 @@ class CloudinaryService(
                 throw IllegalArgumentException("File must be an image")
             }
 
-            // Upload to Cloudinary
+            // Upload to Cloudinary with transformation
             val uploadResult = cloudinary.uploader().upload(
                 file.bytes,
                 ObjectUtils.asMap(
                     "folder", folder,
-                    "resource_type", "image"
+                    "resource_type", "image",
+                    "width", 1920,              // Max width 1920px
+                    "height", 1080,             // Max height 1080px
+                    "crop", "limit",            // Only resize if larger
+                    "quality", "auto:good",     // Automatic quality optimization
+                    "fetch_format", "auto"      // Automatic format selection (WebP, etc.)
                 )
-            )
+            ).toMap()
 
             val imageUrl = uploadResult["secure_url"] as String
             logger.info("Image uploaded successfully: $imageUrl")

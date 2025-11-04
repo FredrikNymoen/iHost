@@ -38,9 +38,7 @@ data class Event(
 
     val updatedAt: String? = null,
 
-    val shareCode: String = "", // Unique code for sharing event with other people
-
-    val imageUrl: String? = null // URL to event image stored in Cloudinary
+    val shareCode: String = "" // Unique code for sharing event with other people
 )
 
 /**
@@ -61,9 +59,7 @@ data class CreateEventRequest(
 
     val free: Boolean = true,
 
-    val price: Double = 0.0,
-
-    val imageUrl: String? = null
+    val price: Double = 0.0
 )
 
 /**
@@ -74,6 +70,5 @@ data class UpdateEventRequest(
     val description: String? = null,
     val eventDate: String? = null,
     val eventTime: String? = null,
-    val location: String? = null,
-    val imageUrl: String? = null
+    val location: String? = null
 )
