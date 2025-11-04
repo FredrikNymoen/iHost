@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.WatchLater
 import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.WatchLater
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,7 +46,7 @@ fun EventItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .height(140.dp),
+            .height(152.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -64,25 +66,53 @@ fun EventItem(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxHeight(),
+                        .fillMaxHeight()
+                        .padding(end = 12.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // Date and time
+                    // Date, time, and attendee count
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(
-                            text = event.eventDate,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.White,
-                            fontSize = 12.sp
-                        )
-                        if (event.eventTime != null) {
+                        // Date and time
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
                             Text(
-                                text = event.eventTime,
+                                text = event.eventDate,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color.White,
+                                fontSize = 12.sp,
+                                modifier = Modifier.padding(end = 16.dp)
+                            )
+                            if (event.eventTime != null) {
+                                Text(
+                                    text = event.eventTime,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color.White,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+
+                        // Attendee count
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            androidx.compose.material3.Icon(
+                                imageVector = Icons.Default.People,
+                                contentDescription = "Attendees",
+                                tint = Color(0xFFFFC107),
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = "${event.attendees.size}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp
                             )
                         }
@@ -197,44 +227,46 @@ fun EventItem(
                 }
 
 
-                // Right side - Event image or attendee count
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(start = 16.dp)
-                ) {
-                    val firstImageUrl = eventImages?.firstOrNull()?.path
+                // Right side - Event image
+                val firstImageUrl = eventImages?.firstOrNull()?.path
 
+                // Always show event image (or placeholder)
+                Card(
+                    modifier = Modifier
+                        .width(170.dp)
+                        .height(120.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
                     if (firstImageUrl != null) {
-                        // Show event image
+                        AsyncImage(
+                            model = firstImageUrl,
+                            contentDescription = "Event image",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        )
+                    } else {
+                        // Show placeholder gradient when no image
                         Box(
                             modifier = Modifier
-                                .width(100.dp)
-                                .height(100.dp)
+                                .fillMaxSize()
+                                .background(
+                                    brush = Brush.linearGradient(
+                                        colors = listOf(
+                                            Color(0xFF6B5B95),
+                                            Color(0xFF4A3F7F)
+                                        )
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
                         ) {
-                            AsyncImage(
-                                model = firstImageUrl,
-                                contentDescription = "Event image",
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.Black, shape = CircleShape),
-                                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                            androidx.compose.material3.Icon(
+                                imageVector = androidx.compose.material.icons.Icons.Default.Event,
+                                contentDescription = "No image",
+                                tint = Color.White.copy(alpha = 0.6f),
+                                modifier = Modifier.size(40.dp)
                             )
                         }
-                    } else {
-                        // Show attendee count when no image
-                        Text(
-                            text = "${event.attendees.size}",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 24.sp
-                        )
-                        Text(
-                            text = "deltakere",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.White,
-                            fontSize = 10.sp
-                        )
                     }
                 }
             }

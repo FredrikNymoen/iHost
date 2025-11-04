@@ -80,13 +80,7 @@ fun EventDetailScreen(
 
     // Load event images when the screen loads
     LaunchedEffect(eventId) {
-        android.util.Log.d("EventDetailScreen", "LaunchedEffect: Loading images for event $eventId")
         viewModel.loadEventImages(eventId)
-    }
-
-    // Log when eventImages changes
-    LaunchedEffect(uiState.eventImages) {
-        android.util.Log.d("EventDetailScreen", "EventImages updated: ${uiState.eventImages.size} events with images")
     }
 
     // Fetch attendee names
@@ -141,11 +135,6 @@ fun EventDetailScreen(
                     .padding(16.dp)
             ) {
                 // Event Card Header
-                // Log for debugging
-                android.util.Log.d("EventDetailScreen", "EventId param: $eventId, Event.id: ${event.id}")
-                android.util.Log.d("EventDetailScreen", "Available image keys: ${uiState.eventImages.keys}")
-                android.util.Log.d("EventDetailScreen", "Images for this event: ${uiState.eventImages[event.id]?.size ?: 0}")
-
                 EventDetailHeader(event, uiState.eventImages[event.id])
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -561,15 +550,6 @@ fun EventDetailScreen(
 
 @Composable
 fun EventDetailHeader(event: Event, eventImages: List<no.ntnu.prog2007.ihost.data.remote.EventImage>?) {
-    // Log for debugging - this will be called every time the composable recomposes
-    android.util.Log.d("EventDetailHeader", "=== COMPOSING EventDetailHeader ===")
-    android.util.Log.d("EventDetailHeader", "Event: ${event.id}")
-    android.util.Log.d("EventDetailHeader", "eventImages parameter: $eventImages")
-    android.util.Log.d("EventDetailHeader", "Images count: ${eventImages?.size ?: 0}")
-    eventImages?.forEach { image ->
-        android.util.Log.d("EventDetailHeader", "Image URL: ${image.path}")
-    }
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -582,24 +562,15 @@ fun EventDetailHeader(event: Event, eventImages: List<no.ntnu.prog2007.ihost.dat
         ) {
             // Display first image if available, otherwise show gradient background
             val firstImageUrl = eventImages?.firstOrNull()?.path
-            android.util.Log.d("EventDetailHeader", "First image URL: $firstImageUrl")
 
             if (firstImageUrl != null) {
-                android.util.Log.d("EventDetailHeader", "Loading image from: $firstImageUrl")
                 AsyncImage(
                     model = firstImageUrl,
                     contentDescription = "Event image",
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                    onError = { error ->
-                        android.util.Log.e("EventDetailHeader", "Error loading image: ${error.result.throwable.message}")
-                    },
-                    onSuccess = {
-                        android.util.Log.d("EventDetailHeader", "Image loaded successfully")
-                    }
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
                 )
             } else {
-                android.util.Log.d("EventDetailHeader", "No image URL found, showing gradient")
                 // Show gradient background when no image
                 Box(
                     modifier = Modifier
@@ -692,11 +663,8 @@ fun EventTimer(eventDate: String?, eventTime: String?) {
                 } else {
                     String.format("%02d:%02d", days, hours)
                 }
-            } else if(diffMillis<1000*60*60*24){
-                "Event Started!"
-            }
-            else{
-                "Event ended!"
+            } else {
+                ""
             }
 
             delay(1000) // Update every second

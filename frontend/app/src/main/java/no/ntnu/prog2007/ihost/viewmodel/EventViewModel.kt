@@ -80,25 +80,14 @@ class EventViewModel(
     fun loadEventImages(eventId: String) {
         viewModelScope.launch {
             try {
-                Log.d("EventViewModel", "Starting to load images for event: $eventId")
                 val images = RetrofitClient.apiService.getEventImages(eventId)
-                Log.d("EventViewModel", "Loaded ${images.size} images for event: $eventId")
-
-                // Log each image URL
-                images.forEachIndexed { index, image ->
-                    Log.d("EventViewModel", "Image $index for event $eventId: ${image.path}")
-                }
-
                 _uiState.update { state ->
                     state.copy(
                         eventImages = state.eventImages + (eventId to images)
                     )
                 }
-
-                Log.d("EventViewModel", "Updated UI state with images for event: $eventId")
             } catch (e: Exception) {
                 Log.e("EventViewModel", "Error loading images for event $eventId: ${e.message}", e)
-                e.printStackTrace()
                 // Don't update error state as this is a background operation
             }
         }
