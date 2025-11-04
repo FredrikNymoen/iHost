@@ -125,7 +125,8 @@ fun EventsScreen(
                             EventItem(
                                 event = event,
                                 authViewModel = authViewModel,
-                                onClick = { onEventClick(event.id) }
+                                onClick = { onEventClick(event.id) },
+                                eventImages = uiState.eventImages[event.id]
                             )
                         }
                     }

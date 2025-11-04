@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import no.ntnu.prog2007.ihost.data.model.Event
+import no.ntnu.prog2007.ihost.data.remote.EventImage
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.ui.theme.MediumBlue
 import no.ntnu.prog2007.ihost.ui.theme.Gold
@@ -31,7 +32,8 @@ import no.ntnu.prog2007.ihost.ui.theme.Gold
 fun EventItem(
     event: Event,
     authViewModel: AuthViewModel,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    eventImages: List<EventImage>? = null
 ) {
     val authUiState by authViewModel.uiState.collectAsState()
     val currentUserId = authUiState.currentUser?.uid
@@ -195,12 +197,31 @@ fun EventItem(
                 }
 
 
-                // Right side - Attendees count
+                // Right side - Event image or attendee count
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(start = 16.dp)
                 ) {
-                    if (!event.imageUrl.isNullOrEmpty()) {
+                    val firstImageUrl = eventImages?.firstOrNull()?.path
+
+                    if (firstImageUrl != null) {
+                        // Show event image
+                        Box(
+                            modifier = Modifier
+                                .width(100.dp)
+                                .height(100.dp)
+                        ) {
+                            AsyncImage(
+                                model = firstImageUrl,
+                                contentDescription = "Event image",
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black, shape = CircleShape),
+                                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                            )
+                        }
+                    } else {
+                        // Show attendee count when no image
                         Text(
                             text = "${event.attendees.size}",
                             style = MaterialTheme.typography.titleLarge,
@@ -214,21 +235,6 @@ fun EventItem(
                             color = Color.White,
                             fontSize = 10.sp
                         )
-                    }
-                    else{
-                        Box(
-
-                        ){
-                            AsyncImage(
-                                model = "22,",
-                                contentDescription = "Selected event image",
-                                modifier = Modifier
-                                    .width(100.dp)
-                                    .height(100.dp)
-                                    .background(Color.Black, shape= CircleShape),
-
-                            )
-                        }
                     }
                 }
             }

@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -37,6 +38,7 @@ fun AddEventScreen(
     viewModel: EventViewModel,
     onEventCreated: () -> Unit
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
@@ -290,6 +292,7 @@ fun AddEventScreen(
                         0.0
                     }
                     viewModel.createEvent(
+                        context = context,
                         title = title,
                         description = description.ifEmpty { null },
                         eventDate = eventDate,
@@ -297,8 +300,7 @@ fun AddEventScreen(
                         location = location.ifEmpty { null },
                         free = isFree,
                         price = priceValue,
-                        imageUrl = ""
-
+                        imageUri = selectedImageUri
                     )
                     onEventCreated()
                 },
