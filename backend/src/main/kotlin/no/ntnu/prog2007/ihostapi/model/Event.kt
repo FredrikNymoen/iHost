@@ -60,6 +60,7 @@ data class CreateEventRequest(
     val free: Boolean = true,
 
     val price: Double = 0.0,
+
 )
 
 /**

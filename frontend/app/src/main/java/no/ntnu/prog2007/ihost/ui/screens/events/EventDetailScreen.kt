@@ -647,7 +647,7 @@ fun EventTimer(eventDate: String?, eventTime: String?) {
                 } else if (hours < 12 && days < 1) {
                     String.format("%02d:%02d:%02d", hours, minutes, seconds)
                 } else {
-                    String.format("%02d:%02d", hours, minutes)
+                    String.format("%02d:%02d", days, hours)
                 }
             } else if(diffMillis<1000*60*60*24){
                 "Event Started!"
