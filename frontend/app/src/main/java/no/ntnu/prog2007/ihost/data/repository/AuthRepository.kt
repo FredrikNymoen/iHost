@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.userProfileChangeRequest
 import kotlinx.coroutines.tasks.await
 import no.ntnu.prog2007.ihost.data.model.CreateUserRequest
+import no.ntnu.prog2007.ihost.data.model.User
 import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
 
 class AuthRepository(
@@ -21,7 +22,9 @@ class AuthRepository(
     suspend fun registerUser(
         name: String,
         email: String,
-        password: String
+        password: String,
+        firstName: String,
+        lastName: String? = null
     ): Result<FirebaseUser> = try {
         Log.d("AuthRepository", "Starting registration for email: $email, name: $name")
 
@@ -44,6 +47,8 @@ class AuthRepository(
         val createUserRequest = CreateUserRequest(
             uid = firebaseUser.uid,
             username = name,
+            firstName = firstName,
+            lastName = lastName,
             email = email
         )
 
@@ -71,6 +76,17 @@ class AuthRepository(
             ?: return Result.failure(Exception("Sign in failed"))
         Result.success(user)
     } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /**
+     * Fetch user profile from backend by UID
+     */
+    suspend fun getUserProfile(uid: String): Result<User> = try {
+        val profile = apiService.getUserByUid(uid)
+        Result.success(profile)
+    } catch (e: Exception) {
+        Log.e("AuthRepository", "Error fetching user profile: ${e.message}")
         Result.failure(e)
     }
 
