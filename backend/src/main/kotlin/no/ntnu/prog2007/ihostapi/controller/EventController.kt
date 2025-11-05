@@ -2,10 +2,7 @@ package no.ntnu.prog2007.ihostapi.controller
 
 import com.google.cloud.firestore.Firestore
 import jakarta.validation.Valid
-import no.ntnu.prog2007.ihostapi.model.CreateEventRequest
-import no.ntnu.prog2007.ihostapi.model.ErrorResponse
-import no.ntnu.prog2007.ihostapi.model.Event
-import no.ntnu.prog2007.ihostapi.model.UpdateEventRequest
+import no.ntnu.prog2007.ihostapi.model.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
@@ -25,6 +22,7 @@ class EventController(
 
     companion object {
         const val EVENTS_COLLECTION = "events"
+        const val EVENT_USERS_COLLECTION = "event_users"
     }
 
     /**
@@ -38,9 +36,37 @@ class EventController(
                 ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
 
-            val query = firestore.collection(EVENTS_COLLECTION).get().get()
-            val events = query.documents.mapNotNull { doc ->
-                doc.toObject(Event::class.java)
+            // Get events where user is invited (from event_users collection)
+            val eventUsersQuery = firestore.collection(EVENT_USERS_COLLECTION)
+                .whereEqualTo("userId", uid)
+                .get()
+                .get()
+
+            val eventUsers = eventUsersQuery.documents.mapNotNull { doc ->
+                doc.toObject(EventUser::class.java)
+            }
+
+            // Fetch the actual event details for each
+            val events = eventUsers.mapNotNull { eventUser ->
+                try {
+                    val eventDoc = firestore.collection(EVENTS_COLLECTION)
+                        .document(eventUser.eventId)
+                        .get()
+                        .get()
+
+                    if (eventDoc.exists()) {
+                        val event = eventDoc.toObject(Event::class.java)
+                        mapOf(
+                            "id" to eventDoc.id,
+                            "event" to event,
+                            "userStatus" to eventUser.status,
+                            "userRole" to eventUser.role
+                        )
+                    } else null
+                } catch (e: Exception) {
+                    logger.warning("Failed to fetch event ${eventUser.eventId}: ${e.message}")
+                    null
+                }
             }
 
             logger.info("Retrieved ${events.size} events for user: $uid")
@@ -77,7 +103,10 @@ class EventController(
             val event = eventDoc.toObject(Event::class.java)
             if (event != null) {
                 logger.info("Retrieved event: $id for user: $uid")
-                ResponseEntity.ok(event)
+                ResponseEntity.ok(mapOf(
+                    "id" to id,
+                    "event" to event
+                ))
             } else {
                 ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ErrorResponse("ERROR", "Could not parse event data"))
@@ -118,7 +147,6 @@ class EventController(
             val timestamp = now.format(formatter)
 
             val event = Event(
-                id = UUID.randomUUID().toString(),
                 title = request.title,
                 description = request.description,
                 eventDate = request.eventDate,
@@ -126,7 +154,6 @@ class EventController(
                 location = request.location,
                 creatorUid = uid,
                 creatorName = creatorName,
-                attendees = listOf(uid), // Creator is automatically an attendee
                 free = request.free,
                 price = request.price,
                 createdAt = timestamp,
@@ -134,15 +161,32 @@ class EventController(
                 shareCode = generateShareCode() // Generate unique share code, see function below
             )
 
-            firestore.collection(EVENTS_COLLECTION)
-                .document(event.id)
-                .set(event)
+            // Create event document
+            val eventRef = firestore.collection(EVENTS_COLLECTION).document()
+            eventRef.set(event).get()
+
+            // Create event_user document for creator
+            val eventUser = EventUser(
+                eventId = eventRef.id,
+                userId = uid,
+                status = EventUserStatus.CREATOR,
+                role = EventUserRole.CREATOR,
+                invitedAt = timestamp,
+                respondedAt = timestamp
+            )
+
+            firestore.collection(EVENT_USERS_COLLECTION)
+                .document()
+                .set(eventUser)
                 .get()
 
-            logger.info("Event created with ID: ${event.id} by user: $uid")
+            logger.info("Event created with ID: ${eventRef.id} by user: $uid")
             ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(event)
+                .body(mapOf(
+                    "id" to eventRef.id,
+                    "event" to event
+                ))
         } catch (e: Exception) {
             logger.warning("Error creating event: ${e.message}")
             ResponseEntity
@@ -210,7 +254,10 @@ class EventController(
                 .get()
 
             logger.info("Event updated: $id by user: $uid")
-            ResponseEntity.ok(updatedEvent)
+            ResponseEntity.ok(mapOf(
+                "id" to id,
+                "event" to updatedEvent
+            ))
         } catch (e: Exception) {
             logger.warning("Error updating event $id: ${e.message}")
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -265,117 +312,8 @@ class EventController(
         }
     }
 
-    /**
-     * Join an event
-     * Add current user to attendees list
-     */
-    @PostMapping("/{id}/join")
-    fun joinEvent(
-        @PathVariable id: String
-    ): ResponseEntity<Any> {
-        return try {
-            val uid = SecurityContextHolder.getContext().authentication.principal as? String
-                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
-
-            val eventDoc = firestore.collection(EVENTS_COLLECTION)
-                .document(id)
-                .get()
-                .get()
-
-            if (!eventDoc.exists()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ErrorResponse("NOT_FOUND", "Event not found"))
-            }
-
-            val event = eventDoc.toObject(Event::class.java)
-                ?: return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ErrorResponse("ERROR", "Could not parse event data"))
-
-            // Check if already attending
-            if (event.attendees.contains(uid)) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ErrorResponse("ALREADY_ATTENDING", "Already attending this event"))
-            }
-
-            val now = LocalDateTime.now()
-            val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
-            val timestamp = now.format(formatter)
-
-            val updatedEvent = event.copy(
-                attendees = event.attendees + uid,
-                updatedAt = timestamp
-            )
-
-            firestore.collection(EVENTS_COLLECTION)
-                .document(id)
-                .set(updatedEvent)
-                .get()
-
-            logger.info("User $uid joined event: $id")
-            ResponseEntity.ok(updatedEvent)
-        } catch (e: Exception) {
-            logger.warning("Error joining event $id: ${e.message}")
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse("ERROR", "Could not join event"))
-        }
-    }
-
-    /**
-     * Leave an event
-     * Remove current user from attendees list
-     */
-    @PostMapping("/{id}/leave")
-    fun leaveEvent(
-        @PathVariable id: String
-    ): ResponseEntity<Any> {
-        return try {
-            val uid = SecurityContextHolder.getContext().authentication.principal as? String
-                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
-
-            val eventDoc = firestore.collection(EVENTS_COLLECTION)
-                .document(id)
-                .get()
-                .get()
-
-            if (!eventDoc.exists()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ErrorResponse("NOT_FOUND", "Event not found"))
-            }
-
-            val event = eventDoc.toObject(Event::class.java)
-                ?: return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ErrorResponse("ERROR", "Could not parse event data"))
-
-            // Check if attending
-            if (!event.attendees.contains(uid)) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ErrorResponse("NOT_ATTENDING", "Not attending this event"))
-            }
-
-            val now = LocalDateTime.now()
-            val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
-            val timestamp = now.format(formatter)
-
-            val updatedEvent = event.copy(
-                attendees = event.attendees.filterNot { it == uid },
-                updatedAt = timestamp
-            )
-
-            firestore.collection(EVENTS_COLLECTION)
-                .document(id)
-                .set(updatedEvent)
-                .get()
-
-            logger.info("User $uid left event: $id")
-            ResponseEntity.ok(updatedEvent)
-        } catch (e: Exception) {
-            logger.warning("Error leaving event $id: ${e.message}")
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse("ERROR", "Could not leave event"))
-        }
-    }
+    // Join/leave functionality moved to EventUserController
+    // Use /api/event-users/{eventUserId}/accept or /decline instead
 
     /**
      * Find event by share code
@@ -405,11 +343,15 @@ class EventController(
             }
 
             // Parse event from document
-            val event = query.documents[0].toObject(Event::class.java)
+            val eventDoc = query.documents[0]
+            val event = eventDoc.toObject(Event::class.java)
 
             // log and return event
-            logger.info("Event found by code $shareCode; ${event.id} for user: $uid")
-            ResponseEntity.ok(event)
+            logger.info("Event found by code $shareCode; ${eventDoc.id} for user: $uid")
+            ResponseEntity.ok(mapOf(
+                "id" to eventDoc.id,
+                "event" to event
+            ))
         } catch (e: Exception) { // Catch any errors
             logger.warning("Error finding event by code $shareCode: ${e.message}") // Log warning
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR) // Return 500

@@ -6,11 +6,10 @@ import java.util.*
 /**
  * Event model representing an event in the system
  * Stored in Firestore
+ * Note: Document ID is used as the event identifier, not stored in the model
+ * Note: Attendees are managed through the event_users collection
  */
 data class Event(
-    @field:NotBlank(message = "ID is required")
-    val id: String = UUID.randomUUID().toString(),
-
     @field:NotBlank(message = "Title is required")
     val title: String = "",
 
@@ -27,8 +26,6 @@ data class Event(
     val creatorUid: String = "",
 
     val creatorName: String? = null,
-
-    val attendees: List<String> = emptyList(),
 
     val free: Boolean = true,
 

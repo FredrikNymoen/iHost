@@ -1,5 +1,6 @@
 package no.ntnu.prog2007.ihost.data.repository
 
+/**
 import no.ntnu.prog2007.ihost.data.model.CreateEventRequest
 import no.ntnu.prog2007.ihost.data.model.Event
 import no.ntnu.prog2007.ihost.data.remote.EventImage
@@ -102,3 +103,4 @@ class EventRepository(
         Result.failure(e)
     }
 }
+*/

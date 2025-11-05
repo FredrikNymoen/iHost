@@ -44,14 +44,14 @@ fun EventsScreen(
             onDismiss = { showJoinDialog = false },
             onSubmit = { code ->
                 isJoining = true
-                viewModel.getEventByCode(code) { event ->
+                viewModel.getEventByCode(code) { eventWithMetadata ->
                     isJoining = false
                     showJoinDialog = false
-                    onEventClick(event.id)
+                    onEventClick(eventWithMetadata.id)
 
                     Toast.makeText(
                         context,
-                        "Event '${event.title}' found",
+                        "Event '${eventWithMetadata.event.title}' found",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -62,13 +62,19 @@ fun EventsScreen(
 
     // Main screen layout
     Scaffold(
+        containerColor = Color.Transparent,
         floatingActionButton = { // Setting floating action buttons to a column
-            Column {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 FloatingActionButton( // Button to join event with code
                     onClick = { showJoinDialog = true },
-                    containerColor = Color.Blue,
-                    contentColor = Color.White,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    containerColor = Color(0xFFFFC107), // Gold color
+                    contentColor = Color(0xFF001D3D), // Dark blue text
+                    elevation = FloatingActionButtonDefaults.elevation(
+                        defaultElevation = 6.dp,
+                        pressedElevation = 12.dp
+                    )
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -78,7 +84,12 @@ fun EventsScreen(
 
                 FloatingActionButton( // Button to refresh events
                     onClick = { viewModel.loadEvents() },
-                    containerColor = Color.Transparent
+                    containerColor = Color(0xFF0C5CA7), // Medium blue
+                    contentColor = Color.White,
+                    elevation = FloatingActionButtonDefaults.elevation(
+                        defaultElevation = 6.dp,
+                        pressedElevation = 12.dp
+                    )
                 ) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
@@ -115,18 +126,18 @@ fun EventsScreen(
                 }
                 else -> {
                     val sortedEvents = uiState.events.sortedWith(
-                        compareBy({ it.eventDate }, { it.eventTime ?: "" })
+                        compareBy({ it.event.eventDate }, { it.event.eventTime ?: "" })
                     )
                     LazyColumn(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(sortedEvents) { event ->
+                        items(sortedEvents) { eventWithMetadata ->
                             EventItem(
-                                event = event,
+                                eventWithMetadata = eventWithMetadata,
                                 authViewModel = authViewModel,
-                                onClick = { onEventClick(event.id) },
-                                eventImages = uiState.eventImages[event.id]
+                                viewModel = viewModel,
+                                onClick = { onEventClick(eventWithMetadata.id) }
                             )
                         }
                     }

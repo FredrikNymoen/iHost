@@ -24,23 +24,31 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import no.ntnu.prog2007.ihost.data.model.Event
-import no.ntnu.prog2007.ihost.data.remote.EventImage
+import no.ntnu.prog2007.ihost.data.model.EventWithMetadata
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
+import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.ui.theme.MediumBlue
 import no.ntnu.prog2007.ihost.ui.theme.Gold
 
 @Composable
 fun EventItem(
-    event: Event,
+    eventWithMetadata: EventWithMetadata,
     authViewModel: AuthViewModel,
-    onClick: () -> Unit,
-    eventImages: List<EventImage>? = null
+    viewModel: EventViewModel,
+    onClick: () -> Unit
 ) {
     val authUiState by authViewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     val currentUserId = authUiState.currentUser?.uid
-    val isAttending = currentUserId != null && event.attendees.contains(currentUserId)
-    val isPending = currentUserId != null && !event.attendees.contains(currentUserId)
+
+    val event = eventWithMetadata.event
+    val eventImages = uiState.eventImages[eventWithMetadata.id]
+    val attendeeCount = uiState.eventAttendees[eventWithMetadata.id]?.size ?: 0
+
+    // Determine status based on userStatus from metadata
+    val isCreator = eventWithMetadata.userRole == "CREATOR"
+    val isAccepted = eventWithMetadata.userStatus == "ACCEPTED" || isCreator
+    val isPending = eventWithMetadata.userStatus == "PENDING"
 
     Card(
         modifier = Modifier
@@ -109,7 +117,7 @@ fun EventItem(
                                 modifier = Modifier.size(14.dp)
                             )
                             Text(
-                                text = "${event.attendees.size}",
+                                text = "$attendeeCount",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
@@ -123,7 +131,31 @@ fun EventItem(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        if (isAttending) {
+                        if (isCreator) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier = Modifier
+                                    .background(
+                                        color = Color(0xFFFFC107).copy(alpha = 0.3f),
+                                        shape = RoundedCornerShape(4.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Event,
+                                    contentDescription = "Creator",
+                                    tint = Color(0xFFFFC107),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Text(
+                                    text = "host",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color(0xFFFFC107),
+                                    fontSize = 10.sp
+                                )
+                            }
+                        } else if (isAccepted) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -165,7 +197,7 @@ fun EventItem(
                                     modifier = Modifier.size(14.dp)
                                 )
                                 Text(
-                                    text = "pending",
+                                    text = "invited",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = Color(0xFFFFC107),
                                     fontSize = 10.sp

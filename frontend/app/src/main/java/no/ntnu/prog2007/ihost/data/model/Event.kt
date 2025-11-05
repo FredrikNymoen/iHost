@@ -2,10 +2,12 @@ package no.ntnu.prog2007.ihost.data.model
 
 import com.google.gson.annotations.SerializedName
 
+/**
+ * Event data model
+ * Note: ID is stored separately in EventWithMetadata wrapper
+ * Note: Attendees are managed through event_users collection
+ */
 data class Event(
-    @SerializedName("id")
-    val id: String,
-
     @SerializedName("title")
     val title: String,
 
@@ -26,9 +28,6 @@ data class Event(
 
     @SerializedName("creatorName")
     val creatorName: String? = null,
-
-    @SerializedName("attendees")
-    val attendees: List<String> = emptyList(),
 
     @SerializedName("free")
     val free: Boolean = true,

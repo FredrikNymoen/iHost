@@ -39,4 +39,7 @@ sealed class Screen(
     object EventDetail : Screen("event_detail/{eventId}", "Event detaljer") {
         fun createRoute(eventId: String) = "event_detail/$eventId"
     }
+    object InviteUsers : Screen("invite_users/{eventId}", "Invite Users") {
+        fun createRoute(eventId: String) = "invite_users/$eventId"
+    }
 }

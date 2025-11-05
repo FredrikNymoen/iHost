@@ -11,6 +11,7 @@ import no.ntnu.prog2007.ihost.ui.screens.auth.LoginScreen
 import no.ntnu.prog2007.ihost.ui.screens.auth.SignUpScreen
 import no.ntnu.prog2007.ihost.ui.screens.events.EventsScreen
 import no.ntnu.prog2007.ihost.ui.screens.events.EventDetailScreen
+import no.ntnu.prog2007.ihost.ui.screens.events.InviteUsersScreen
 import no.ntnu.prog2007.ihost.ui.screens.addevent.AddEventScreen
 import no.ntnu.prog2007.ihost.ui.screens.profile.ProfileScreen
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
@@ -78,6 +79,25 @@ fun NavigationGraph(
                 },
                 onEdit = { id ->
                     // TODO: Navigate to edit event screen when available
+                    navController.popBackStack()
+                },
+                onInviteUsers = { id ->
+                    navController.navigate(Screen.InviteUsers.createRoute(id))
+                }
+            )
+        }
+
+        composable(
+            route = Screen.InviteUsers.route,
+            arguments = listOf(
+                navArgument("eventId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString("eventId") ?: return@composable
+            InviteUsersScreen(
+                eventId = eventId,
+                viewModel = eventViewModel,
+                onBack = {
                     navController.popBackStack()
                 }
             )
