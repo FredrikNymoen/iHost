@@ -338,14 +338,14 @@ class EventViewModel(
     }
 
     /**
-     * Get user display name by UID
+     * Get user Username by UID
      * @param uid The user's UID
-     * @return The user's display name, or "User" if fetch fails
+     * @return The user's Username, or "User" if fetch fails
      */
-    suspend fun getUserDisplayName(uid: String): String {
+    suspend fun getUserUserName(uid: String): String {
         return try {
             val user = RetrofitClient.apiService.getUserByUid(uid)
-            user.displayName
+            user.username
         } catch (e: Exception) {
             Log.e("EventViewModel", "Error fetching user name for $uid: ${e.message}", e)
             "User"

@@ -12,18 +12,32 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import no.ntnu.prog2007.ihost.data.model.User
 import no.ntnu.prog2007.ihost.data.repository.AuthRepository
 
 data class AuthUiState(
     val currentUser: FirebaseUser? = null,
+    val userProfile: User? = null, // Profile data to separate auth from user data
+    val isProfileLoading: Boolean = false, // Loading state for profile data
     val isLoggedIn: Boolean = false,
     val isLoading: Boolean = false,
     val errorMessage: String? = null
 )
 
+/**
+ * State holder for registration form fields for the personal info part of the registration form
+ */
+data class RegistrationState(
+    val firstName: String = "",
+    val lastName: String = "",
+    val email: String = "",
+)
+
 class AuthViewModel : ViewModel() {
     private val auth: FirebaseAuth = Firebase.auth
     private val authRepository = AuthRepository(auth)
+    private val _registrationState = MutableStateFlow(RegistrationState()) // State for registration form
+    val registrationState : StateFlow<RegistrationState> = _registrationState.asStateFlow() // read only expose of registration state
 
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
@@ -32,9 +46,54 @@ class AuthViewModel : ViewModel() {
         checkCurrentUser()
     }
 
+    /**
+     * Update registration form fields in the registration state
+     */
+    fun updateRegistrationField(field: String, value: String) {
+        when (field) {
+            "firstName" -> _registrationState.update { it.copy(firstName = value) }
+            "lastName" -> _registrationState.update { it.copy(lastName = value) }
+            "email" -> _registrationState.update { it.copy(email = value) }
+        }
+    }
+
+    /**
+     * Reset registration state
+     */
+    fun resetRegistrationState() {
+        _registrationState.value = RegistrationState()
+    }
+
     private fun checkCurrentUser() {
         val user = auth.currentUser
         _uiState.update { it.copy(currentUser = user, isLoggedIn = user != null) }
+    }
+
+    /**
+     * Load user profile data from backend for the current authenticated user
+     */
+    fun loadUserProfile() {
+        viewModelScope.launch {
+            // Fetch uid from the current authenticated user
+            val uid = _uiState.value.currentUser?.uid ?: return@launch
+
+            // Update loading state
+            _uiState.update { it.copy(isProfileLoading = true) }
+
+            try { // Call repository to get user profile
+                val userResult = authRepository.getUserProfile(uid)
+                userResult.onSuccess { profile -> // Success, update profile data
+                    _uiState.update { it.copy(userProfile = profile, isProfileLoading = false) }
+                }
+                userResult.onFailure { error ->
+                    _uiState.update { it.copy(isProfileLoading = false) }
+                    Log.e("AuthViewModel", "Error fetching user profile: ${error.message}")
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isProfileLoading = false) }
+                Log.e("AuthViewModel", "Error loading user profile: ${e.message}", e)
+            }
+        }
     }
 
     fun signIn(email: String, password: String) {
@@ -63,10 +122,41 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun signUp(name: String, email: String, password: String) {
+    fun signUp(username: String, password: String) {
+        val regState = _registrationState.value
+
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            val result = authRepository.registerUser(name, email, password)
+            // Check if username is available
+            val usernameResult = authRepository.isUsernameAvailable(username = username)
+            if (usernameResult.isFailure) { // Error during check
+                _uiState.update {
+                    it.copy(
+                        errorMessage = "Feil ved sjekking av brukernavn: ${usernameResult.exceptionOrNull()?.localizedMessage}",
+                        isLoading = false
+                    )
+                }
+                return@launch
+            }
+            val isAvailable = usernameResult.getOrNull() ?: false
+            if (!isAvailable) { // Username taken
+                _uiState.update {
+                    it.copy(
+                        errorMessage = "Brukernavnet er allerede tatt.",
+                        isLoading = false
+                    )
+                }
+                return@launch
+            }
+
+            // If we reach here, username is available - proceed with registration
+            val result = authRepository.registerUser(
+                username = username,
+                email = regState.email,
+                password = password,
+                firstName = regState.firstName,
+                lastName = regState.lastName
+            )
             result.onSuccess { user ->
                 _uiState.update {
                     it.copy(
@@ -75,7 +165,7 @@ class AuthViewModel : ViewModel() {
                         isLoading = false
                     )
                 }
-                Log.d("AuthViewModel", "User signed up and registered: $email")
+                Log.d("AuthViewModel", "User signed up and registered: $regState.email")
             }
             result.onFailure { e ->
                 Log.e("AuthViewModel", "Sign up error: ${e.message}", e)
@@ -92,6 +182,36 @@ class AuthViewModel : ViewModel() {
     fun signOut() {
         authRepository.signOut()
         _uiState.update { it.copy(currentUser = null, isLoggedIn = false) }
+    }
+
+    /**
+     * Username availability check for SignUpScreen
+     * Calls authRepositorys username availability check and returns result via callback
+     * @param username The username to check
+     * @param onResult Callback with result: true if available, false if taken or error
+     */
+    fun checkUsernameAvailability(username: String, onResult: (Boolean) -> Unit) {
+        if (username.isBlank()) { // Empty username fail early
+            onResult(false)
+            return
+        }
+        if (username.length !in 4..12) { // Invalid length fail early
+            onResult(false)
+            return
+        }
+        viewModelScope.launch { // Call repository check
+            try {
+                val result = authRepository.isUsernameAvailable(username)
+                result.onSuccess { available ->
+                    onResult(available)
+                }
+                result.onFailure {
+                    onResult(false)
+                }
+            } catch (e: Exception) {
+                onResult(false) // We dont really care about why it failed, we just return that it failed.
+            }
+        }
     }
 
     suspend fun getIdToken(): String? {

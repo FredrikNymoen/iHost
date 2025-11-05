@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.userProfileChangeRequest
 import kotlinx.coroutines.tasks.await
 import no.ntnu.prog2007.ihost.data.model.CreateUserRequest
+import no.ntnu.prog2007.ihost.data.model.User
 import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
 
 class AuthRepository(
@@ -19,11 +20,13 @@ class AuthRepository(
      * Handles the complete registration flow
      */
     suspend fun registerUser(
-        name: String,
+        username: String,
         email: String,
-        password: String
+        password: String,
+        firstName: String,
+        lastName: String? = null
     ): Result<FirebaseUser> = try {
-        Log.d("AuthRepository", "Starting registration for email: $email, name: $name")
+        Log.d("AuthRepository", "Starting registration for email: $email, name: $username")
 
         // Step 1: Create user in Firebase Auth
         val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password)
@@ -35,19 +38,24 @@ class AuthRepository(
 
         // Step 2: Update display name in Firebase
         firebaseUser.updateProfile(userProfileChangeRequest {
-            displayName = name
+            displayName = username
         }).await()
 
-        Log.d("AuthRepository", "Firebase profile updated with name: $name")
+        Log.d("AuthRepository", "Firebase profile updated with name: $username")
 
         // Step 3: Register on backend (token is added automatically by interceptor)
         val createUserRequest = CreateUserRequest(
             uid = firebaseUser.uid,
-            displayName = name,
+            username = username,
+            firstName = firstName,
+            lastName = lastName,
             email = email
         )
 
-        Log.d("AuthRepository", "Sending to backend: uid=${firebaseUser.uid}, email=$email, displayName=$name")
+        Log.d(
+            "AuthRepository",
+            "Sending to backend: uid=${firebaseUser.uid}, email=$email, displayName=$username"
+        )
 
         val response = apiService.registerUser(createUserRequest)
 
@@ -72,6 +80,17 @@ class AuthRepository(
     }
 
     /**
+     * Fetch user profile from backend by UID
+     */
+    suspend fun getUserProfile(uid: String): Result<User> = try {
+        val profile = apiService.getUserByUid(uid)
+        Result.success(profile)
+    } catch (e: Exception) {
+        Log.e("AuthRepository", "Error fetching user profile: ${e.message}")
+        Result.failure(e)
+    }
+
+    /**
      * Sign out current user
      */
     fun signOut() {
@@ -90,5 +109,13 @@ class AuthRepository(
         firebaseAuth.currentUser?.getIdToken(true)?.await()?.token
     } catch (e: Exception) {
         null
+    }
+
+    suspend fun isUsernameAvailable(username: String): Result<Boolean> = try {
+        val response = apiService.isUsernameAvailable(username)
+        Result.success(response["available"] == true)
+    } catch (e: Exception) {
+        Log.e("AuthRepository", "Username availability check error: ${e.message}", e)
+        Result.failure(e)
     }
 }

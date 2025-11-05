@@ -13,6 +13,7 @@ import no.ntnu.prog2007.ihost.ui.screens.events.EventsScreen
 import no.ntnu.prog2007.ihost.ui.screens.events.EventDetailScreen
 import no.ntnu.prog2007.ihost.ui.screens.events.InviteUsersScreen
 import no.ntnu.prog2007.ihost.ui.screens.addevent.AddEventScreen
+import no.ntnu.prog2007.ihost.ui.screens.auth.PersonalInfoScreen
 import no.ntnu.prog2007.ihost.ui.screens.profile.ProfileScreen
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
@@ -37,7 +38,20 @@ fun NavigationGraph(
             LoginScreen(
                 viewModel = authViewModel,
                 onNavigateToSignUp = {
+                    authViewModel.resetRegistrationState()
+                    navController.navigate(Screen.PersonalInfo.route)
+                }
+            )
+        }
+
+        composable(Screen.PersonalInfo.route) {
+            PersonalInfoScreen(
+                viewModel = authViewModel,
+                onNext = {
                     navController.navigate(Screen.SignUp.route)
+                },
+                onNavigateToLogin = {
+                    navController.popBackStack()
                 }
             )
         }
@@ -47,6 +61,9 @@ fun NavigationGraph(
                 viewModel = authViewModel,
                 onNavigateToLogin = {
                     navController.popBackStack()
+                },
+                onNavigateBack = {
+                    navController.navigate(Screen.PersonalInfo.route)
                 }
             )
         }

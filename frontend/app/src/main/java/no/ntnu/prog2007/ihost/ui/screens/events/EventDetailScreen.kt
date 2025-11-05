@@ -51,7 +51,10 @@ import androidx.compose.ui.text.style.TextAlign
 
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.delay
+import java.time.LocalTime
+import java.time.ZoneId
 import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalAmount
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,8 +98,8 @@ fun EventDetailScreen(
     LaunchedEffect(eventAttendees) {
         val names = mutableMapOf<String, String>()
         for (eventUser in eventAttendees) {
-            val displayName = viewModel.getUserDisplayName(eventUser.userId)
-            names[eventUser.userId] = displayName
+            val userName = viewModel.getUserUserName(eventUser.userId)
+            names[eventUser.userId] = userName
         }
         attendeeNames = names
     }
@@ -104,13 +107,12 @@ fun EventDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-
                 title = {
                     Text(
                         event?.title ?: "Event Details",
                         color = Color(0xFFFFC107),
                         fontSize = 36.sp,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Medium
                     )
                 },
                 navigationIcon = {
@@ -167,6 +169,18 @@ fun EventDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // Date and Time Section
+                SectionTitle("Date & Time")
+                EventDetailItem(
+                    label = "Date",
+                    value = event.eventDate
+                )
+                if (event.eventTime != null) {
+                    EventDetailItem(
+                        label = "Time",
+                        value = event.eventTime
+                    )
+                }
 
                 //TODO: creating better interface from here:
                 Row {
@@ -807,8 +821,8 @@ fun EventDetailItem(label: String, value: String) {
 @Composable
 fun EventTimer(eventDate: String?, eventTime: String?) {
     var timeRemaining by remember { mutableStateOf("") }
-    var checkedTime = "00:00"
-    if (!eventTime.isNullOrBlank()) {
+    var checkedTime="00:00"
+    if(!eventTime.isNullOrBlank()){
         checkedTime = eventTime
 
     }

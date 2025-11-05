@@ -264,7 +264,7 @@ fun UserItem(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = user.displayName.firstOrNull()?.uppercase() ?: "?",
+                        text = user.username.firstOrNull()?.uppercase() ?: "?",
                         color = Color(0xFF001D3D),
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp
@@ -273,13 +273,13 @@ fun UserItem(
 
                 Column {
                     Text(
-                        text = user.displayName,
+                        text = user.username,
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )
                     Text(
-                        text = user.email,
+                        text = user.firstName +" " + (user.lastName ?: ""),
                         color = Color.White.copy(alpha = 0.7f),
                         fontSize = 14.sp
                     )
