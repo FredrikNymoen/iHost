@@ -66,6 +66,29 @@ class AuthViewModel : ViewModel() {
     fun signUp(name: String, email: String, password: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            // Check if username is available
+            val usernameResult = authRepository.isUsernameAvailable(username = name)
+            if (usernameResult.isFailure) { // Error during check
+                _uiState.update {
+                    it.copy(
+                        errorMessage = "Feil ved sjekking av brukernavn: ${usernameResult.exceptionOrNull()?.localizedMessage}",
+                        isLoading = false
+                    )
+                }
+                return@launch
+            }
+            val isAvailable = usernameResult.getOrNull() ?: false
+            if (!isAvailable) { // Username taken
+                _uiState.update {
+                    it.copy(
+                        errorMessage = "Brukernavnet er allerede tatt.",
+                        isLoading = false
+                    )
+                }
+                return@launch
+            }
+
+            // If we reach here, username is available - proceed with registration
             val result = authRepository.registerUser(name, email, password)
             result.onSuccess { user ->
                 _uiState.update {
@@ -92,6 +115,36 @@ class AuthViewModel : ViewModel() {
     fun signOut() {
         authRepository.signOut()
         _uiState.update { it.copy(currentUser = null, isLoggedIn = false) }
+    }
+
+    /**
+     * Username availability check for SignUpScreen
+     * Calls authRepositorys username availability check and returns result via callback
+     * @param username The username to check
+     * @param onResult Callback with result: true if available, false if taken or error
+     */
+    fun checkUsernameAvailability(username: String, onResult: (Boolean) -> Unit) {
+        if (username.isBlank()) { // Empty username fail early
+            onResult(false)
+            return
+        }
+        if (username.length !in 4..12) { // Invalid length fail early
+            onResult(false)
+            return
+        }
+        viewModelScope.launch { // Call repository check
+            try {
+                val result = authRepository.isUsernameAvailable(username)
+                result.onSuccess { available ->
+                    onResult(available)
+                }
+                result.onFailure {
+                    onResult(false)
+                }
+            } catch (e: Exception) {
+                onResult(false) // We dont really care about why it failed, we just return that it failed.
+            }
+        }
     }
 
     suspend fun getIdToken(): String? {
