@@ -24,15 +24,44 @@ data class AuthUiState(
     val errorMessage: String? = null
 )
 
+/**
+ * State holder for registration form fields for the personal info part of the registration form
+ */
+data class RegistrationState(
+    val firstName: String = "",
+    val lastName: String = "",
+    val email: String = "",
+)
+
 class AuthViewModel : ViewModel() {
     private val auth: FirebaseAuth = Firebase.auth
     private val authRepository = AuthRepository(auth)
+    private val _registrationState = MutableStateFlow(RegistrationState()) // State for registration form
+    val registrationState : StateFlow<RegistrationState> = _registrationState.asStateFlow() // read only expose of registration state
 
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
     init {
         checkCurrentUser()
+    }
+
+    /**
+     * Update registration form fields in the registration state
+     */
+    fun updateRegistrationField(field: String, value: String) {
+        when (field) {
+            "firstName" -> _registrationState.update { it.copy(firstName = value) }
+            "lastName" -> _registrationState.update { it.copy(lastName = value) }
+            "email" -> _registrationState.update { it.copy(email = value) }
+        }
+    }
+
+    /**
+     * Reset registration state
+     */
+    fun resetRegistrationState() {
+        _registrationState.value = RegistrationState()
     }
 
     private fun checkCurrentUser() {
@@ -93,11 +122,13 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun signUp(name: String, email: String, password: String, firstName: String, lastName: String?) {
+    fun signUp(username: String, password: String) {
+        val regState = _registrationState.value
+
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             // Check if username is available
-            val usernameResult = authRepository.isUsernameAvailable(username = name)
+            val usernameResult = authRepository.isUsernameAvailable(username = username)
             if (usernameResult.isFailure) { // Error during check
                 _uiState.update {
                     it.copy(
@@ -119,7 +150,13 @@ class AuthViewModel : ViewModel() {
             }
 
             // If we reach here, username is available - proceed with registration
-            val result = authRepository.registerUser(name, email, password, firstName, lastName)
+            val result = authRepository.registerUser(
+                username = username,
+                email = regState.email,
+                password = password,
+                firstName = regState.firstName,
+                lastName = regState.lastName
+            )
             result.onSuccess { user ->
                 _uiState.update {
                     it.copy(
@@ -128,7 +165,7 @@ class AuthViewModel : ViewModel() {
                         isLoading = false
                     )
                 }
-                Log.d("AuthViewModel", "User signed up and registered: $email")
+                Log.d("AuthViewModel", "User signed up and registered: $regState.email")
             }
             result.onFailure { e ->
                 Log.e("AuthViewModel", "Sign up error: ${e.message}", e)
