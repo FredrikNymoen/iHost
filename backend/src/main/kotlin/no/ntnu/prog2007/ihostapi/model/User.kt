@@ -20,7 +20,7 @@ data class User(
 
     @field:NotBlank(message = "Username is required")
     @field:Size(min = 4, max = 12, message = "Username must be between 4 and 12 characters")
-    val userName: String = "",
+    val username: String = "",
 
     val phoneNumber: String? = null,
 
