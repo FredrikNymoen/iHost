@@ -3,6 +3,7 @@ package no.ntnu.prog2007.ihost.ui.screens.auth
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -28,15 +29,15 @@ import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 @Composable
 fun SignUpScreen(
     viewModel: AuthViewModel,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    onNavigateBack: () -> Unit
 ) {
     // State variables
     val uiState by viewModel.uiState.collectAsState()
-    val focusManager = LocalFocusManager.current
+    val registrationState by viewModel.registrationState.collectAsState()
 
     // Input field states
     var username by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -105,18 +106,37 @@ fun SignUpScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        // TopAppBar for back button
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+                .align(Alignment.Start)
+        ) {
+            IconButton(
+                onClick = onNavigateBack,
+                modifier = Modifier.align(Alignment.CenterStart)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Tilbake",
+                    tint = Color.White
+                )
+            }
+        }
         // Title
         Text(
             text = "Opprett konto",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFFFFC107)
+            color = Color(0xFFFFC107),
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Registrer deg for å begynne",
+            text = "Velg brukernavn og passord",
             fontSize = 16.sp,
             color = Color.White
         )
@@ -200,29 +220,7 @@ fun SignUpScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Email field
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("E-post", color = Color.White) },
-            leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email", tint = Color.White) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(emailFocusRequester),
-            enabled = !uiState.isLoading,
-            textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFFFFC107),
-                unfocusedBorderColor = Color(0xFFFFC107),
-                cursorColor = Color(0xFFFFC107)
-            )
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         // Password field
         OutlinedTextField(
@@ -304,15 +302,15 @@ fun SignUpScreen(
 
         // Sign up button
         Button(
-            onClick = { viewModel.signUp(username, email, password) },
+            onClick = { viewModel.signUp(username, password) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
             enabled = !uiState.isLoading &&
                     username.isNotBlank() &&
-                    email.isNotBlank() &&
                     password.isNotBlank() &&
-                    password == confirmPassword
+                    password == confirmPassword &&
+                    isUsernameAvailable == true
         ) {
             if (uiState.isLoading) {
                 CircularProgressIndicator(
