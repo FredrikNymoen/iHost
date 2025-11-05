@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.WatchLater
@@ -43,12 +44,13 @@ fun EventItem(
 
     val event = eventWithMetadata.event
     val eventImages = uiState.eventImages[eventWithMetadata.id]
-    val attendeeCount = uiState.eventAttendees[eventWithMetadata.id]?.size ?: 0
+    val attendeeCount = viewModel.getAttendeeCount(eventWithMetadata.id)
 
     // Determine status based on userStatus from metadata
     val isCreator = eventWithMetadata.userRole == "CREATOR"
     val isAccepted = eventWithMetadata.userStatus == "ACCEPTED" || isCreator
     val isPending = eventWithMetadata.userStatus == "PENDING"
+    val isDeclined = eventWithMetadata.userStatus == "DECLINED"
 
     Card(
         modifier = Modifier
@@ -137,7 +139,7 @@ fun EventItem(
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                                 modifier = Modifier
                                     .background(
-                                        color = Color(0xFFFFC107).copy(alpha = 0.3f),
+                                        color = Color(0xFF00BCD4).copy(alpha = 0.3f),
                                         shape = RoundedCornerShape(4.dp)
                                     )
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -145,13 +147,13 @@ fun EventItem(
                                 Icon(
                                     imageVector = Icons.Default.Event,
                                     contentDescription = "Creator",
-                                    tint = Color(0xFFFFC107),
+                                    tint = Color(0xFF00BCD4),
                                     modifier = Modifier.size(14.dp)
                                 )
                                 Text(
                                     text = "host",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = Color(0xFFFFC107),
+                                    color = Color(0xFF00BCD4),
                                     fontSize = 10.sp
                                 )
                             }
@@ -203,6 +205,30 @@ fun EventItem(
                                     fontSize = 10.sp
                                 )
                             }
+                        } else if (isDeclined) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier = Modifier
+                                    .background(
+                                        color = Color(0xFF757575).copy(alpha = 0.3f),
+                                        shape = RoundedCornerShape(4.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Declined",
+                                    tint = Color(0xFF757575),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Text(
+                                    text = "declined",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color(0xFF757575),
+                                    fontSize = 10.sp
+                                )
+                            }
                         }
 
                         // Price indicator
@@ -212,7 +238,7 @@ fun EventItem(
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                                 modifier = Modifier
                                     .background(
-                                        color = Color(0xFF9C27B0),
+                                        color = Color(0xFFFF6F00),
                                         shape = RoundedCornerShape(4.dp)
                                     )
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -285,8 +311,8 @@ fun EventItem(
                                 .background(
                                     brush = Brush.linearGradient(
                                         colors = listOf(
-                                            Color(0xFF6B5B95),
-                                            Color(0xFF4A3F7F)
+                                            Color(0xFF0C5CA7),
+                                            Color(0xFF003D73)
                                         )
                                     )
                                 ),

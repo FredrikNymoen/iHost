@@ -106,19 +106,16 @@ class EventViewModel(
     /**
      * Load attendees for a specific event
      * @param eventId The ID of the event to load attendees for
+     * Note: This loads ALL event_users (including PENDING) for the event
      */
     fun loadEventAttendees(eventId: String) {
         viewModelScope.launch {
             try {
-                // Get all attendees (ACCEPTED and CREATOR) - don't filter by status to get everyone
+                // Get all event_users for this event (no status filter)
                 val attendees = RetrofitClient.apiService.getEventAttendees(eventId, status = null)
-                // Filter to only include ACCEPTED and CREATOR statuses
-                val activeAttendees = attendees.filter {
-                    it.status == "ACCEPTED" || it.status == "CREATOR"
-                }
                 _uiState.update { state ->
                     state.copy(
-                        eventAttendees = state.eventAttendees + (eventId to activeAttendees)
+                        eventAttendees = state.eventAttendees + (eventId to attendees)
                     )
                 }
             } catch (e: Exception) {
@@ -130,10 +127,12 @@ class EventViewModel(
     /**
      * Get attendee count for an event
      * @param eventId The ID of the event
-     * @return The number of accepted attendees
+     * @return The number of accepted attendees (ACCEPTED or CREATOR status only)
      */
     fun getAttendeeCount(eventId: String): Int {
-        return _uiState.value.eventAttendees[eventId]?.size ?: 0
+        return _uiState.value.eventAttendees[eventId]
+            ?.count { it.status == "ACCEPTED" || it.status == "CREATOR" }
+            ?: 0
     }
 
     /**

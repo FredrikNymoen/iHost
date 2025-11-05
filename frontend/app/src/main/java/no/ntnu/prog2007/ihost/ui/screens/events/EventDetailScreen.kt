@@ -229,7 +229,10 @@ fun EventDetailScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Attendees Section
-                SectionTitle("Attendees (${eventAttendees.size})")
+                val confirmedAttendees = eventAttendees.filter {
+                    it.status == "ACCEPTED" || it.status == "CREATOR"
+                }
+                SectionTitle("Attendees (${confirmedAttendees.size})")
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -240,7 +243,7 @@ fun EventDetailScreen(
                         .padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    if (eventAttendees.isEmpty()) {
+                    if (confirmedAttendees.isEmpty()) {
                         Text(
                             text = "No attendees yet",
                             style = MaterialTheme.typography.bodySmall,
@@ -248,7 +251,7 @@ fun EventDetailScreen(
                             color = Color(0xFFB0B0B0)
                         )
                     } else {
-                        eventAttendees.forEach { eventUser ->
+                        confirmedAttendees.forEach { eventUser ->
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically,
@@ -297,6 +300,7 @@ fun EventDetailScreen(
                 val userStatus = eventWithMetadata?.userStatus
                 val isAccepted = userStatus == "ACCEPTED" || userStatus == "CREATOR"
                 val isPending = userStatus == "PENDING"
+                val isDeclined = userStatus == "DECLINED"
 
                 if (isCreator) {
                     // Show Share button
@@ -423,7 +427,7 @@ fun EventDetailScreen(
                                 .weight(1f)
                                 .height(48.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF6B5B95)
+                                containerColor = Color(0xFF00BCD4)
                             )
                         ) {
                             Icon(
@@ -560,6 +564,31 @@ fun EventDetailScreen(
                             Text("Decline")
                         }
                     }
+                } else if (isDeclined) {
+                    // Declined invitation
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFF757575).copy(alpha = 0.2f)
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "You have declined this event",
+                                color = Color(0xFF757575),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
                 } else {
                     // Not invited - Cannot access
                     Card(
@@ -622,8 +651,8 @@ fun EventDetailHeader(event: Event, eventImages: List<no.ntnu.prog2007.ihost.dat
                         .background(
                             brush = androidx.compose.ui.graphics.Brush.linearGradient(
                                 colors = listOf(
-                                    Color(0xFF6B5B95),
-                                    Color(0xFF4A3F7F)
+                                    Color(0xFF0C5CA7),
+                                    Color(0xFF003D73)
                                 )
                             )
                         )

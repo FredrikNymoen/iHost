@@ -84,7 +84,8 @@ class EventUserController(
 
                 val docRef = firestore.collection(EVENT_USERS_COLLECTION).document()
                 docRef.set(eventUser).get()
-                invitedUsers.add(eventUser)
+                // Add eventUser with Firestore document ID
+                invitedUsers.add(eventUser.copy(id = docRef.id))
             }
 
             logger.info("Invited ${invitedUsers.size} users to event ${request.eventId}")
@@ -217,8 +218,10 @@ class EventUserController(
             }
 
             val result = query.get().get()
-            val eventUsers = result.documents.map { doc ->
-                doc.toObject(EventUser::class.java)
+            val eventUsers = result.documents.mapNotNull { doc ->
+                val eventUser = doc.toObject(EventUser::class.java)
+                // Return eventUser with Firestore document ID
+                eventUser?.copy(id = doc.id)
             }
 
             ResponseEntity.ok(eventUsers)
