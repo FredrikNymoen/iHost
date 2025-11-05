@@ -43,11 +43,14 @@ class AuthRepository(
         // Step 3: Register on backend (token is added automatically by interceptor)
         val createUserRequest = CreateUserRequest(
             uid = firebaseUser.uid,
-            displayName = name,
+            username = name,
             email = email
         )
 
-        Log.d("AuthRepository", "Sending to backend: uid=${firebaseUser.uid}, email=$email, displayName=$name")
+        Log.d(
+            "AuthRepository",
+            "Sending to backend: uid=${firebaseUser.uid}, email=$email, displayName=$name"
+        )
 
         val response = apiService.registerUser(createUserRequest)
 
@@ -90,5 +93,13 @@ class AuthRepository(
         firebaseAuth.currentUser?.getIdToken(true)?.await()?.token
     } catch (e: Exception) {
         null
+    }
+
+    suspend fun isUsernameAvailable(username: String): Result<Boolean> = try {
+        val response = apiService.isUsernameAvailable(username)
+        Result.success(response["available"] == true)
+    } catch (e: Exception) {
+        Log.e("AuthRepository", "Username availability check error: ${e.message}", e)
+        Result.failure(e)
     }
 }
