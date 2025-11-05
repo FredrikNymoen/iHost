@@ -97,9 +97,11 @@ fun ProfileScreen(
                         color = DividerDefaults.color
                     )
                     if (userProfile != null) {
+                        val firstName = userProfile.firstName
+                        val lastName = userProfile.lastName ?: ""
                         ProfileInfoItem(
                             "Navn",
-                            "${userProfile.firstName} ${userProfile.lastName ?: ""}"
+                            if (lastName.isNotEmpty()) "$firstName $lastName" else firstName
                         )
                         HorizontalDivider(
                             modifier = Modifier.padding(vertical = 8.dp),
