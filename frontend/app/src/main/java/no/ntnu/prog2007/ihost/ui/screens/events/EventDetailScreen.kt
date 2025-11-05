@@ -507,18 +507,39 @@ fun EventDetailScreen(
                     ) {
                         Button(
                             onClick = {
-                                // Find the eventUser document for this user
                                 val myEventUser = eventAttendees.find { it.userId == currentUserId }
                                 if (myEventUser != null) {
-                                    viewModel.acceptInvitation(
-                                        eventUserId = myEventUser.id,
-                                        onSuccess = {
-                                            Toast.makeText(context, "Invitation accepted!", Toast.LENGTH_SHORT).show()
-                                        },
-                                        onError = { error ->
-                                            Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
-                                        }
-                                    )
+                                    if (!event.free && activity != null) {
+                                        // Paid event - initiate payment first
+                                        stripeViewModel.initiatePayment(
+                                            activity = activity,
+                                            eventId = eventId,
+                                            onPaymentComplete = {
+                                                // Payment succeeded, now accept invitation
+                                                viewModel.acceptInvitation(
+                                                    eventUserId = myEventUser.id,
+                                                    onSuccess = {
+                                                        Toast.makeText(context, "Payment successful! Invitation accepted!", Toast.LENGTH_SHORT).show()
+                                                        stripeViewModel.clearPaymentSuccess()
+                                                    },
+                                                    onError = { error ->
+                                                        Toast.makeText(context, "Payment succeeded but acceptance failed: $error", Toast.LENGTH_LONG).show()
+                                                    }
+                                                )
+                                            }
+                                        )
+                                    } else {
+                                        // Free event - just accept
+                                        viewModel.acceptInvitation(
+                                            eventUserId = myEventUser.id,
+                                            onSuccess = {
+                                                Toast.makeText(context, "Invitation accepted!", Toast.LENGTH_SHORT).show()
+                                            },
+                                            onError = { error ->
+                                                Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
+                                            }
+                                        )
+                                    }
                                 }
                             },
                             modifier = Modifier
@@ -526,15 +547,24 @@ fun EventDetailScreen(
                                 .height(48.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0xFF4CAF50)
-                            )
+                            ),
+                            enabled = !stripeUiState.isProcessingPayment
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Accept",
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Accept")
+                            if (stripeUiState.isProcessingPayment) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(18.dp),
+                                    color = Color.White,
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Accept",
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(if (!event.free) "Buy & Accept" else "Accept")
+                            }
                         }
 
                         Button(

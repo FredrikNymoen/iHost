@@ -239,7 +239,7 @@ fun EventItem(
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         // Date
                         Text(
@@ -275,20 +275,22 @@ fun EventItem(
                             )
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                horizontalArrangement = Arrangement.spacedBy(1.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.AttachMoney,
                                     contentDescription = "Paid event",
                                     tint = Color(0xFFFF6F00),
-                                    modifier = Modifier.size(12.dp)
+                                    modifier = Modifier.size(10.dp)
                                 )
                                 Text(
                                     text = "${String.format("%.0f", event.price)} NOK",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = Color(0xFFFF6F00),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
                             }
                         }
