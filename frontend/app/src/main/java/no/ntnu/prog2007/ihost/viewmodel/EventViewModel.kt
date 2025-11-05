@@ -110,10 +110,15 @@ class EventViewModel(
     fun loadEventAttendees(eventId: String) {
         viewModelScope.launch {
             try {
-                val attendees = RetrofitClient.apiService.getEventAttendees(eventId, status = "ACCEPTED")
+                // Get all attendees (ACCEPTED and CREATOR) - don't filter by status to get everyone
+                val attendees = RetrofitClient.apiService.getEventAttendees(eventId, status = null)
+                // Filter to only include ACCEPTED and CREATOR statuses
+                val activeAttendees = attendees.filter {
+                    it.status == "ACCEPTED" || it.status == "CREATOR"
+                }
                 _uiState.update { state ->
                     state.copy(
-                        eventAttendees = state.eventAttendees + (eventId to attendees)
+                        eventAttendees = state.eventAttendees + (eventId to activeAttendees)
                     )
                 }
             } catch (e: Exception) {

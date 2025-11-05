@@ -102,10 +102,27 @@ class EventController(
 
             val event = eventDoc.toObject(Event::class.java)
             if (event != null) {
+                // Check if user has an event_user entry for this event
+                val eventUserQuery = firestore.collection(EVENT_USERS_COLLECTION)
+                    .whereEqualTo("eventId", id)
+                    .whereEqualTo("userId", uid)
+                    .limit(1)
+                    .get()
+                    .get()
+
+                val (userStatus, userRole) = if (!eventUserQuery.documents.isEmpty()) {
+                    val eventUser = eventUserQuery.documents[0].toObject(EventUser::class.java)
+                    Pair(eventUser?.status, eventUser?.role)
+                } else {
+                    Pair(null, null)
+                }
+
                 logger.info("Retrieved event: $id for user: $uid")
                 ResponseEntity.ok(mapOf(
                     "id" to id,
-                    "event" to event
+                    "event" to event,
+                    "userStatus" to userStatus,
+                    "userRole" to userRole
                 ))
             } else {
                 ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -185,7 +202,9 @@ class EventController(
                 .status(HttpStatus.CREATED)
                 .body(mapOf(
                     "id" to eventRef.id,
-                    "event" to event
+                    "event" to event,
+                    "userStatus" to EventUserStatus.CREATOR,
+                    "userRole" to EventUserRole.CREATOR
                 ))
         } catch (e: Exception) {
             logger.warning("Error creating event: ${e.message}")
@@ -256,7 +275,9 @@ class EventController(
             logger.info("Event updated: $id by user: $uid")
             ResponseEntity.ok(mapOf(
                 "id" to id,
-                "event" to updatedEvent
+                "event" to updatedEvent,
+                "userStatus" to EventUserStatus.CREATOR,
+                "userRole" to EventUserRole.CREATOR
             ))
         } catch (e: Exception) {
             logger.warning("Error updating event $id: ${e.message}")
@@ -346,11 +367,28 @@ class EventController(
             val eventDoc = query.documents[0]
             val event = eventDoc.toObject(Event::class.java)
 
+            // Check if user has an event_user entry for this event
+            val eventUserQuery = firestore.collection(EVENT_USERS_COLLECTION)
+                .whereEqualTo("eventId", eventDoc.id)
+                .whereEqualTo("userId", uid)
+                .limit(1)
+                .get()
+                .get()
+
+            val (userStatus, userRole) = if (!eventUserQuery.documents.isEmpty()) {
+                val eventUser = eventUserQuery.documents[0].toObject(EventUser::class.java)
+                Pair(eventUser?.status, eventUser?.role)
+            } else {
+                Pair(null, null)
+            }
+
             // log and return event
             logger.info("Event found by code $shareCode; ${eventDoc.id} for user: $uid")
             ResponseEntity.ok(mapOf(
                 "id" to eventDoc.id,
-                "event" to event
+                "event" to event,
+                "userStatus" to userStatus,
+                "userRole" to userRole
             ))
         } catch (e: Exception) { // Catch any errors
             logger.warning("Error finding event by code $shareCode: ${e.message}") // Log warning
