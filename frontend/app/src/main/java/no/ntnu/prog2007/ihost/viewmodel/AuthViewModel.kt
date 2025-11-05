@@ -12,10 +12,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import no.ntnu.prog2007.ihost.data.model.User
 import no.ntnu.prog2007.ihost.data.repository.AuthRepository
 
 data class AuthUiState(
     val currentUser: FirebaseUser? = null,
+    val userProfile: User? = null, // Profile data to separate auth from user data
+    val isProfileLoading: Boolean = false, // Loading state for profile data
     val isLoggedIn: Boolean = false,
     val isLoading: Boolean = false,
     val errorMessage: String? = null
@@ -35,6 +38,33 @@ class AuthViewModel : ViewModel() {
     private fun checkCurrentUser() {
         val user = auth.currentUser
         _uiState.update { it.copy(currentUser = user, isLoggedIn = user != null) }
+    }
+
+    /**
+     * Load user profile data from backend for the current authenticated user
+     */
+    fun loadUserProfile() {
+        viewModelScope.launch {
+            // Fetch uid from the current authenticated user
+            val uid = _uiState.value.currentUser?.uid ?: return@launch
+
+            // Update loading state
+            _uiState.update { it.copy(isProfileLoading = true) }
+
+            try { // Call repository to get user profile
+                val userResult = authRepository.getUserProfile(uid)
+                userResult.onSuccess { profile -> // Success, update profile data
+                    _uiState.update { it.copy(userProfile = profile, isProfileLoading = false) }
+                }
+                userResult.onFailure { error ->
+                    _uiState.update { it.copy(isProfileLoading = false) }
+                    Log.e("AuthViewModel", "Error fetching user profile: ${error.message}")
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isProfileLoading = false) }
+                Log.e("AuthViewModel", "Error loading user profile: ${e.message}", e)
+            }
+        }
     }
 
     fun signIn(email: String, password: String) {
@@ -63,7 +93,7 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun signUp(name: String, email: String, password: String) {
+    fun signUp(name: String, email: String, password: String, firstName: String, lastName: String?) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             // Check if username is available
@@ -89,7 +119,7 @@ class AuthViewModel : ViewModel() {
             }
 
             // If we reach here, username is available - proceed with registration
-            val result = authRepository.registerUser(name, email, password)
+            val result = authRepository.registerUser(name, email, password, firstName, lastName)
             result.onSuccess { user ->
                 _uiState.update {
                     it.copy(
