@@ -279,7 +279,7 @@ fun UserItem(
                         fontSize = 16.sp
                     )
                     Text(
-                        text = user.email,
+                        text = user.firstName +" " + (user.lastName ?: ""),
                         color = Color.White.copy(alpha = 0.7f),
                         fontSize = 14.sp
                     )
