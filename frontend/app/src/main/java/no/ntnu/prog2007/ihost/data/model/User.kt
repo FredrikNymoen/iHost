@@ -24,6 +24,12 @@ data class User(
     @SerializedName("updatedAt")
     val updatedAt: String? = null, // ISO 8601 format
 
+    @SerializedName("firstName")
+    val firstName: String,
+
+    @SerializedName("lastName")
+    val lastName: String? = null,
+
     @SerializedName("isEmailVerified")
     val isEmailVerified: Boolean = false
 )
@@ -32,6 +38,8 @@ data class CreateUserRequest(
     val uid: String,
     val email: String,
     val username: String,
+    val firstName: String,
+    val lastName: String? = null,
     val phoneNumber: String? = null,
     val photoUrl: String? = null
 )
