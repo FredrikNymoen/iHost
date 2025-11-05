@@ -571,7 +571,7 @@ fun EventDetailScreen(
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFF757575).copy(alpha = 0.2f)
+                            containerColor = Color(0xFFD32F2F).copy(alpha = 0.2f)
                         )
                     ) {
                         Row(
@@ -583,7 +583,7 @@ fun EventDetailScreen(
                         ) {
                             Text(
                                 text = "You have declined this event",
-                                color = Color(0xFF757575),
+                                color = Color(0xFFD32F2F),
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium
                             )

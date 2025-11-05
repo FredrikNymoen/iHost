@@ -56,7 +56,7 @@ fun EventItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .height(152.dp),
+            .height(140.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -78,61 +78,15 @@ fun EventItem(
                         .weight(1f)
                         .fillMaxHeight()
                         .padding(end = 12.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Date, time, and attendee count
+                    // Status badge and attendee count at top
                     Row(
+                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        // Date and time
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(
-                                text = event.eventDate,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color.White,
-                                fontSize = 12.sp,
-                                modifier = Modifier.padding(end = 16.dp)
-                            )
-                            if (event.eventTime != null) {
-                                Text(
-                                    text = event.eventTime,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Color.White,
-                                    fontSize = 12.sp
-                                )
-                            }
-                        }
-
-                        // Attendee count
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            androidx.compose.material3.Icon(
-                                imageVector = Icons.Default.People,
-                                contentDescription = "Attendees",
-                                tint = Color(0xFFFFC107),
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Text(
-                                text = "$attendeeCount",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp
-                            )
-                        }
-                    }
-
-                    // Status badge
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
+                        // Status badge
                         if (isCreator) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -211,7 +165,7 @@ fun EventItem(
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                                 modifier = Modifier
                                     .background(
-                                        color = Color(0xFF757575).copy(alpha = 0.3f),
+                                        color = Color(0xFFD32F2F).copy(alpha = 0.3f),
                                         shape = RoundedCornerShape(4.dp)
                                     )
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -219,44 +173,39 @@ fun EventItem(
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = "Declined",
-                                    tint = Color(0xFF757575),
+                                    tint = Color(0xFFD32F2F),
                                     modifier = Modifier.size(14.dp)
                                 )
                                 Text(
                                     text = "declined",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = Color(0xFF757575),
+                                    color = Color(0xFFD32F2F),
                                     fontSize = 10.sp
                                 )
                             }
+                        } else {
+                            // Empty space if no status badge
+                            Spacer(modifier = Modifier.width(1.dp))
                         }
 
-                        // Price indicator
-                        if (!event.free) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                modifier = Modifier
-                                    .background(
-                                        color = Color(0xFFFF6F00),
-                                        shape = RoundedCornerShape(4.dp)
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.AttachMoney,
-                                    contentDescription = "Paid event",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Text(
-                                    text = "${String.format("%.2f", event.price)} NOK",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Color.White,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
+                        // Attendee count
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            androidx.compose.material3.Icon(
+                                imageVector = Icons.Default.People,
+                                contentDescription = "Attendees",
+                                tint = Color(0xFFFFC107),
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = "$attendeeCount",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            )
                         }
                     }
 
@@ -277,10 +226,72 @@ fun EventItem(
                             text = event.description,
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.White,
-                            maxLines = 1,
+                            maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
-                            fontSize = 12.sp
+                            fontSize = 12.sp,
+                            modifier = Modifier.weight(1f, fill = false)
                         )
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+
+                    // Bottom row: Date, Time, and Price
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Date
+                        Text(
+                            text = event.eventDate,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White.copy(alpha = 0.8f),
+                            fontSize = 11.sp
+                        )
+
+                        // Time
+                        if (event.eventTime != null) {
+                            Text(
+                                text = "•",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.White.copy(alpha = 0.5f),
+                                fontSize = 11.sp
+                            )
+                            Text(
+                                text = event.eventTime,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.White.copy(alpha = 0.8f),
+                                fontSize = 11.sp
+                            )
+                        }
+
+                        // Price indicator
+                        if (!event.free) {
+                            Text(
+                                text = "•",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.White.copy(alpha = 0.5f),
+                                fontSize = 11.sp
+                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AttachMoney,
+                                    contentDescription = "Paid event",
+                                    tint = Color(0xFFFF6F00),
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Text(
+                                    text = "${String.format("%.0f", event.price)} NOK",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color(0xFFFF6F00),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -291,7 +302,7 @@ fun EventItem(
                 // Always show event image (or placeholder)
                 Card(
                     modifier = Modifier
-                        .width(170.dp)
+                        .width(164.dp)
                         .height(120.dp),
                     shape = RoundedCornerShape(8.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
