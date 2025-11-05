@@ -9,8 +9,8 @@ data class User(
     @SerializedName("email")
     val email: String,
 
-    @SerializedName("userName")
-    val userName: String,
+    @SerializedName("username")
+    val username: String,
 
     @SerializedName("phoneNumber")
     val phoneNumber: String? = null,
@@ -31,7 +31,7 @@ data class User(
 data class CreateUserRequest(
     val uid: String,
     val email: String,
-    val userName: String,
+    val username: String,
     val phoneNumber: String? = null,
     val photoUrl: String? = null
 )
@@ -43,8 +43,8 @@ data class AuthResponse(
     @SerializedName("email")
     val email: String? = null,
 
-    @SerializedName("userName")
-    val userName: String? = null,
+    @SerializedName("username")
+    val username: String? = null,
 
     @SerializedName("message")
     val message: String? = null
