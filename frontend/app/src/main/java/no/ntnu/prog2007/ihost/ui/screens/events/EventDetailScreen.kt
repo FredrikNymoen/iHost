@@ -169,18 +169,7 @@ fun EventDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Date and Time Section
-                SectionTitle("Date & Time")
-                EventDetailItem(
-                    label = "Date",
-                    value = event.eventDate
-                )
-                if (event.eventTime != null) {
-                    EventDetailItem(
-                        label = "Time",
-                        value = event.eventTime
-                    )
-                }
+
 
                 //TODO: creating better interface from here:
                 Row {
