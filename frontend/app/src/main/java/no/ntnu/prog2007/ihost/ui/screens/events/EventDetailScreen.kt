@@ -90,8 +90,8 @@ fun EventDetailScreen(
     LaunchedEffect(eventAttendees) {
         val names = mutableMapOf<String, String>()
         for (eventUser in eventAttendees) {
-            val displayName = viewModel.getUserDisplayName(eventUser.userId)
-            names[eventUser.userId] = displayName
+            val userName = viewModel.getUserUserName(eventUser.userId)
+            names[eventUser.userId] = userName
         }
         attendeeNames = names
     }
