@@ -20,13 +20,13 @@ class AuthRepository(
      * Handles the complete registration flow
      */
     suspend fun registerUser(
-        name: String,
+        username: String,
         email: String,
         password: String,
         firstName: String,
         lastName: String? = null
     ): Result<FirebaseUser> = try {
-        Log.d("AuthRepository", "Starting registration for email: $email, name: $name")
+        Log.d("AuthRepository", "Starting registration for email: $email, name: $username")
 
         // Step 1: Create user in Firebase Auth
         val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password)
@@ -38,15 +38,15 @@ class AuthRepository(
 
         // Step 2: Update display name in Firebase
         firebaseUser.updateProfile(userProfileChangeRequest {
-            displayName = name
+            displayName = username
         }).await()
 
-        Log.d("AuthRepository", "Firebase profile updated with name: $name")
+        Log.d("AuthRepository", "Firebase profile updated with name: $username")
 
         // Step 3: Register on backend (token is added automatically by interceptor)
         val createUserRequest = CreateUserRequest(
             uid = firebaseUser.uid,
-            username = name,
+            username = username,
             firstName = firstName,
             lastName = lastName,
             email = email
@@ -54,7 +54,7 @@ class AuthRepository(
 
         Log.d(
             "AuthRepository",
-            "Sending to backend: uid=${firebaseUser.uid}, email=$email, displayName=$name"
+            "Sending to backend: uid=${firebaseUser.uid}, email=$email, displayName=$username"
         )
 
         val response = apiService.registerUser(createUserRequest)
