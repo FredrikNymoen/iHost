@@ -189,7 +189,9 @@ class AuthController(
                 photoUrl = request.photoUrl,
                 createdAt = timestamp,
                 updatedAt = timestamp,
-                isEmailVerified = userRecord.isEmailVerified
+                isEmailVerified = userRecord.isEmailVerified,
+                firstName = request.firstName,
+                lastName = request.lastName
             )
 
             // Save user document to Firestore and wait for completion
