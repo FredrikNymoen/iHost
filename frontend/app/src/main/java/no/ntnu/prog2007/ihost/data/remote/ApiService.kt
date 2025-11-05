@@ -102,6 +102,10 @@ interface ApiService {
     suspend fun getEventImages(
         @Path("eventId") eventId: String
     ): List<EventImage>
+
+    // Username availability check
+    @GET("api/auth/username-available/{username}")
+    suspend fun isUsernameAvailable(@Path("username") username: String): Map<String, Boolean>
 }
 
 data class ImageUploadResponse(
