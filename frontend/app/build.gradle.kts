@@ -77,6 +77,7 @@ dependencies {
 
     // Coroutines for Firebase
     implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.ui)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
