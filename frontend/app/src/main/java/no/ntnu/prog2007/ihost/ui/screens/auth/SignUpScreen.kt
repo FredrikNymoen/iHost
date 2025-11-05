@@ -19,6 +19,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
@@ -27,16 +30,69 @@ fun SignUpScreen(
     viewModel: AuthViewModel,
     onNavigateToLogin: () -> Unit
 ) {
+    // State variables
     val uiState by viewModel.uiState.collectAsState()
     val focusManager = LocalFocusManager.current
 
-    var name by remember { mutableStateOf("") }
+    // Input field states
+    var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
+    // Username validation state
+    var isCheckingUsername by remember { mutableStateOf(false) }
+    var isUsernameAvailable by remember { mutableStateOf<Boolean?>(null) }
+    var usernameError by remember { mutableStateOf<String?>(null) }
+
+    // Username availability check debounce to run only after user stops typing so we dont
+    // accidentally spam the backend by checking on every keystroke
+    val scope = rememberCoroutineScope()
+    val debouncePeriod = 500L // milliseconds
+    var debounceJob by remember { mutableStateOf<Job?>(null) }
+
+    // Username validation function
+    fun validateUsername(value: String) {
+        // Reset previous errores and states first
+        isUsernameAvailable = null
+        usernameError = null
+
+        // If its blank, no need to check
+        if (value.isBlank()) return
+
+        // Check length
+        if (value.length !in 4..12) {
+            usernameError = "Brukernavn må være mellom 4 og 12 tegn"
+            return
+        }
+
+        // Check for illegal characters
+        if (!value.matches(Regex("^[a-zA-z0-9_]+$"))) {
+            usernameError = "Brukernavn kan kun inneholde bokstaver, tall og understrek"
+            return
+        }
+
+        // Cancel previous debounce job if any
+        debounceJob?.cancel()
+
+        // Launch new debounce job and set checking state to true
+        isCheckingUsername = true
+        debounceJob = scope.launch {
+            delay(debouncePeriod) // Wait for user to stop typing
+            // Call the viewModel to check username availability
+            viewModel.checkUsernameAvailability(value) { available ->
+                isCheckingUsername = false // Done checking
+                isUsernameAvailable = available // Update availability state
+                // Set error message if not available
+                usernameError = if (!available) "Brukernavnet er allerede tatt" else null
+            }
+
+        }
+    }
+
+    // Focus requesters
     val nameFocusRequester = remember { FocusRequester() }
     val emailFocusRequester = remember { FocusRequester() }
     val passwordFocusRequester = remember { FocusRequester() }
@@ -85,12 +141,40 @@ fun SignUpScreen(
             }
         }
 
-        // Name field
+        // Username field
         OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text("Fullt navn", color = Color.White) },
-            leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Name", tint = Color.White) },
+            value = username,
+            onValueChange = {
+                username = it
+                validateUsername(it)
+            },
+            label = { Text("Brukernavn", color = Color.White) },
+            leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Username", tint = Color.White) },
+            trailingIcon = { // Show loading, check or error icon based on state
+                when {
+                    isCheckingUsername -> { // Show loading indicator
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                            color = Color.White
+                        )
+                    }
+                    isUsernameAvailable == true -> { // Green check icon if username is available
+                        Icon(
+                            Icons.Default.Check,
+                            contentDescription = "Brukernavn tilgjengelig",
+                            tint = Color.Green
+                        )
+                    }
+                    isUsernameAvailable == false -> { // Red close icon if username is taken
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = "Brukernavn ikke tilgjengelig",
+                            tint = Color.Red
+                        )
+                    }
+                }
+            },
             singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
@@ -103,6 +187,18 @@ fun SignUpScreen(
                 cursorColor = Color(0xFFFFC107)
             )
         )
+
+        // Username error
+        if (usernameError != null) {
+            Text(
+                text= usernameError!!,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, top = 4.dp)
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -208,12 +304,12 @@ fun SignUpScreen(
 
         // Sign up button
         Button(
-            onClick = { viewModel.signUp(name, email, password) },
+            onClick = { viewModel.signUp(username, email, password) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
             enabled = !uiState.isLoading &&
-                    name.isNotBlank() &&
+                    username.isNotBlank() &&
                     email.isNotBlank() &&
                     password.isNotBlank() &&
                     password == confirmPassword
