@@ -5,7 +5,6 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Drafts
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -18,6 +17,7 @@ sealed class Screen(
 ) {
     object Login : Screen("login", "Logg inn")
     object SignUp : Screen("signup", "Registrer deg")
+    object PersonalInfo : Screen("personal_info", "Personlig informasjon")
     object Events : Screen(
         "events",
         "Events",
