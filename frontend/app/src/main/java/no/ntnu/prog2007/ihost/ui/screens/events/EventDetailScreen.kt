@@ -238,15 +238,20 @@ fun EventDetailScreen(
                                     modifier = Modifier.size(36.dp),
                                 )
                             }
-
-
+                        }
+                        Row(
+                            modifier = Modifier
+                                .padding(top = 12.dp, bottom = 12.dp)
+                        ) {
+                            var priceString = "Free"
+                            if (!event.free) priceString = event.price.toString() + " kr"
                             Text(
                                 fontSize = 24.sp,
                                 modifier = Modifier
                                     .padding(end = 24.dp)
                                     .fillMaxHeight()
                                     .align(alignment = Alignment.CenterVertically),
-                                text = event.price.toString(),
+                                text = priceString,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.White
                             )
@@ -256,8 +261,8 @@ fun EventDetailScreen(
                                 tint = Color(0xFFFFC107),
                                 modifier = Modifier.size(36.dp),
                             )
-
                         }
+
 
                     }
                 }
