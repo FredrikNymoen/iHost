@@ -6,6 +6,8 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import android.Manifest
+import androidx.compose.runtime.remember
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -37,6 +40,7 @@ fun AddEventScreen(
     viewModel: EventViewModel,
     onEventCreated: () -> Unit
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
@@ -48,6 +52,43 @@ fun AddEventScreen(
     var price by remember { mutableStateOf("") }
 
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var showImageSourceDialog by remember { mutableStateOf(false) }
+    var imageKey by remember { mutableStateOf(0) } // Key to force image reload
+
+    // Camera launcher - must be declared before cameraPermissionLauncher
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (!success) {
+            selectedImageUri = null
+            Log.d("Camera", "Photo capture cancelled or failed")
+        } else {
+            Log.d("Camera", "Photo captured: $selectedImageUri")
+            imageKey++ // Increment key to force image reload
+        }
+    }
+
+    // Camera permission launcher
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            // Permission granted, now take photo
+            val imageFile = java.io.File(
+                context.cacheDir,
+                "camera_${System.currentTimeMillis()}.jpg"
+            )
+            val uri = androidx.core.content.FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.provider",
+                imageFile
+            )
+            selectedImageUri = uri
+            cameraLauncher.launch(uri)
+        } else {
+            Log.d("Camera", "Camera permission denied")
+        }
+    }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -58,6 +99,89 @@ fun AddEventScreen(
         }
     }
 
+
+    // Dialog for selecting image source
+    if (showImageSourceDialog) {
+        AlertDialog(
+            onDismissRequest = { showImageSourceDialog = false },
+            title = {
+                Text(
+                    "Select Image Source",
+                    color = Color(0xFFFFC107),
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        "How would you like to add an image?",
+                        color = Color.White
+                    )
+                }
+            },
+            confirmButton = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            showImageSourceDialog = false
+                            // Request camera permission first
+                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF0C5CA7),
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AddAPhoto,
+                            contentDescription = "Take photo",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Take Photo")
+                    }
+                    Button(
+                        onClick = {
+                            showImageSourceDialog = false
+                            galleryLauncher.launch(
+                                PickVisualMediaRequest(
+                                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                                )
+                            )
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFFFC107),
+                            contentColor = Color(0xFF001D3D)
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CloudUpload,
+                            contentDescription = "Select from gallery",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Gallery")
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showImageSourceDialog = false }
+                ) {
+                    Text("Cancel", color = Color.White)
+                }
+            },
+            containerColor = Color(0xFF001D3D)
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -83,21 +207,24 @@ fun AddEventScreen(
             contentAlignment = Alignment.Center
         ) {
             if (selectedImageUri != null) {
-                AsyncImage(
-                    model = selectedImageUri,
-                    contentDescription = "Selected event image",
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            color = Color(0xFF4A90E2),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .border(
-                            width = 2.dp,
-                            color = Color(0xFFFFC107),
-                            shape = RoundedCornerShape(12.dp)
-                        ),
-                )
+                androidx.compose.runtime.key(imageKey) {
+                    AsyncImage(
+                        model = selectedImageUri,
+                        contentDescription = "Selected event image",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                color = Color(0xFF4A90E2),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(
+                                width = 2.dp,
+                                color = Color(0xFFFFC107),
+                                shape = RoundedCornerShape(12.dp)
+                            ),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                    )
+                }
                 IconButton(
                     onClick = { selectedImageUri = null },
                     modifier = Modifier
@@ -119,26 +246,18 @@ fun AddEventScreen(
                     verticalArrangement = Arrangement.Center,
                     modifier = Modifier
                         .fillMaxSize()
-                        .clickable(
-                            onClick =
-                                {
-                                    galleryLauncher.launch(
-                                        PickVisualMediaRequest(
-                                            ActivityResultContracts.PickVisualMedia.ImageOnly
-                                        )
-                                    )
-                                })
+                        .clickable(onClick = { showImageSourceDialog = true })
                 ) {
 
                     Icon(
-                        Icons.Default.CloudUpload,
-                        contentDescription = "Upload image",
+                        Icons.Default.AddAPhoto,
+                        contentDescription = "Add image",
                         modifier = Modifier.size(40.dp),
                         tint = Color(0xFFFFC107)
                     )
 
                     Text(
-                        "Tap to select image",
+                        "Tap to add image",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color.White
@@ -290,6 +409,7 @@ fun AddEventScreen(
                         0.0
                     }
                     viewModel.createEvent(
+                        context = context,
                         title = title,
                         description = description.ifEmpty { null },
                         eventDate = eventDate,
@@ -297,8 +417,7 @@ fun AddEventScreen(
                         location = location.ifEmpty { null },
                         free = isFree,
                         price = priceValue,
-                        imageUrl = ""
-
+                        imageUri = selectedImageUri
                     )
                     onEventCreated()
                 },

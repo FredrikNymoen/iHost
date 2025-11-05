@@ -2,10 +2,12 @@ package no.ntnu.prog2007.ihost.data.model
 
 import com.google.gson.annotations.SerializedName
 
+/**
+ * Event data model
+ * Note: ID is stored separately in EventWithMetadata wrapper
+ * Note: Attendees are managed through event_users collection
+ */
 data class Event(
-    @SerializedName("id")
-    val id: String,
-
     @SerializedName("title")
     val title: String,
 
@@ -27,9 +29,6 @@ data class Event(
     @SerializedName("creatorName")
     val creatorName: String? = null,
 
-    @SerializedName("attendees")
-    val attendees: List<String> = emptyList(),
-
     @SerializedName("free")
     val free: Boolean = true,
 
@@ -43,11 +42,7 @@ data class Event(
     val updatedAt: String? = null, // ISO 8601 format
 
     @SerializedName("shareCode")
-    val shareCode: String = "", // Share code for sharing events
-
-    @SerializedName("imageUrl")
-    val imageUrl: String? = "" // Share code for sharing events
-
+    val shareCode: String = "" // Share code for sharing events
 )
 
 data class CreateEventRequest(
@@ -70,10 +65,24 @@ data class CreateEventRequest(
     val free: Boolean = true,
 
     @SerializedName("price")
-    val price: Double = 0.0,
+    val price: Double = 0.0
+)
 
-    @SerializedName("image")
-    val imageUrl: String?
+data class UpdateEventRequest(
+    @SerializedName("title")
+    val title: String? = null,
+
+    @SerializedName("description")
+    val description: String? = null,
+
+    @SerializedName("eventDate")
+    val eventDate: String? = null,
+
+    @SerializedName("eventTime")
+    val eventTime: String? = null,
+
+    @SerializedName("location")
+    val location: String? = null
 )
 
 data class PaymentIntentRequest(

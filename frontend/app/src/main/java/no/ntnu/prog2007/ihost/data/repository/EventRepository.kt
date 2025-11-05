@@ -1,7 +1,9 @@
 package no.ntnu.prog2007.ihost.data.repository
 
+/**
 import no.ntnu.prog2007.ihost.data.model.CreateEventRequest
 import no.ntnu.prog2007.ihost.data.model.Event
+import no.ntnu.prog2007.ihost.data.remote.EventImage
 import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
 
 class EventRepository(
@@ -49,8 +51,7 @@ class EventRepository(
             description = description,
             eventDate = eventDate,
             eventTime = eventTime,
-            location = location,
-            imageUrl =imageUrl
+            location = location
         )
         val event = apiService.createEvent(request)
         Result.success(event)
@@ -90,4 +91,16 @@ class EventRepository(
     } catch (e: Exception) {
         Result.failure(e)
     }
+
+    /**
+     * Get all images for a specific event
+     */
+    suspend fun getEventImages(eventId: String): Result<List<EventImage>> = try {
+        val token = getAuthToken() ?: return Result.failure(Exception("Not authenticated"))
+        val images = apiService.getEventImages(eventId)
+        Result.success(images)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
 }
+*/

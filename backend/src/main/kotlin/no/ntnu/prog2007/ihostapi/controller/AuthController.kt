@@ -77,6 +77,35 @@ class AuthController(
     }
 
     /**
+     * Get all users
+     * Used for inviting users to events
+     * Requires authentication
+     */
+    @GetMapping("/users")
+    fun getAllUsers(): ResponseEntity<Any> {
+        return try {
+            val uid = SecurityContextHolder.getContext().authentication.principal as? String
+                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
+
+            val usersQuery = firestore.collection(USERS_COLLECTION)
+                .get()
+                .get()
+
+            val users = usersQuery.documents.mapNotNull { doc ->
+                doc.toObject(User::class.java)
+            }
+
+            logger.info("Retrieved ${users.size} users for user: $uid")
+            ResponseEntity.ok(users)
+        } catch (e: Exception) {
+            logger.warning("Error getting users: ${e.message}")
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ErrorResponse("ERROR", "Could not retrieve users"))
+        }
+    }
+
+    /**
      * Get user by UID
      * Used to retrieve user information (like display name) for a specific UID
      * Public endpoint - does not require authentication
