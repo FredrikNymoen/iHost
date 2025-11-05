@@ -376,10 +376,38 @@ class EventController(
                 .get()
 
             val (userStatus, userRole) = if (!eventUserQuery.documents.isEmpty()) {
+                // User already has an event_user entry
                 val eventUser = eventUserQuery.documents[0].toObject(EventUser::class.java)
-                Pair(eventUser?.status, eventUser?.role)
+                Pair(eventUser.status, eventUser?.role)
             } else {
-                Pair(null, null)
+                // User doesn't have an event_user entry
+                // Check if user is the creator - don't create event_user for creator fetching their own event
+                if (event.creatorUid == uid) {
+                    // Creator is fetching their own event via share code - should already have CREATOR event_user
+                    // This shouldn't happen normally, but handle gracefully
+                    logger.warning("Creator $uid fetching their own event ${eventDoc.id} via share code without event_user entry")
+                    Pair(null, null)
+                } else {
+                    // Regular user finding event via share code - create PENDING event_user
+                    val now = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                    val newEventUser = EventUser(
+                        eventId = eventDoc.id,
+                        userId = uid,
+                        status = EventUserStatus.PENDING,
+                        role = EventUserRole.ATTENDEE,
+                        invitedAt = now,
+                        respondedAt = null
+                    )
+
+                    // Save to Firestore
+                    firestore.collection(EVENT_USERS_COLLECTION)
+                        .document()
+                        .set(newEventUser)
+                        .get()
+
+                    logger.info("Created PENDING event_user for user $uid on event ${eventDoc.id}")
+                    Pair(EventUserStatus.PENDING, EventUserRole.ATTENDEE)
+                }
             }
 
             // log and return event

@@ -272,20 +272,12 @@ class EventViewModel(
         viewModelScope.launch { // Launch coroutine for network call
             _uiState.update { it.copy(isLoading = true, errorMessage = null) } // Set loading state
             try { // Try to fetch event
-                // Fetch event by share code
+                // Fetch event by share code - backend will auto-create PENDING event_user if needed
                 val eventWithMetadata = RetrofitClient.apiService.getEventByCode(shareCode)
-                _uiState.update { state ->
-                    // Only add event if not already present
-                    val updatedEvents =
-                        if (state.events.any { it.id == eventWithMetadata.id }) { // Event already exists
-                            state.events // No change
-                        } else { // Event didnt already exist
-                            state.events + eventWithMetadata // Add new event
-                        }
-                    state.copy( // Update state with new event
-                        events = updatedEvents, isLoading = false
-                    )
-                }
+
+                // Reload all events to get the updated list from server (including new event_user)
+                loadEvents()
+
                 // Success callback and log it
                 onSuccess(eventWithMetadata)
                 Log.d("EventViewModel", "Fetched event '${eventWithMetadata.event.title}' by code: $shareCode")
