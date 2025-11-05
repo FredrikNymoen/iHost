@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +45,8 @@ import no.ntnu.prog2007.ihost.data.model.Event
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 
 import coil3.compose.AsyncImage
@@ -101,12 +104,13 @@ fun EventDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+
                 title = {
                     Text(
                         event?.title ?: "Event Details",
                         color = Color(0xFFFFC107),
                         fontSize = 36.sp,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
                 },
                 navigationIcon = {
@@ -115,6 +119,31 @@ fun EventDetailScreen(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
                             tint = Color(0xFFFFC107)
+                        )
+                    }
+                },
+                actions = {
+
+                    IconButton(onClick = {
+                        val shareMessage =
+                            "Join my event '${event?.title}' on iHost! Use the share code: ${event?.shareCode}"
+                        // Copy button
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, shareMessage)
+                        }
+                        context.startActivity(
+                            Intent.createChooser(
+                                intent,
+                                "Share event code"
+                            )
+                        )
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Share,
+                            tint = Color(0xFFFFC107),
+                            modifier = Modifier.size(24.dp),
+                            contentDescription = "Localized description"
                         )
                     }
                 },
@@ -138,25 +167,6 @@ fun EventDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Description Section
-                if (event.description != null) {
-                    SectionTitle("")
-                    Text(
-                        text = event.description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .background(
-                                color = Color(0xFF0C5CA7),
-                                shape = RoundedCornerShape(8.dp)
-                            )
-                            .padding(12.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
 
                 //TODO: creating better interface from here:
                 Row {
@@ -216,11 +226,12 @@ fun EventDetailScreen(
                         modifier = Modifier.weight(0.5f),
                         horizontalAlignment = Alignment.End
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .padding(top = 12.dp, bottom = 12.dp)
-                        ) {
-                            if (!event.location.isNullOrBlank()) {
+                        if (!event.location.isNullOrBlank()) {
+                            Row(
+                                modifier = Modifier
+                                    .padding(top = 12.dp, bottom = 12.dp)
+                            ) {
+
                                 Text(
                                     fontSize = 24.sp,
                                     modifier = Modifier
@@ -237,6 +248,7 @@ fun EventDetailScreen(
                                     tint = Color(0xFFFFC107),
                                     modifier = Modifier.size(36.dp),
                                 )
+
                             }
                         }
                         Row(
@@ -271,21 +283,28 @@ fun EventDetailScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-
-                // Creator Info
-                SectionTitle("Host")
-                EventDetailItem(
-                    label = "Name",
-                    value = event.creatorName ?: "Anonymous"
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
                 // Attendees Section
                 val confirmedAttendees = eventAttendees.filter {
                     it.status == "ACCEPTED" || it.status == "CREATOR"
                 }
-                SectionTitle("Attendees (${confirmedAttendees.size})")
+                Row {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Attendees",
+                        tint = Color(0xFFFFC107),
+                        modifier = Modifier.size(24.dp),
+                    )
+                    Text(
+                        fontSize = 16.sp,
+                        modifier = Modifier
+                            .padding(end = 16.dp)
+                            .fillMaxHeight()
+                            .align(alignment = Alignment.CenterVertically),
+                        text = "${eventAttendees.size+1}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White
+                    )
+                }
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -296,6 +315,26 @@ fun EventDetailScreen(
                         .padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Host",
+                            tint = Color(0xFFFFC107),
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = attendeeNames[event.creatorUid] ?: "Loading...",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontSize = 11.sp,
+                            color = Color.White
+                        )
+                    }
+
                     if (confirmedAttendees.isEmpty()) {
                         Text(
                             text = "No attendees yet",
@@ -304,7 +343,9 @@ fun EventDetailScreen(
                             color = Color(0xFFB0B0B0)
                         )
                     } else {
-                        confirmedAttendees.forEach { eventUser ->
+                        confirmedAttendees.filter { eventUser ->
+                            !eventUser.userId.equals(event.creatorUid, true)
+                        }.forEach { eventUser ->
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically,
@@ -356,98 +397,6 @@ fun EventDetailScreen(
                 val isDeclined = userStatus == "DECLINED"
 
                 if (isCreator) {
-                    // Show Share button
-                    SectionTitle("Share Event")
-
-                    Surface(
-                        color = Color.Blue,
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                "Share Code: ${event.shareCode}",
-                                color = Color.White,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Text(
-                                "Use this code to invite others to your event. Share it with friends!",
-                                color = Color.White,
-                                style = MaterialTheme.typography.bodySmall,
-                                fontSize = 12.sp
-                            )
-
-                            Spacer(modifier = Modifier.height(12.dp))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                val shareMessage =
-                                    "Join my event '${event.title}' on iHost! Use the share code: ${event.shareCode}"
-                                // Copy button
-                                Button(
-                                    onClick = { // Copy to clipboard
-                                        // Get clipboard manager from context
-                                        // (https://stackoverflow.com/questions/79692173/how-to-resolve-deprecated-clipboardmanager-in-jetpack-compose)
-                                        // and (https://stackoverflow.com/questions/45255755/failed-to-use-android-context-clipboardmanager-to-clip-a-phone-number)
-                                        // Apparently, they deprecated the WAY EASIER TO USE old ClipboardManager in favor of this bullshit..
-                                        val clipBoardManager =
-                                            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                        // Create clip data
-                                        val clipData =
-                                            ClipData.newPlainText("Event share", shareMessage)
-                                        // Set primary clip
-                                        clipBoardManager.setPrimaryClip(clipData)
-                                        // Show toast
-                                        Toast.makeText(
-                                            context,
-                                            "Share code copied to clipboard",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color(0xFF1976D2)
-                                    )
-                                ) {
-                                    Text("Copy invite message")
-                                }
-
-                                // Share button
-                                Button(
-                                    onClick = {
-                                        val intent = Intent(Intent.ACTION_SEND).apply {
-                                            type = "text/plain"
-                                            putExtra(Intent.EXTRA_TEXT, shareMessage)
-                                        }
-                                        context.startActivity(
-                                            Intent.createChooser(
-                                                intent,
-                                                "Share event code"
-                                            )
-                                        )
-                                    },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color(0xFFFFC107),
-                                        contentColor = Color(0xFF001D3D)
-                                    )
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Share,
-                                        contentDescription = "Share",
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Share Event")
-                                }
-                            }
-                        }
-                    }
 
                     // Invite Users Button
                     Button(
@@ -736,12 +685,19 @@ fun EventDetailHeader(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(250.dp),
+            .height(300.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(16.dp)
     ) {
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(16.dp))
+                .background(
+                    Color(0xFF0C5CA7)
+                )
+
+
         ) {
             // Display first image if available, otherwise show gradient background
             val firstImageUrl = eventImages?.firstOrNull()?.path
@@ -750,9 +706,13 @@ fun EventDetailHeader(
                 AsyncImage(
                     model = firstImageUrl,
                     contentDescription = "Event image",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
-                )
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.8f)
+                        .clip(RoundedCornerShape(16.dp)),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+
+                    )
             } else {
                 // Show gradient background when no image
                 Box(
@@ -779,7 +739,32 @@ fun EventDetailHeader(
             ) {
                 EventTimer(event.eventDate, event.eventTime)
             }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.BottomStart
+            ) {
+
+                // Description Section
+                if (event.description != null) {
+                    SectionTitle("")
+                    Text(
+                        text = event.description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .padding(12.dp),
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
         }
+
     }
 }
 
