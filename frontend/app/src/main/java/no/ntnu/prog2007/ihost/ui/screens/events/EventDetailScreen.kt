@@ -303,6 +303,26 @@ fun EventDetailScreen(
                 val isDeclined = userStatus == "DECLINED"
 
                 if (isCreator) {
+                    // Invite Users Button
+                    Button(
+                        onClick = { onInviteUsers(eventId) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .padding(bottom = 12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF0C5CA7)
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PersonAdd,
+                            contentDescription = "Invite Users",
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Invite Users")
+                    }
+
                     // Show Share button
                     SectionTitle("Share Event")
 
@@ -394,26 +414,6 @@ fun EventDetailScreen(
                                 }
                             }
                         }
-                    }
-
-                    // Invite Users Button
-                    Button(
-                        onClick = { onInviteUsers(eventId) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                            .padding(bottom = 12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF0C5CA7)
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.PersonAdd,
-                            contentDescription = "Invite Users",
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Invite Users")
                     }
 
                     // Edit and Delete
