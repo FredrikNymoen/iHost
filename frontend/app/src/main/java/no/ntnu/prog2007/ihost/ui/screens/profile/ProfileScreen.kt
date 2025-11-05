@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,6 +18,13 @@ fun ProfileScreen(
 ) {
     val uiState by authViewModel.uiState.collectAsState()
     val user = uiState.currentUser
+    val userProfile = uiState.userProfile
+    val isProfileLoading = uiState.isProfileLoading
+
+    // Load profile data when the screen is displayed
+    LaunchedEffect(Unit) {
+        authViewModel.loadUserProfile()
+    }
 
     Column(
         modifier = Modifier
@@ -24,6 +32,7 @@ fun ProfileScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Profile icon (shows regardless of loading state)
         Icon(
             imageVector = Icons.Default.AccountCircle,
             contentDescription = "Profile",
@@ -33,7 +42,31 @@ fun ProfileScreen(
             tint = MaterialTheme.colorScheme.primary
         )
 
-        if (user != null) {
+        // Show loading indicator if profile is loading, else show profile info
+        if (isProfileLoading || (user != null && userProfile == null)) {
+            // Loading indicator
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(48.dp),
+                        strokeWidth = 4.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Laster profil...",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        } else if (user != null) {
             Text(
                 text = user.displayName ?: "Bruker",
                 style = MaterialTheme.typography.headlineMedium,
@@ -57,10 +90,29 @@ fun ProfileScreen(
                         .fillMaxWidth()
                         .padding(16.dp)
                 ) {
-                    ProfileInfoItem(label = "Navn", value = user.displayName ?: "N/A")
-                    Divider(modifier = Modifier.padding(vertical = 8.dp))
+                    ProfileInfoItem(label = "Brukernavn", value = user.displayName ?: "N/A")
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        thickness = DividerDefaults.Thickness,
+                        color = DividerDefaults.color
+                    )
+                    if (userProfile != null) {
+                        ProfileInfoItem(
+                            "Navn",
+                            "${userProfile.firstName} ${userProfile.lastName ?: ""}"
+                        )
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            thickness = DividerDefaults.Thickness,
+                            color = DividerDefaults.color
+                        )
+                    }
                     ProfileInfoItem(label = "E-post", value = user.email ?: "N/A")
-                    Divider(modifier = Modifier.padding(vertical = 8.dp))
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        thickness = DividerDefaults.Thickness,
+                        color = DividerDefaults.color
+                    )
                     ProfileInfoItem(
                         label = "E-post bekreftet",
                         value = if (user.isEmailVerified) "Ja" else "Nei"
