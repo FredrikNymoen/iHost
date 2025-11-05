@@ -29,6 +29,10 @@ import androidx.compose.runtime.setValue
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,10 +48,7 @@ import androidx.compose.ui.text.style.TextAlign
 
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.delay
-import java.time.LocalTime
-import java.time.ZoneId
 import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalAmount
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,6 +68,7 @@ fun EventDetailScreen(
     val event = eventWithMetadata?.event
     val currentUserId = authUiState.currentUser?.uid
     val context = LocalContext.current
+
 
     // Get the ComponentActivity from context
     val activity = context as? ComponentActivity
@@ -136,79 +138,16 @@ fun EventDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Date and Time Section
-                SectionTitle("Date & Time")
-                EventDetailItem(
-                    label = "Date",
-                    value = event.eventDate
-                )
-                if (event.eventTime != null) {
-                    EventDetailItem(
-                        label = "Time",
-                        value = event.eventTime
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Location Section
-                if (event.location != null) {
-                    SectionTitle("Location")
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                color = Color(0xFF0C5CA7),
-                                shape = RoundedCornerShape(8.dp)
-                            )
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = "Location",
-                            tint = Color(0xFFFFC107),
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Text(
-                            text = event.location,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.White
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-                // Price Section
-                if (!event.free) {
-                    SectionTitle("Price")
-                    EventDetailItem(
-                        label = "Cost",
-                        value = "${String.format("%.2f", event.price)} NOK"
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                } else {
-                    SectionTitle("Price")
-                    EventDetailItem(
-                        label = "Cost",
-                        value = "Free"
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
                 // Description Section
                 if (event.description != null) {
-                    SectionTitle("Description")
+                    SectionTitle("")
                     Text(
                         text = event.description,
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White,
                         modifier = Modifier
                             .fillMaxWidth()
+                            .wrapContentHeight()
                             .background(
                                 color = Color(0xFF0C5CA7),
                                 shape = RoundedCornerShape(8.dp)
@@ -218,6 +157,115 @@ fun EventDetailScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
                 }
+
+                //TODO: creating better interface from here:
+                Row {
+                    Column(
+                        modifier = Modifier.weight(0.5f),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        //Date field
+                        Row(
+                            modifier = Modifier
+                                .padding(top = 12.dp, bottom = 12.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CalendarMonth,
+                                contentDescription = "Date",
+                                tint = Color(0xFFFFC107),
+                                modifier = Modifier.size(36.dp),
+                            )
+                            Text(
+                                fontSize = 24.sp,
+                                modifier = Modifier
+                                    .padding(start = 24.dp)
+                                    .fillMaxHeight()
+                                    .align(alignment = Alignment.CenterVertically),
+                                text = event.eventDate,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White
+
+                            )
+                        }
+                        //Time field
+                        if (!event.eventTime.isNullOrBlank()) {
+                            Row(
+                                modifier = Modifier
+                                    .padding(top = 12.dp, bottom = 12.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AccessTime,
+                                    contentDescription = "Time",
+                                    tint = Color(0xFFFFC107),
+                                    modifier = Modifier.size(36.dp)
+                                )
+                                Text(
+                                    fontSize = 24.sp,
+                                    modifier = Modifier
+                                        .padding(start = 24.dp)
+                                        .fillMaxHeight()
+                                        .align(alignment = Alignment.CenterVertically),
+                                    text = event.eventTime,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.White
+                                )
+                            }
+                        }
+                    }
+                    Column(
+                        modifier = Modifier.weight(0.5f),
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .padding(top = 12.dp, bottom = 12.dp)
+                        ) {
+                            if (!event.location.isNullOrBlank()) {
+                                Text(
+                                    fontSize = 24.sp,
+                                    modifier = Modifier
+                                        .padding(end = 24.dp)
+                                        .fillMaxHeight()
+                                        .align(alignment = Alignment.CenterVertically),
+                                    text = event.location,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.White
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.Map,
+                                    contentDescription = "Location",
+                                    tint = Color(0xFFFFC107),
+                                    modifier = Modifier.size(36.dp),
+                                )
+                            }
+
+
+                            Text(
+                                fontSize = 24.sp,
+                                modifier = Modifier
+                                    .padding(end = 24.dp)
+                                    .fillMaxHeight()
+                                    .align(alignment = Alignment.CenterVertically),
+                                text = event.price.toString(),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White
+                            )
+                            Icon(
+                                imageVector = Icons.Default.AttachMoney,
+                                contentDescription = "Price",
+                                tint = Color(0xFFFFC107),
+                                modifier = Modifier.size(36.dp),
+                            )
+
+                        }
+
+                    }
+                }
+
+                //TODO: to here
+
+                Spacer(modifier = Modifier.height(16.dp))
+
 
                 // Creator Info
                 SectionTitle("Host")
@@ -519,11 +567,19 @@ fun EventDetailScreen(
                                                 viewModel.acceptInvitation(
                                                     eventUserId = myEventUser.id,
                                                     onSuccess = {
-                                                        Toast.makeText(context, "Payment successful! Invitation accepted!", Toast.LENGTH_SHORT).show()
+                                                        Toast.makeText(
+                                                            context,
+                                                            "Payment successful! Invitation accepted!",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
                                                         stripeViewModel.clearPaymentSuccess()
                                                     },
                                                     onError = { error ->
-                                                        Toast.makeText(context, "Payment succeeded but acceptance failed: $error", Toast.LENGTH_LONG).show()
+                                                        Toast.makeText(
+                                                            context,
+                                                            "Payment succeeded but acceptance failed: $error",
+                                                            Toast.LENGTH_LONG
+                                                        ).show()
                                                     }
                                                 )
                                             }
@@ -533,10 +589,18 @@ fun EventDetailScreen(
                                         viewModel.acceptInvitation(
                                             eventUserId = myEventUser.id,
                                             onSuccess = {
-                                                Toast.makeText(context, "Invitation accepted!", Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(
+                                                    context,
+                                                    "Invitation accepted!",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
                                             },
                                             onError = { error ->
-                                                Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(
+                                                    context,
+                                                    "Error: $error",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
                                             }
                                         )
                                     }
@@ -575,11 +639,19 @@ fun EventDetailScreen(
                                     viewModel.declineInvitation(
                                         eventUserId = myEventUser.id,
                                         onSuccess = {
-                                            Toast.makeText(context, "Invitation declined", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(
+                                                context,
+                                                "Invitation declined",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                             onBack() // Go back to events list
                                         },
                                         onError = { error ->
-                                            Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(
+                                                context,
+                                                "Error: $error",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                         }
                                     )
                                 }
@@ -652,7 +724,10 @@ fun EventDetailScreen(
 }
 
 @Composable
-fun EventDetailHeader(event: Event, eventImages: List<no.ntnu.prog2007.ihost.data.remote.EventImage>?) {
+fun EventDetailHeader(
+    event: Event,
+    eventImages: List<no.ntnu.prog2007.ihost.data.remote.EventImage>?
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -736,13 +811,14 @@ fun EventDetailItem(label: String, value: String) {
             color = Color.White
         )
     }
+
 }
 
 @Composable
 fun EventTimer(eventDate: String?, eventTime: String?) {
     var timeRemaining by remember { mutableStateOf("") }
-    var checkedTime="00:00"
-    if(!eventTime.isNullOrBlank()){
+    var checkedTime = "00:00"
+    if (!eventTime.isNullOrBlank()) {
         checkedTime = eventTime
 
     }

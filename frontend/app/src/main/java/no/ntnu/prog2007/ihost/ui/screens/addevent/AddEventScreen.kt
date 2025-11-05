@@ -54,6 +54,8 @@ fun AddEventScreen(
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var showImageSourceDialog by remember { mutableStateOf(false) }
     var imageKey by remember { mutableStateOf(0) } // Key to force image reload
+    var showLocationPicker by remember { mutableStateOf(false) }
+
 
     // Camera launcher - must be declared before cameraPermissionLauncher
     val cameraLauncher = rememberLauncherForActivityResult(
