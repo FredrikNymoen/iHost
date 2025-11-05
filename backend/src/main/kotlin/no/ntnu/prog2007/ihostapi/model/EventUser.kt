@@ -1,12 +1,10 @@
 package no.ntnu.prog2007.ihostapi.model
 
-import java.util.UUID
-
 /**
  * Represents a user's relationship to an event
+ * Note: The document ID in Firestore is used as the identifier, not stored in this model
  */
 data class EventUser(
-    val id: String = UUID.randomUUID().toString(),
     val eventId: String = "",
     val userId: String = "",
     val status: EventUserStatus = EventUserStatus.PENDING,
@@ -31,4 +29,31 @@ enum class EventUserStatus {
 enum class EventUserRole {
     CREATOR,    // Event creator/host
     ATTENDEE    // Regular attendee
+}
+
+/**
+ * Response DTO for EventUser with Firestore document ID
+ */
+data class EventUserResponse(
+    val id: String,  // Firestore document ID
+    val eventId: String,
+    val userId: String,
+    val status: EventUserStatus,
+    val role: EventUserRole,
+    val invitedAt: String,
+    val respondedAt: String?
+) {
+    companion object {
+        fun from(eventUser: EventUser, documentId: String): EventUserResponse {
+            return EventUserResponse(
+                id = documentId,
+                eventId = eventUser.eventId,
+                userId = eventUser.userId,
+                status = eventUser.status,
+                role = eventUser.role,
+                invitedAt = eventUser.invitedAt,
+                respondedAt = eventUser.respondedAt
+            )
+        }
+    }
 }

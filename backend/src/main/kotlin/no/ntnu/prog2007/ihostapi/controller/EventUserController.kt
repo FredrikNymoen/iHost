@@ -57,7 +57,7 @@ class EventUserController(
             }
 
             val now = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-            val invitedUsers = mutableListOf<EventUser>()
+            val invitedUsers = mutableListOf<EventUserResponse>()
 
             // Create event_user documents for each invited user
             for (userId in request.userIds) {
@@ -84,8 +84,8 @@ class EventUserController(
 
                 val docRef = firestore.collection(EVENT_USERS_COLLECTION).document()
                 docRef.set(eventUser).get()
-                // Add eventUser with Firestore document ID
-                invitedUsers.add(eventUser.copy(id = docRef.id))
+                // Add EventUserResponse with Firestore document ID
+                invitedUsers.add(EventUserResponse.from(eventUser, docRef.id))
             }
 
             logger.info("Invited ${invitedUsers.size} users to event ${request.eventId}")
@@ -220,8 +220,8 @@ class EventUserController(
             val result = query.get().get()
             val eventUsers = result.documents.mapNotNull { doc ->
                 val eventUser = doc.toObject(EventUser::class.java)
-                // Return eventUser with Firestore document ID
-                eventUser?.copy(id = doc.id)
+                // Convert to EventUserResponse with Firestore document ID
+                eventUser?.let { EventUserResponse.from(it, doc.id) }
             }
 
             ResponseEntity.ok(eventUsers)
