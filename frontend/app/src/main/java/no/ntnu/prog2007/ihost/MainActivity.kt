@@ -74,12 +74,16 @@ fun IHostApp() {
     // Navigate when auth state changes
     LaunchedEffect(authUiState.isLoggedIn, authUiState.isLoading) {
         if (authUiState.isLoggedIn && !authUiState.isLoading) {
-            // User logged in/signed up and loading is done - navigate to Events
+            // User logged in/signed up and loading is done
+            // Load fresh events for the new user
+            eventViewModel.loadEvents()
+            // Navigate to Events
             navController.navigate(Screen.Events.route) {
                 popUpTo(Screen.Login.route) { inclusive = true }
             }
         } else if (!authUiState.isLoggedIn && currentRoute !in listOf(Screen.Login.route, Screen.SignUp.route)) {
-            // User logged out - navigate back to Login
+            // User logged out - reset event data and navigate back to Login
+            eventViewModel.resetEvents()
             navController.navigate(Screen.Login.route) {
                 popUpTo(0) { inclusive = true }
             }

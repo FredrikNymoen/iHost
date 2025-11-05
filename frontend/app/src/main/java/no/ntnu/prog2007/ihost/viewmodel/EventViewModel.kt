@@ -385,4 +385,14 @@ class EventViewModel(
             }
         }
     }
+
+    /**
+     * Reset all event data (call this when user logs out)
+     */
+    fun resetEvents() {
+        _uiState.update {
+            EventUiState() // Reset to initial empty state
+        }
+        eventsLoaded = false
+    }
 }
