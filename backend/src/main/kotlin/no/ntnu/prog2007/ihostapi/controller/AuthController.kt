@@ -184,7 +184,7 @@ class AuthController(
             val user = User(
                 uid = uid,
                 email = request.email,
-                userName = request.userName,
+                username = request.username,
                 phoneNumber = request.phoneNumber,
                 photoUrl = request.photoUrl,
                 createdAt = timestamp,
@@ -207,7 +207,7 @@ class AuthController(
                     AuthResponse(
                         uid = user.uid,
                         email = user.email,
-                        userName = user.userName,
+                        username = user.username,
                         message = "Brukerprofil opprettet. Du kan nå logge inn."
                     )
                 )
