@@ -16,8 +16,9 @@ data class CreateUserRequest(
     @field:Email(message = "Email must be valid")
     val email: String,
 
-    @field:NotBlank(message = "Display name is required")
-    val displayName: String,
+    @field:NotBlank(message = "Username is required")
+    @field:Size(min = 4, max = 12, message = "Username must be between 4 and 12 characters")
+    val userName: String,
 
     val phoneNumber: String? = null,
 
@@ -30,6 +31,6 @@ data class CreateUserRequest(
 data class AuthResponse(
     val uid: String,
     val email: String,
-    val displayName: String,
+    val userName: String,
     val message: String = "Bruker opprettet"
 )
