@@ -184,7 +184,7 @@ class AuthController(
             val user = User(
                 uid = uid,
                 email = request.email,
-                displayName = request.displayName,
+                userName = request.userName,
                 phoneNumber = request.phoneNumber,
                 photoUrl = request.photoUrl,
                 createdAt = timestamp,
@@ -207,7 +207,7 @@ class AuthController(
                     AuthResponse(
                         uid = user.uid,
                         email = user.email,
-                        displayName = user.displayName,
+                        userName = user.userName,
                         message = "Brukerprofil opprettet. Du kan nå logge inn."
                     )
                 )
@@ -227,6 +227,37 @@ class AuthController(
                         message = errorMessage
                     )
                 )
+        }
+    }
+
+    /**
+     * Check if a username is available
+     */
+    @GetMapping("/username-available/{username}")
+    fun isUsernameAvailable(@PathVariable username: String): ResponseEntity<Map<String, Boolean>> {
+        return try {
+            // Validate username length
+            if (username.length !in 4..12) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(mapOf("available" to false))
+            }
+
+            // Query Firestore for existing username
+            val query = firestore.collection(USERS_COLLECTION)
+                .whereEqualTo("username", username)
+                .limit(1)
+                .get()
+                .get()
+
+            // Username is available if no documents were found
+            val available = query.isEmpty
+
+            // Return availability result
+            ResponseEntity.ok(mapOf("available" to available))
+        } catch (e: Exception) {
+            logger.warning("Error checking username availability: ${e.message}")
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(mapOf("available" to false))
         }
     }
 }
