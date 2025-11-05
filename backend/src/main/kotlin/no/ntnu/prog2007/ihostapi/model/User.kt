@@ -22,6 +22,12 @@ data class User(
     @field:Size(min = 4, max = 12, message = "Username must be between 4 and 12 characters")
     val username: String = "",
 
+    // Required first name but optional last name
+    @field:NotBlank(message = "First name is required")
+    val firstName: String = "",
+
+    val lastName: String? = null,
+
     val phoneNumber: String? = null,
 
     val photoUrl: String? = null,
