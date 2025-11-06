@@ -35,7 +35,6 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -46,6 +45,7 @@ import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 
@@ -106,6 +106,7 @@ fun EventDetailScreen(
 
     Scaffold(
         topBar = {
+            //Toppbar for event description screen
             TopAppBar(
                 title = {
                     Text(
@@ -114,8 +115,7 @@ fun EventDetailScreen(
                         fontSize = 36.sp,
                         fontWeight = FontWeight.Medium
                     )
-                },
-                navigationIcon = {
+                }, navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
@@ -124,6 +124,7 @@ fun EventDetailScreen(
                         )
                     }
                 },
+                // Icon Button to share your event with others
                 actions = {
 
                     IconButton(onClick = {
@@ -136,8 +137,7 @@ fun EventDetailScreen(
                         }
                         context.startActivity(
                             Intent.createChooser(
-                                intent,
-                                "Share event code"
+                                intent, "Share event code"
                             )
                         )
                     }) {
@@ -148,13 +148,11 @@ fun EventDetailScreen(
                             contentDescription = "Localized description"
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
+                }, colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent
                 )
             )
-        },
-        containerColor = Color.Transparent
+        }, containerColor = Color.Transparent
     ) { padding ->
         if (event != null && currentUserId != null) {
             Column(
@@ -170,17 +168,14 @@ fun EventDetailScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
 
-
                 //TODO: creating better interface from here:
                 Row {
                     Column(
-                        modifier = Modifier.weight(0.5f),
-                        horizontalAlignment = Alignment.Start
+                        modifier = Modifier.weight(0.5f), horizontalAlignment = Alignment.Start
                     ) {
                         //Date field
                         Row(
-                            modifier = Modifier
-                                .padding(top = 12.dp, bottom = 12.dp)
+                            modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.CalendarMonth,
@@ -203,8 +198,7 @@ fun EventDetailScreen(
                         //Time field
                         if (!event.eventTime.isNullOrBlank()) {
                             Row(
-                                modifier = Modifier
-                                    .padding(top = 12.dp, bottom = 12.dp)
+                                modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.AccessTime,
@@ -226,13 +220,11 @@ fun EventDetailScreen(
                         }
                     }
                     Column(
-                        modifier = Modifier.weight(0.5f),
-                        horizontalAlignment = Alignment.End
+                        modifier = Modifier.weight(0.5f), horizontalAlignment = Alignment.End
                     ) {
                         if (!event.location.isNullOrBlank()) {
                             Row(
-                                modifier = Modifier
-                                    .padding(top = 12.dp, bottom = 12.dp)
+                                modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)
                             ) {
 
                                 Text(
@@ -255,8 +247,7 @@ fun EventDetailScreen(
                             }
                         }
                         Row(
-                            modifier = Modifier
-                                .padding(top = 12.dp, bottom = 12.dp)
+                            modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)
                         ) {
                             var priceString = "Free"
                             if (!event.free) priceString = event.price.toString() + " kr"
@@ -303,7 +294,7 @@ fun EventDetailScreen(
                             .padding(end = 16.dp)
                             .fillMaxHeight()
                             .align(alignment = Alignment.CenterVertically),
-                        text = "${eventAttendees.size+1}",
+                        text = "${eventAttendees.size}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White
                     )
@@ -312,11 +303,9 @@ fun EventDetailScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = Color(0xFF0C5CA7),
-                            shape = RoundedCornerShape(8.dp)
+                            color = Color(0xFF0C5CA7), shape = RoundedCornerShape(8.dp)
                         )
-                        .padding(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
 
                     Row(
@@ -537,10 +526,8 @@ fun EventDetailScreen(
                                                             "Payment succeeded but acceptance failed: $error",
                                                             Toast.LENGTH_LONG
                                                         ).show()
-                                                    }
-                                                )
-                                            }
-                                        )
+                                                    })
+                                            })
                                     } else {
                                         // Free event - just accept
                                         viewModel.acceptInvitation(
@@ -554,12 +541,9 @@ fun EventDetailScreen(
                                             },
                                             onError = { error ->
                                                 Toast.makeText(
-                                                    context,
-                                                    "Error: $error",
-                                                    Toast.LENGTH_SHORT
+                                                    context, "Error: $error", Toast.LENGTH_SHORT
                                                 ).show()
-                                            }
-                                        )
+                                            })
                                     }
                                 }
                             },
@@ -597,20 +581,15 @@ fun EventDetailScreen(
                                         eventUserId = myEventUser.id,
                                         onSuccess = {
                                             Toast.makeText(
-                                                context,
-                                                "Invitation declined",
-                                                Toast.LENGTH_SHORT
+                                                context, "Invitation declined", Toast.LENGTH_SHORT
                                             ).show()
                                             onBack() // Go back to events list
                                         },
                                         onError = { error ->
                                             Toast.makeText(
-                                                context,
-                                                "Error: $error",
-                                                Toast.LENGTH_SHORT
+                                                context, "Error: $error", Toast.LENGTH_SHORT
                                             ).show()
-                                        }
-                                    )
+                                        })
                                 }
                             },
                             modifier = Modifier
@@ -671,8 +650,7 @@ fun EventDetailScreen(
             }
         } else {
             Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+                modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(color = Color(0xFFFFC107))
             }
@@ -688,86 +666,69 @@ fun EventDetailHeader(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(300.dp),
+            .wrapContentHeight(),  // REMOVE fixed height, only keep wrapContentHeight
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(16.dp))
-                .background(
-                    Color(0xFF0C5CA7)
-                )
-
-
+                .fillMaxWidth()
+                .wrapContentHeight()  // Let Box expand with content
         ) {
-            // Display first image if available, otherwise show gradient background
-            val firstImageUrl = eventImages?.firstOrNull()?.path
+            // Image Section - Fixed height
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)  // Fixed height for image only
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color(0xFF0C5CA7))
+            ) {
+                val firstImageUrl = eventImages?.firstOrNull()?.path
 
-            if (firstImageUrl != null) {
-                AsyncImage(
-                    model = firstImageUrl,
-                    contentDescription = "Event image",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.8f)
-                        .clip(RoundedCornerShape(16.dp)),
-                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-
+                if (firstImageUrl != null) {
+                    AsyncImage(
+                        model = firstImageUrl,
+                        contentDescription = "Event image",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
                     )
-            } else {
-                // Show gradient background when no image
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            brush = androidx.compose.ui.graphics.Brush.linearGradient(
-                                colors = listOf(
-                                    Color(0xFF0C5CA7),
-                                    Color(0xFF003D73)
+                } else {
+                    // Show gradient background when no image
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                brush = androidx.compose.ui.graphics.Brush.linearGradient(
+                                    colors = listOf(
+                                        Color(0xFF0C5CA7),
+                                        Color(0xFF003D73)
+                                    )
                                 )
                             )
-                        )
-                )
+                    )
+                }
             }
 
-            // Overlay timer on top of image/gradient
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.3f))
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                EventTimer(event.eventDate, event.eventTime)
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.BottomStart
-            ) {
-
-                // Description Section
-                if (event.description != null) {
-                    SectionTitle("")
+            // Description overlays at bottom - Expands with text
+            if (event.description != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .align(Alignment.BottomStart)  // Stick to bottom of parent Box
+                        .background(Color(0xFF003D73).copy(alpha = 0.9f))
+                        .padding(16.dp)
+                ) {
                     Text(
                         text = event.description,
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White,
-                        fontSize = 16.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .padding(12.dp),
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp
                     )
-
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
-
     }
 }
 
@@ -789,8 +750,7 @@ fun EventDetailItem(label: String, value: String) {
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = Color(0xFF0C5CA7),
-                shape = RoundedCornerShape(8.dp)
+                color = Color(0xFF0C5CA7), shape = RoundedCornerShape(8.dp)
             )
             .padding(12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -810,8 +770,8 @@ fun EventDetailItem(label: String, value: String) {
 @Composable
 fun EventTimer(eventDate: String?, eventTime: String?) {
     var timeRemaining by remember { mutableStateOf("") }
-    var checkedTime="00:00"
-    if(!eventTime.isNullOrBlank()){
+    var checkedTime = "00:00"
+    if (!eventTime.isNullOrBlank()) {
         checkedTime = eventTime
 
     }
