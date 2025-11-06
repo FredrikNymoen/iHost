@@ -854,7 +854,7 @@ fun EventTimer(eventDate: String?, eventTime: String?) {
                     String.format("%02d day(s) %02d hours", days, hours)
                 }
             } else {
-                ""
+                "Event started"
             }
 
             delay(1000) // Update every second
