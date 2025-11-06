@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.AttachMoney
@@ -167,9 +168,8 @@ fun EventDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-
-                //TODO: creating better interface from here:
                 Row {
+                    //left column with date and time
                     Column(
                         modifier = Modifier.weight(0.5f), horizontalAlignment = Alignment.Start
                     ) {
@@ -219,29 +219,66 @@ fun EventDetailScreen(
                             }
                         }
                     }
+                    // Right column with location and price
+
                     Column(
                         modifier = Modifier.weight(0.5f), horizontalAlignment = Alignment.End
                     ) {
                         if (!event.location.isNullOrBlank()) {
                             Row(
-                                modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)
+                                modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
+                                horizontalArrangement = Arrangement.End  // This aligns content to the right
+
                             ) {
 
                                 Text(
                                     fontSize = 24.sp,
                                     modifier = Modifier
-                                        .padding(end = 24.dp)
-                                        .fillMaxHeight()
-                                        .align(alignment = Alignment.CenterVertically),
+                                        .padding(end = 12.dp)
+                                        .weight(1f),  // Takes remaining space
                                     text = event.location,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Color.White
+                                    color = Color.White,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.End,
+                                    maxLines = 2,  // Allow 2 lines
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                 )
                                 Icon(
                                     imageVector = Icons.Default.Map,
                                     contentDescription = "Location",
                                     tint = Color(0xFFFFC107),
-                                    modifier = Modifier.size(36.dp),
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clickable {  // Make the icon clickable
+                                            // Open Google Maps with the location
+                                            val intent = android.content.Intent(
+                                                android.content.Intent.ACTION_VIEW,
+                                                android.net.Uri.parse(
+                                                    "geo:0,0?q=${
+                                                        android.net.Uri.encode(
+                                                            event.location
+                                                        )
+                                                    }"
+                                                )
+                                            )
+                                            intent.setPackage("com.google.android.apps.maps")  // Force Google Maps
+
+                                            try {
+                                                context.startActivity(intent)
+                                            } catch (e: Exception) {
+                                                // If Google Maps not installed, use browser
+                                                val webIntent = android.content.Intent(
+                                                    android.content.Intent.ACTION_VIEW,
+                                                    android.net.Uri.parse(
+                                                        "https://www.google.com/maps/search/?api=1&query=${
+                                                            android.net.Uri.encode(
+                                                                event.location
+                                                            )
+                                                        }"
+                                                    )
+                                                )
+                                                context.startActivity(webIntent)
+                                            }
+                                        },
                                 )
 
                             }
@@ -273,7 +310,6 @@ fun EventDetailScreen(
                     }
                 }
 
-                //TODO: to here
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -337,26 +373,27 @@ fun EventDetailScreen(
                     } else {
                         confirmedAttendees.filter { eventUser ->
                             !eventUser.userId.equals(event.creatorUid, true)
-                        }.forEach { eventUser ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = "Attending",
-                                    tint = Color(0xFF4CAF50),
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Text(
-                                    text = attendeeNames[eventUser.userId] ?: "Loading...",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontSize = 11.sp,
-                                    color = Color.White
-                                )
+                        }.filter { eventUser -> eventUser.status.equals("ACCEPTED")}
+                            .forEach { eventUser ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = "Attending",
+                                        tint = Color(0xFF4CAF50),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Text(
+                                        text = attendeeNames[eventUser.userId] ?: "Loading...",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontSize = 11.sp,
+                                        color = Color.White
+                                    )
+                                }
                             }
-                        }
                     }
                 }
 
@@ -666,22 +703,21 @@ fun EventDetailHeader(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight(),  // REMOVE fixed height, only keep wrapContentHeight
+            .wrapContentHeight(),  // Expands with content
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
-        Box(
+        Column(  // Use Column to stack image and description
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentHeight()  // Let Box expand with content
+                .wrapContentHeight()
         ) {
-            // Image Section - Fixed height
+            // Image Section with Timer overlay
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(250.dp)  // Fixed height for image only
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF0C5CA7))
+                    .height(250.dp)
+                    .background(Color(0xFF003D73))  // ADD THIS - same color as description
             ) {
                 val firstImageUrl = eventImages?.firstOrNull()?.path
 
@@ -689,7 +725,9 @@ fun EventDetailHeader(
                     AsyncImage(
                         model = firstImageUrl,
                         contentDescription = "Event image",
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(16.dp)),
                         contentScale = androidx.compose.ui.layout.ContentScale.Crop
                     )
                 } else {
@@ -697,6 +735,7 @@ fun EventDetailHeader(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
+                            .clip(RoundedCornerShape(16.dp))
                             .background(
                                 brush = androidx.compose.ui.graphics.Brush.linearGradient(
                                     colors = listOf(
@@ -707,16 +746,35 @@ fun EventDetailHeader(
                             )
                     )
                 }
+
+                // Timer overlay at TOP of image with background
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter)  // Position at top
+                        .padding(16.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .background(
+                                color = Color.Black.copy(alpha = 0.2f),  // 20% visibility black background
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        EventTimer(event.eventDate, event.eventTime)
+                    }
+                }
             }
 
-            // Description overlays at bottom - Expands with text
+            // Description below image - Expands with text
             if (event.description != null) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .wrapContentHeight()
-                        .align(Alignment.BottomStart)  // Stick to bottom of parent Box
-                        .background(Color(0xFF003D73).copy(alpha = 0.9f))
+                        .wrapContentHeight()  // Expands downward with text
+                        .background(Color(0xFF003D73))
                         .padding(16.dp)
                 ) {
                     Text(
@@ -791,9 +849,9 @@ fun EventTimer(eventDate: String?, eventTime: String?) {
                 if (days > 2) {
                     String.format("%02d days", days)
                 } else if (hours < 12 && days < 1) {
-                    String.format("%02d:%02d:%02d", hours, minutes, seconds)
+                    String.format("%02d hours %02d minutes %02d seconds", hours, minutes, seconds)
                 } else {
-                    String.format("%02d:%02d", days, hours)
+                    String.format("%02d day(s) %02d hours", days, hours)
                 }
             } else {
                 ""
@@ -805,7 +863,7 @@ fun EventTimer(eventDate: String?, eventTime: String?) {
 
     Text(
         text = timeRemaining,
-        fontSize = 40.sp,
+        fontSize = 24.sp,
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
         modifier = Modifier
