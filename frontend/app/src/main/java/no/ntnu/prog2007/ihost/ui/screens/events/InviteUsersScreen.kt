@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 import no.ntnu.prog2007.ihost.data.model.User
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 
@@ -40,6 +42,14 @@ fun InviteUsersScreen(
     var isLoading by remember { mutableStateOf(true) }
     var isSending by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
+    var searchText by remember { mutableStateOf("") }  // This is what user types
+
+
+    LaunchedEffect(searchText) {
+        delay(500)  // Wait 500ms
+        searchQuery = searchText  // Then update the actual search query
+    }
 
     // Load users and current attendees
     LaunchedEffect(eventId) {
@@ -144,6 +154,7 @@ fun InviteUsersScreen(
                         color = Color(0xFFFFC107)
                     )
                 }
+
                 errorMessage != null -> {
                     Column(
                         modifier = Modifier
@@ -169,6 +180,7 @@ fun InviteUsersScreen(
                         }
                     }
                 }
+
                 availableUsers.isEmpty() -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -181,10 +193,12 @@ fun InviteUsersScreen(
                         )
                     }
                 }
+
                 else -> {
                     Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
+
                         // Selected count
                         if (selectedUserIds.isNotEmpty()) {
                             Surface(
@@ -199,6 +213,23 @@ fun InviteUsersScreen(
                                 )
                             }
                         }
+                        OutlinedTextField(
+                            value = searchText,
+                            onValueChange = { searchText = it },
+                            modifier = Modifier
+                                .fillMaxWidth(0.8f)
+                                .padding(top = 32.dp)
+                                .padding(bottom = 16.dp)
+                                .align(Alignment.CenterHorizontally),
+                            shape = RoundedCornerShape(12.dp),
+                            enabled = !uiState.isLoading,
+                            textStyle = LocalTextStyle.current.copy(color = Color.White),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color(0xFFFFC107),
+                                unfocusedBorderColor = Color(0xFFFFC107),
+                                cursorColor = Color(0xFFFFC107)
+                            )
+                        )
 
                         // User list
                         LazyColumn(
@@ -206,7 +237,13 @@ fun InviteUsersScreen(
                             contentPadding = PaddingValues(16.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(availableUsers) { user ->
+                            items(availableUsers.filter { it ->
+
+                                "${it.firstName} ${it.lastName} ${it.username}".contains(
+                                    searchQuery, true
+                                )
+
+                            }) { user ->
                                 UserItem(
                                     user = user,
                                     isSelected = user.uid in selectedUserIds,
@@ -273,16 +310,17 @@ fun UserItem(
 
                 Column {
                     Text(
-                        text = user.username,
+                        text = user.firstName + " " + (user.lastName ?: ""),
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )
                     Text(
-                        text = user.firstName +" " + (user.lastName ?: ""),
+                        text = user.username,
                         color = Color.White.copy(alpha = 0.7f),
                         fontSize = 14.sp
                     )
+
                 }
             }
 

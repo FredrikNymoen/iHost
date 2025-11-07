@@ -294,15 +294,8 @@ fun EventDetailScreen(
                         Row(
                             modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)
                         ) {
-
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "Attendees",
-                                tint = Color(0xFFFFC107),
-                                modifier = Modifier.size(24.dp),
-                            )
                             Text(
-                                fontSize = 16.sp,
+                                fontSize = 24.sp,
                                 modifier = Modifier
                                     .padding(end = 16.dp)
                                     .fillMaxHeight()
@@ -311,6 +304,13 @@ fun EventDetailScreen(
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.White
                             )
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Attendees",
+                                tint = Color(0xFFFFC107),
+                                modifier = Modifier.size(24.dp),
+                            )
+
                         }
 
 

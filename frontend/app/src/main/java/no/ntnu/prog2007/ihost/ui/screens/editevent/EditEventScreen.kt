@@ -231,7 +231,7 @@ fun EditEventScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF001D3D)
+                    containerColor = Color.Transparent
                 )
             )
         },
