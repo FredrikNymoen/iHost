@@ -348,7 +348,39 @@ class EventViewModel(
     suspend fun getUserUserName(uid: String): String {
         return try {
             val user = RetrofitClient.apiService.getUserByUid(uid)
+            print(user.username)
             user.username
+        } catch (e: Exception) {
+            Log.e("EventViewModel", "Error fetching user name for $uid: ${e.message}", e)
+            "User"
+        }
+    }
+
+
+    /**
+     * Get user Last name by UID
+     * @param uid The user's UID
+     * @return The user's Last name, or "User" if fetch fails
+     */
+    suspend fun getUserLastName(uid: String): String? {
+        return try {
+            val user = RetrofitClient.apiService.getUserByUid(uid)
+            user.lastName
+        } catch (e: Exception) {
+            Log.e("EventViewModel", "Error fetching user name for $uid: ${e.message}", e)
+            "User"
+        }
+    }
+
+    /**
+     * Get user First name by UID
+     * @param uid The user's UID
+     * @return The user's First name, or "User" if fetch fails
+     */
+    suspend fun getUserFirstName(uid: String): String {
+        return try {
+            val user = RetrofitClient.apiService.getUserByUid(uid)
+            user.firstName
         } catch (e: Exception) {
             Log.e("EventViewModel", "Error fetching user name for $uid: ${e.message}", e)
             "User"

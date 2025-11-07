@@ -1,8 +1,5 @@
 package no.ntnu.prog2007.ihost.ui.screens.events
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -16,7 +13,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -77,7 +73,9 @@ fun EventDetailScreen(
     val activity = context as? ComponentActivity
 
     // State to hold attendee names mapping
-    var attendeeNames by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+    var attendeeUserNames by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+    var attendeeFirsNames by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+    var attendeeLastNames by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
 
     // Stripe state
     val stripeUiState by stripeViewModel.uiState.collectAsState()
@@ -98,12 +96,21 @@ fun EventDetailScreen(
 
     // Fetch attendee names
     LaunchedEffect(eventAttendees) {
-        val names = mutableMapOf<String, String>()
+        val userNames = mutableMapOf<String, String>()
+        val firstNames = mutableMapOf<String, String>()
+        val lastNames = mutableMapOf<String, String>()
+
         for (eventUser in eventAttendees) {
             val userName = viewModel.getUserUserName(eventUser.userId)
-            names[eventUser.userId] = userName
+            val firstName = viewModel.getUserFirstName(eventUser.userId)
+            val lastName = viewModel.getUserLastName(eventUser.userId)
+            userNames[eventUser.userId] = userName
+            firstNames[eventUser.userId] = firstName
+            lastNames[eventUser.userId] = if (lastName != null) lastName else ""
         }
-        attendeeNames = names
+        attendeeUserNames = userNames
+        attendeeFirsNames = firstNames
+        attendeeLastNames = lastNames
     }
 
     Scaffold(
@@ -336,7 +343,7 @@ fun EventDetailScreen(
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
-                            text = attendeeNames[event.creatorUid] ?: "Loading...",
+                            text = "${attendeeFirsNames[event.creatorUid]} ${attendeeLastNames[event.creatorUid]} (${attendeeUserNames[event.creatorUid]})" ?: "Loading...",
                             style = MaterialTheme.typography.bodySmall,
                             fontSize = 11.sp,
                             color = Color.White
@@ -367,7 +374,7 @@ fun EventDetailScreen(
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Text(
-                                        text = attendeeNames[eventUser.userId] ?: "Loading...",
+                                        text = "${attendeeFirsNames[eventUser.userId]} ${attendeeLastNames[eventUser.userId]}(${attendeeUserNames[eventUser.userId]})" ?: "Loading...",
                                         style = MaterialTheme.typography.bodySmall,
                                         fontSize = 11.sp,
                                         color = Color.White
