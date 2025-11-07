@@ -1,8 +1,10 @@
 package no.ntnu.prog2007.ihost.ui.screens.profile
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
@@ -64,6 +66,39 @@ fun ProfileScreen(
                         text = "Laster profil...",
                         style = MaterialTheme.typography.bodyMedium
                     )
+                }
+            }
+        } else if (uiState.errorMessage?.contains("account has been deleted") == true ||
+            uiState.errorMessage?.contains("sign in again") == true) {
+            // Account deleted or requires re-authentication
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Error,
+                    contentDescription = "Error",
+                    modifier = Modifier.size(64.dp),
+                    tint = MaterialTheme.colorScheme.error
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Please sign in again.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = onLogOut,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Return to Login.")
                 }
             }
         } else if (user != null) {
