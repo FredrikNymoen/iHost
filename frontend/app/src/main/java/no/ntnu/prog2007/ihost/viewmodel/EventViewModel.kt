@@ -419,7 +419,7 @@ class EventViewModel(
 
             try {
                 // Create the update request
-                val updateRequest = no.ntnu.prog2007.ihost.data.model.UpdateEventRequest(
+                val updateRequest = UpdateEventRequest(
                     title = title,
                     description = description,
                     eventDate = eventDate,

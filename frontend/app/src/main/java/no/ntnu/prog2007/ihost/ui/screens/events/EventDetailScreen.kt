@@ -31,7 +31,6 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
@@ -52,10 +51,7 @@ import androidx.compose.ui.text.style.TextAlign
 
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.delay
-import java.time.LocalTime
-import java.time.ZoneId
 import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalAmount
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,7 +71,6 @@ fun EventDetailScreen(
     val event = eventWithMetadata?.event
     val currentUserId = authUiState.currentUser?.uid
     val context = LocalContext.current
-
 
 
     // Get the ComponentActivity from context
@@ -358,7 +353,7 @@ fun EventDetailScreen(
                     } else {
                         confirmedAttendees.filter { eventUser ->
                             !eventUser.userId.equals(event.creatorUid, true)
-                        }.filter { eventUser -> eventUser.status.equals("ACCEPTED")}
+                        }.filter { eventUser -> eventUser.status.equals("ACCEPTED") }
                             .forEach { eventUser ->
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
@@ -385,6 +380,7 @@ fun EventDetailScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Show payment error if any
+                /*
                 stripeUiState.paymentError?.let { error ->
                     Card(
                         modifier = Modifier
@@ -401,7 +397,7 @@ fun EventDetailScreen(
                             modifier = Modifier.padding(12.dp)
                         )
                     }
-                }
+                }*/
 
                 // Action Buttons
                 val isCreator = event.creatorUid == currentUserId
@@ -525,7 +521,9 @@ fun EventDetailScreen(
                             onClick = {
                                 val myEventUser = eventAttendees.find { it.userId == currentUserId }
                                 if (myEventUser != null) {
-                                    if (!event.free && activity != null) {
+                                    // ACTIVATE THIS IF TEST then payment system implemented
+
+                                    /*if (!event.free && activity != null) {
                                         // Paid event - initiate payment first
                                         stripeViewModel.initiatePayment(
                                             activity = activity,
@@ -550,24 +548,25 @@ fun EventDetailScreen(
                                                         ).show()
                                                     })
                                             })
-                                    } else {
-                                        // Free event - just accept
-                                        viewModel.acceptInvitation(
-                                            eventUserId = myEventUser.id,
-                                            onSuccess = {
-                                                Toast.makeText(
-                                                    context,
-                                                    "Invitation accepted!",
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
-                                            },
-                                            onError = { error ->
-                                                Toast.makeText(
-                                                    context, "Error: $error", Toast.LENGTH_SHORT
-                                                ).show()
-                                            })
-                                    }
+                                    }*/
+
+                                    // Free event - just accept
+                                    viewModel.acceptInvitation(
+                                        eventUserId = myEventUser.id,
+                                        onSuccess = {
+                                            Toast.makeText(
+                                                context,
+                                                "Invitation accepted!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        },
+                                        onError = { error ->
+                                            Toast.makeText(
+                                                context, "Error: $error", Toast.LENGTH_SHORT
+                                            ).show()
+                                        })
                                 }
+
                             },
                             modifier = Modifier
                                 .weight(1f)

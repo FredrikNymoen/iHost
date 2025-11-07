@@ -241,7 +241,7 @@ fun EditEventScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
+                .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
@@ -265,7 +265,6 @@ fun EditEventScreen(
             ) {
                 if (selectedImageUri != null) {
                     AsyncImage(
-                        key = imageKey,
                         model = selectedImageUri,
                         contentDescription = "Event image preview",
                         modifier = Modifier
@@ -378,7 +377,7 @@ fun EditEventScreen(
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
                 enabled = !uiState.isLoading,
-                textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
+                textStyle = LocalTextStyle.current.copy(color = Color.White),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFFFFC107),
                     unfocusedBorderColor = Color(0xFFFFC107),
@@ -392,13 +391,11 @@ fun EditEventScreen(
                 label = { Text("Sted (valgfritt)", color = Color.White) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-                    .clickable { showLocationPicker = true },
-                enabled = false,
-                textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
+                    .padding(bottom = 16.dp),
+                textStyle = LocalTextStyle.current.copy(color = Color.White),
                 colors = OutlinedTextFieldDefaults.colors(
-                    disabledBorderColor = Color(0xFFFFC107),
-                    disabledTextColor = Color.White,
+                    focusedBorderColor = Color(0xFFFFC107),
+                    unfocusedBorderColor = Color(0xFFFFC107),
                     cursorColor = Color(0xFFFFC107)
                 ),
                 trailingIcon = {
@@ -425,7 +422,8 @@ fun EditEventScreen(
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
-
+            // This code is documented until Payment system will be implemented right way.
+            /*
             if (!isFree) {
                 OutlinedTextField(
                     value = price,
@@ -445,7 +443,7 @@ fun EditEventScreen(
                         keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
                     )
                 )
-            }
+            }*/
 
             if (uiState.errorMessage != null) {
                 Text(

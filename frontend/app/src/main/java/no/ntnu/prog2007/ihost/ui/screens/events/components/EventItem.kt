@@ -265,7 +265,9 @@ fun EventItem(
                             )
                         }
 
+                        //Functionality frizzed until functionality for payment system will be implemented.
                         // Price indicator
+                        /*
                         if (!event.free) {
                             Text(
                                 text = "•",
@@ -293,7 +295,7 @@ fun EventItem(
                                     softWrap = false
                                 )
                             }
-                        }
+                        }*/
                     }
                 }
 

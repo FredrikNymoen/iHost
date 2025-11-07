@@ -49,7 +49,7 @@ fun AddEventScreen(
     var location by remember { mutableStateOf("") }
     var showDatePicker by remember { mutableStateOf(false) }
     var isFree by remember { mutableStateOf(true) }
-    var price by remember { mutableStateOf("") }
+    //var price by remember { mutableStateOf("") }
 
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var showImageSourceDialog by remember { mutableStateOf(false) }
@@ -350,7 +350,8 @@ fun AddEventScreen(
                 cursorColor = Color(0xFFFFC107)
             )
         )
-
+        //Price frizzed until future implementation, until paymant system will work coractly
+        /*
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -366,6 +367,7 @@ fun AddEventScreen(
                 modifier = Modifier.padding(start = 8.dp)
             )
         }
+
 
         if (!isFree) {
             OutlinedTextField(
@@ -387,7 +389,7 @@ fun AddEventScreen(
                 )
             )
         }
-
+        */
         if (uiState.errorMessage != null) {
             Text(
                 text = uiState.errorMessage!!,
@@ -405,11 +407,7 @@ fun AddEventScreen(
         ) {
             Button(
                 onClick = {
-                    val priceValue = if (!isFree && price.isNotEmpty()) {
-                        price.toDoubleOrNull() ?: 0.0
-                    } else {
-                        0.0
-                    }
+                    val priceValue = 0.0 // TODO: change price value to value from field after payment system implemented
                     viewModel.createEvent(
                         context = context,
                         title = title,
