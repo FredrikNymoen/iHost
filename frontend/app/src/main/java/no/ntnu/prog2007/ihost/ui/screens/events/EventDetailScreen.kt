@@ -77,6 +77,7 @@ fun EventDetailScreen(
     val context = LocalContext.current
 
 
+
     // Get the ComponentActivity from context
     val activity = context as? ComponentActivity
 
@@ -88,6 +89,11 @@ fun EventDetailScreen(
 
     // Get attendees from event_users
     val eventAttendees = uiState.eventAttendees[eventId] ?: emptyList()
+
+    // Attendees Section
+    val confirmedAttendees = eventAttendees.filter {
+        it.status == "ACCEPTED" || it.status == "CREATOR"
+    }
 
     // Load event images and attendees when the screen loads
     LaunchedEffect(eventId) {
@@ -286,23 +292,22 @@ fun EventDetailScreen(
                         Row(
                             modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)
                         ) {
-                            var priceString = "Free"
-                            if (!event.free) priceString = event.price.toString() + " kr"
+
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Attendees",
+                                tint = Color(0xFFFFC107),
+                                modifier = Modifier.size(24.dp),
+                            )
                             Text(
-                                fontSize = 24.sp,
+                                fontSize = 16.sp,
                                 modifier = Modifier
-                                    .padding(end = 24.dp)
+                                    .padding(end = 16.dp)
                                     .fillMaxHeight()
                                     .align(alignment = Alignment.CenterVertically),
-                                text = priceString,
+                                text = "${confirmedAttendees.size}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.White
-                            )
-                            Icon(
-                                imageVector = Icons.Default.AttachMoney,
-                                contentDescription = "Price",
-                                tint = Color(0xFFFFC107),
-                                modifier = Modifier.size(36.dp),
                             )
                         }
 
@@ -313,28 +318,8 @@ fun EventDetailScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Attendees Section
-                val confirmedAttendees = eventAttendees.filter {
-                    it.status == "ACCEPTED" || it.status == "CREATOR"
-                }
-                Row {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Attendees",
-                        tint = Color(0xFFFFC107),
-                        modifier = Modifier.size(24.dp),
-                    )
-                    Text(
-                        fontSize = 16.sp,
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .fillMaxHeight()
-                            .align(alignment = Alignment.CenterVertically),
-                        text = "${eventAttendees.size}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White
-                    )
-                }
+
+
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -788,41 +773,6 @@ fun EventDetailHeader(
             }
         }
     }
-}
-
-@Composable
-fun SectionTitle(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.Bold,
-        fontSize = 14.sp,
-        color = Color.White,
-        modifier = Modifier.padding(bottom = 8.dp)
-    )
-}
-
-@Composable
-fun EventDetailItem(label: String, value: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                color = Color(0xFF0C5CA7), shape = RoundedCornerShape(8.dp)
-            )
-            .padding(12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = Color.White
-        )
-    }
-
 }
 
 @Composable

@@ -234,6 +234,9 @@ class EventViewModel(
             }
         }
     }
+    fun editEvent(eventId:String, onSuccess: (EventWithMetadata) -> Unit){
+
+    }
 
     fun deleteEvent(eventId: String) {
         viewModelScope.launch {
@@ -394,5 +397,61 @@ class EventViewModel(
             EventUiState() // Reset to initial empty state
         }
         eventsLoaded = false
+    }
+
+    /**
+     * Updating information about event
+     */
+    fun updateEvent(
+        context: android.content.Context,
+        eventId: String,
+        title: String,
+        description: String?,
+        eventDate: String,
+        eventTime: String?,
+        location: String?,
+        free: Boolean,
+        price: Double,
+        imageUri: android.net.Uri?
+    ) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+
+            try {
+                // Create the update request
+                val updateRequest = no.ntnu.prog2007.ihost.data.model.UpdateEventRequest(
+                    title = title,
+                    description = description,
+                    eventDate = eventDate,
+                    eventTime = eventTime,
+                    location = location
+                )
+
+                // Call the API to update the event
+                val updatedEvent = RetrofitClient.apiService.updateEvent(eventId, updateRequest)
+
+                // Update the events list in state
+                val updatedEvents = _uiState.value.events.map { eventWithMetadata ->
+                    if (eventWithMetadata.id == eventId) {
+                        updatedEvent
+                    } else {
+                        eventWithMetadata
+                    }
+                }
+
+                _uiState.value = _uiState.value.copy(
+                    events = updatedEvents,
+                    isLoading = false
+                )
+
+
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = "Failed to update event: ${e.message}"
+                )
+                android.util.Log.e("EventViewModel", "Error updating event", e)
+            }
+        }
     }
 }
