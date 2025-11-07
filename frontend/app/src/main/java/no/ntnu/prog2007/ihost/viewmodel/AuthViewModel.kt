@@ -86,8 +86,24 @@ class AuthViewModel : ViewModel() {
                     _uiState.update { it.copy(userProfile = profile, isProfileLoading = false) }
                 }
                 userResult.onFailure { error ->
-                    _uiState.update { it.copy(isProfileLoading = false) }
-                    Log.e("AuthViewModel", "Error fetching user profile: ${error.message}")
+                    // Check if its a 404 not found error to handle deleted or missing profiles trying to be loaded from stored auth tokens
+                    if (error.message?.contains("404") == true ||
+                        error.message?.contains("not found") == true) {
+
+                        // Profile doesnt exist, force log out and inform
+                        Log.w("AuthViewModel","User profile not found for authenticated user $uid, signing out.")
+                        signOut()
+                        _uiState.update {
+                            it.copy(
+                                isProfileLoading = false,
+                                errorMessage = "Your account has been deleted or does not exist. Please sign in again."
+                            )
+                        }
+                    } else {
+                        // Other error, just update load state
+                        _uiState.update { it.copy(isProfileLoading = false) }
+                        Log.e("AuthViewModel", "Error fetching user profile: ${error.message}")
+                    }
                 }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isProfileLoading = false) }

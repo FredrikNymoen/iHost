@@ -8,6 +8,7 @@ import kotlinx.coroutines.tasks.await
 import no.ntnu.prog2007.ihost.data.model.CreateUserRequest
 import no.ntnu.prog2007.ihost.data.model.User
 import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
+import retrofit2.HttpException
 
 class AuthRepository(
     private val firebaseAuth: FirebaseAuth
@@ -83,8 +84,20 @@ class AuthRepository(
      * Fetch user profile from backend by UID
      */
     suspend fun getUserProfile(uid: String): Result<User> = try {
-        val profile = apiService.getUserByUid(uid)
-        Result.success(profile)
+        try {
+            val user = apiService.getUserByUid(uid)
+            Result.success(user)
+        } catch (e: HttpException) {
+            if (e.code() == 404) {
+                // 404 not found
+                Log.e("AuthRepository", "User profile not found for UID $uid")
+                Result.failure(Exception("User profile not found (404)"))
+            } else {
+                // Other http errors
+                Log.e("AuthRepository", "HTTP error fetching profile: ${e.code()}, ${e.message()}")
+                Result.failure(e)
+            }
+        }
     } catch (e: Exception) {
         Log.e("AuthRepository", "Error fetching user profile: ${e.message}")
         Result.failure(e)
