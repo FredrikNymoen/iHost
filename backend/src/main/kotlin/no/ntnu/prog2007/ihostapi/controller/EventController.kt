@@ -319,13 +319,32 @@ class EventController(
                     .body(ErrorResponse("FORBIDDEN", "Only the creator can delete this event"))
             }
 
-            firestore.collection(EVENTS_COLLECTION)
-                .document(id)
-                .delete()
+            // Create batch operation for atomic deletion and cascading deletion of event_users to fix orphaned entries issue
+            val batch = firestore.batch()
+
+            // Find all event_users corresponding to this event
+            val eventUsersQuery = firestore.collection(EVENT_USERS_COLLECTION)
+                .whereEqualTo("eventId", id)
+                .get()
                 .get()
 
-            logger.info("Event deleted: $id by user: $uid")
-            ResponseEntity.ok(mapOf("message" to "Event deleted successfully"))
+            // Count how many records we find for more detailed logging to help identify issues
+            val eventUsersCount = eventUsersQuery.size()
+
+            //Add all event_users to the batch to prepare for deletion
+            for (doc in eventUsersQuery.documents) {
+                batch.delete(doc.reference)
+            }
+
+            // Add the event itself
+            batch.delete(firestore.collection(EVENTS_COLLECTION).document(id))
+
+            // Finally execute the batch and log it
+            batch.commit().get()
+
+            logger.info("Event deleted: $id by user: $uid with $eventUsersCount related event_users")
+
+            ResponseEntity.ok(mapOf("message" to "Event deleted successfully", "deletedEventUsers" to eventUsersCount))
         } catch (e: Exception) {
             logger.warning("Error deleting event $id: ${e.message}")
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
