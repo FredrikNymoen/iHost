@@ -1,6 +1,8 @@
 package no.ntnu.prog2007.ihost.ui.components
 
 import android.app.Activity
+import android.location.Geocoder
+import android.os.Build
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,6 +34,101 @@ import com.google.maps.android.compose.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.util.Locale
+
+/**
+ * Performs reverse geocoding to get formatted address from coordinates
+ * Format: "Gatenavn Gatenummer, Postnummer Poststed"
+ */
+suspend fun getAddressFromLocation(context: android.content.Context, latLng: LatLng): String? {
+    return withContext(Dispatchers.IO) {
+        try {
+            val geocoder = Geocoder(context, Locale.getDefault())
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                // For Android 13+ (API 33+)
+                var addressResult: String? = null
+                geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1) { addresses ->
+                    if (addresses.isNotEmpty()) {
+                        val address = addresses[0]
+                        addressResult = formatAddress(address)
+                    }
+                }
+                // Wait a bit for the callback
+                kotlinx.coroutines.delay(1000)
+                addressResult
+            } else {
+                // For older Android versions
+                @Suppress("DEPRECATION")
+                val addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
+                if (!addresses.isNullOrEmpty()) {
+                    formatAddress(addresses[0])
+                } else {
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("LocationPicker", "Reverse geocoding failed", e)
+            null
+        }
+    }
+}
+
+/**
+ * Formats address with preference for full address line
+ * This gives better results for locations like NTNU, businesses, etc.
+ */
+private fun formatAddress(address: android.location.Address): String {
+    // Get the full first address line (most complete and accurate)
+    val fullAddressLine = address.getAddressLine(0)
+
+    // If we have a full address line, use it but clean it up
+    if (!fullAddressLine.isNullOrEmpty()) {
+        // Remove country from the end if present (usually ", Norway" or ", Norge")
+        val cleanedAddress = fullAddressLine
+            .replace(", Norway", "")
+            .replace(", Norge", "")
+            .trim()
+
+        return cleanedAddress
+    }
+
+    // Fallback: try to build address manually
+    val streetAddress = address.thoroughfare ?: "" // Gatenavn
+    val streetNumber = address.subThoroughfare ?: "" // Gatenummer
+    val postalCode = address.postalCode ?: "" // Postnummer
+    val locality = address.locality ?: "" // Poststed
+    val featureName = address.featureName ?: "" // Building/place name
+
+    val parts = mutableListOf<String>()
+
+    // Add feature name if it's different from street name
+    if (featureName.isNotEmpty() && featureName != streetAddress) {
+        parts.add(featureName)
+    }
+
+    // Add street address
+    if (streetAddress.isNotEmpty() && streetNumber.isNotEmpty()) {
+        parts.add("$streetAddress $streetNumber")
+    } else if (streetAddress.isNotEmpty()) {
+        parts.add(streetAddress)
+    }
+
+    // Add city part
+    if (postalCode.isNotEmpty() && locality.isNotEmpty()) {
+        parts.add("$postalCode $locality")
+    } else if (locality.isNotEmpty()) {
+        parts.add(locality)
+    }
+
+    return if (parts.isNotEmpty()) {
+        parts.joinToString(", ")
+    } else {
+        "Unknown location"
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -205,13 +302,19 @@ fun LocationPickerDialog(
                                                         place.latLng?.let { latLng ->
                                                             selectedLatLng = latLng
                                                             markerPosition = latLng
-                                                            searchQuery =
-                                                                prediction.getPrimaryText(null)
-                                                                    .toString()
                                                             showPredictions = false
 
-                                                            // Animate camera to new position
+                                                            // Get formatted address
                                                             scope.launch {
+                                                                val address = getAddressFromLocation(context, latLng)
+                                                                if (address != null) {
+                                                                    searchQuery = address
+                                                                } else {
+                                                                    // Fallback to prediction text
+                                                                    searchQuery = prediction.getPrimaryText(null).toString()
+                                                                }
+
+                                                                // Animate camera to new position
                                                                 cameraPositionState.animate(
                                                                     update = com.google.android.gms.maps.CameraUpdateFactory
                                                                         .newLatLngZoom(latLng, 15f),
@@ -280,8 +383,13 @@ fun LocationPickerDialog(
                         onMapClick = { latLng ->
                             markerPosition = latLng
                             selectedLatLng = latLng
-                            // Reverse geocoding would be done here to update searchQuery
-                            // For now, just update coordinates
+                            // Perform reverse geocoding
+                            scope.launch {
+                                val address = getAddressFromLocation(context, latLng)
+                                if (address != null) {
+                                    searchQuery = address
+                                }
+                            }
                         }
                     ) {
                         val markerState = rememberMarkerState(position = markerPosition)
@@ -297,11 +405,17 @@ fun LocationPickerDialog(
                             draggable = true
                         )
 
-                        // Listen to marker drag
+                        // Listen to marker drag and perform reverse geocoding
                         LaunchedEffect(markerState.position) {
                             if (markerState.position != markerPosition) {
                                 markerPosition = markerState.position
                                 selectedLatLng = markerState.position
+
+                                // Perform reverse geocoding when marker is dragged
+                                val address = getAddressFromLocation(context, markerState.position)
+                                if (address != null) {
+                                    searchQuery = address
+                                }
                             }
                         }
                     }
