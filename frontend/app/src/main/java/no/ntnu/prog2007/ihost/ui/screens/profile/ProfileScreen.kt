@@ -425,6 +425,7 @@ fun EditNameDialog(
     var lastName by remember { mutableStateOf(currentLastName) }
 
     AlertDialog(
+        containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismiss,
         title = {
             Text(
@@ -484,6 +485,7 @@ fun ChangeAvatarDialog(
     }
 
     AlertDialog(
+        containerColor = MaterialTheme.colorScheme.background,
         onDismissRequest = onDismiss,
         title = {
             Text(
