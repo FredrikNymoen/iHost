@@ -29,7 +29,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.People
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,7 +44,8 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
-
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.foundation.layout.FlowRow
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.delay
 import java.time.temporal.ChronoUnit
@@ -176,235 +177,56 @@ fun EventDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Row {
-                    //left column with date and time
-                    Column(
-                        modifier = Modifier.weight(0.5f), horizontalAlignment = Alignment.Start
-                    ) {
-                        //Date field
-                        Row(
-                            modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.CalendarMonth,
-                                contentDescription = "Date",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(36.dp),
+                // Event Info Section - Modern Card Grid
+                EventInfoSection(
+                    eventDate = event.eventDate,
+                    eventTime = event.eventTime,
+                    location = event.location,
+                    attendeeCount = confirmedAttendees.size,
+                    onLocationClick = {
+                        // Open Google Maps with the location
+                        val intent = android.content.Intent(
+                            android.content.Intent.ACTION_VIEW,
+                            android.net.Uri.parse(
+                                "geo:0,0?q=${android.net.Uri.encode(event.location)}"
                             )
-                            Text(
-                                fontSize = 24.sp,
-                                modifier = Modifier
-                                    .padding(start = 24.dp)
-                                    .fillMaxHeight()
-                                    .align(alignment = Alignment.CenterVertically),
-                                text = event.eventDate,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onBackground
+                        )
+                        intent.setPackage("com.google.android.apps.maps")
 
+                        try {
+                            context.startActivity(intent)
+                        } catch (e: Exception) {
+                            // If Google Maps not installed, use browser
+                            val webIntent = android.content.Intent(
+                                android.content.Intent.ACTION_VIEW,
+                                android.net.Uri.parse(
+                                    "https://www.google.com/maps/search/?api=1&query=${
+                                        android.net.Uri.encode(event.location)
+                                    }"
+                                )
                             )
-                        }
-                        //Time field
-                        if (!event.eventTime.isNullOrBlank()) {
-                            Row(
-                                modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.AccessTime,
-                                    contentDescription = "Time",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(36.dp)
-                                )
-                                Text(
-                                    fontSize = 24.sp,
-                                    modifier = Modifier
-                                        .padding(start = 24.dp)
-                                        .fillMaxHeight()
-                                        .align(alignment = Alignment.CenterVertically),
-                                    text = event.eventTime,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onBackground
-                                )
-                            }
+                            context.startActivity(webIntent)
                         }
                     }
-                    // Right column with location and price
-
-                    Column(
-                        modifier = Modifier.weight(0.5f), horizontalAlignment = Alignment.End
-                    ) {
-                        if (!event.location.isNullOrBlank()) {
-                            Row(
-                                modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
-                                horizontalArrangement = Arrangement.End  // This aligns content to the right
-
-                            ) {
-
-                                Text(
-                                    fontSize = 24.sp,
-                                    modifier = Modifier
-                                        .padding(end = 12.dp)
-                                        .weight(1f),  // Takes remaining space
-                                    text = event.location,
-                                    color = MaterialTheme.colorScheme.onBackground,
-                                    textAlign = androidx.compose.ui.text.style.TextAlign.End,
-                                    maxLines = 2,  // Allow 2 lines
-                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                                )
-                                Icon(
-                                    imageVector = Icons.Default.Map,
-                                    contentDescription = "Location",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier
-                                        .size(36.dp)
-                                        .clickable {  // Make the icon clickable
-                                            // Open Google Maps with the location
-                                            val intent = android.content.Intent(
-                                                android.content.Intent.ACTION_VIEW,
-                                                android.net.Uri.parse(
-                                                    "geo:0,0?q=${
-                                                        android.net.Uri.encode(
-                                                            event.location
-                                                        )
-                                                    }"
-                                                )
-                                            )
-                                            intent.setPackage("com.google.android.apps.maps")  // Force Google Maps
-
-                                            try {
-                                                context.startActivity(intent)
-                                            } catch (e: Exception) {
-                                                // If Google Maps not installed, use browser
-                                                val webIntent = android.content.Intent(
-                                                    android.content.Intent.ACTION_VIEW,
-                                                    android.net.Uri.parse(
-                                                        "https://www.google.com/maps/search/?api=1&query=${
-                                                            android.net.Uri.encode(
-                                                                event.location
-                                                            )
-                                                        }"
-                                                    )
-                                                )
-                                                context.startActivity(webIntent)
-                                            }
-                                        },
-                                )
-
-                            }
-                        }
-                        Row(
-                            modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)
-                        ) {
-                            Text(
-                                fontSize = 24.sp,
-                                modifier = Modifier
-                                    .padding(end = 16.dp)
-                                    .fillMaxHeight()
-                                    .align(alignment = Alignment.CenterVertically),
-                                text = "${confirmedAttendees.size}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "Attendees",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(24.dp),
-                            )
-
-                        }
-
-
-                    }
-                }
-
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            color = MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "Host",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Text(
-                            text = "${attendeeFirsNames[event.creatorUid]} ${attendeeLastNames[event.creatorUid]} (${attendeeUserNames[event.creatorUid]})" ?: "Loading...",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.onSecondary
-                        )
-                    }
-
-                    if (confirmedAttendees.isEmpty()) {
-                        Text(
-                            text = "No attendees yet",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.6f)
-                        )
-                    } else {
-                        confirmedAttendees.filter { eventUser ->
-                            !eventUser.userId.equals(event.creatorUid, true)
-                        }.filter { eventUser -> eventUser.status.equals("ACCEPTED") }
-                            .forEach { eventUser ->
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = "Attending",
-                                        tint = Color(0xFF4CAF50),
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Text(
-                                        text = "${attendeeFirsNames[eventUser.userId]} ${attendeeLastNames[eventUser.userId]}(${attendeeUserNames[eventUser.userId]})" ?: "Loading...",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        fontSize = 11.sp,
-                                        color = MaterialTheme.colorScheme.onSecondary
-                                    )
-                                }
-                            }
-                    }
-                }
+                )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Show payment error if any
-                /*
-                stripeUiState.paymentError?.let { error ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFFD32F2F)
-                        )
-                    ) {
-                        Text(
-                            text = error,
-                            color = Color.White,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(12.dp)
+                // Attendees Section - Modern Card with Chips
+                AttendeesSection(
+                    hostName = "${attendeeFirsNames[event.creatorUid]} ${attendeeLastNames[event.creatorUid]}",
+                    hostUsername = attendeeUserNames[event.creatorUid] ?: "Loading...",
+                    attendees = confirmedAttendees.filter { eventUser ->
+                        !eventUser.userId.equals(event.creatorUid, true) && eventUser.status == "ACCEPTED"
+                    }.map { eventUser ->
+                        AttendeeInfo(
+                            name = "${attendeeFirsNames[eventUser.userId]} ${attendeeLastNames[eventUser.userId]}",
+                            username = attendeeUserNames[eventUser.userId] ?: "Loading..."
                         )
                     }
-                }*/
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
 
                 // Action Buttons
                 val isCreator = event.creatorUid == currentUserId
@@ -414,264 +236,77 @@ fun EventDetailScreen(
                 val isDeclined = userStatus == "DECLINED"
 
                 if (isCreator) {
-
-                    // Invite Users Button
-                    Button(
-                        onClick = { onInviteUsers(eventId) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                            .padding(bottom = 12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.PersonAdd,
-                            contentDescription = "Invite Users",
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Invite Users")
-                    }
-
-                    // Edit and Delete
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Button(
-                            onClick = { onEdit(eventId) },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(48.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Edit",
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Edit")
+                    // Creator Action Buttons
+                    CreatorActionButtons(
+                        onInviteUsers = { onInviteUsers(eventId) },
+                        onEdit = { onEdit(eventId) },
+                        onDelete = {
+                            viewModel.deleteEvent(eventId)
+                            onBack()
                         }
-
-                        Button(
-                            onClick = {
-                                viewModel.deleteEvent(eventId)
-                                onBack()
-                            },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(48.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete",
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Delete")
-                        }
-                    }
-                } else if (isAccepted) {
-                    // Already accepted - Show status
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFF4CAF50).copy(alpha = 0.2f)
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Accepted",
-                                tint = Color(0xFF4CAF50),
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = "You're attending this event",
-                                color = Color(0xFF4CAF50),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                } else if (isPending) {
-                    // Pending invitation - Show Accept/Decline buttons
-                    Text(
-                        text = "You're invited!",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 12.dp)
                     )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Button(
-                            onClick = {
-                                val myEventUser = eventAttendees.find { it.userId == currentUserId }
-                                if (myEventUser != null) {
-                                    // ACTIVATE THIS IF TEST then payment system implemented
-
-                                    /*if (!event.free && activity != null) {
-                                        // Paid event - initiate payment first
-                                        stripeViewModel.initiatePayment(
-                                            activity = activity,
-                                            eventId = eventId,
-                                            onPaymentComplete = {
-                                                // Payment succeeded, now accept invitation
-                                                viewModel.acceptInvitation(
-                                                    eventUserId = myEventUser.id,
-                                                    onSuccess = {
-                                                        Toast.makeText(
-                                                            context,
-                                                            "Payment successful! Invitation accepted!",
-                                                            Toast.LENGTH_SHORT
-                                                        ).show()
-                                                        stripeViewModel.clearPaymentSuccess()
-                                                    },
-                                                    onError = { error ->
-                                                        Toast.makeText(
-                                                            context,
-                                                            "Payment succeeded but acceptance failed: $error",
-                                                            Toast.LENGTH_LONG
-                                                        ).show()
-                                                    })
-                                            })
-                                    }*/
-
-                                    // Free event - just accept
-                                    viewModel.acceptInvitation(
-                                        eventUserId = myEventUser.id,
-                                        onSuccess = {
-                                            Toast.makeText(
-                                                context,
-                                                "Invitation accepted!",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        },
-                                        onError = { error ->
-                                            Toast.makeText(
-                                                context, "Error: $error", Toast.LENGTH_SHORT
-                                            ).show()
-                                        })
-                                }
-
-                            },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(48.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            ),
-                            enabled = !stripeUiState.isProcessingPayment
-                        ) {
-                            if (stripeUiState.isProcessingPayment) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(18.dp),
-                                    color = Color.White,
-                                    strokeWidth = 2.dp
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = "Accept",
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(if (!event.free) "Buy & Accept" else "Accept")
+                } else if (isAccepted) {
+                    // Accepted Status Card
+                    StatusCard(
+                        icon = Icons.Default.Check,
+                        message = "You're attending this event",
+                        statusType = StatusType.ACCEPTED
+                    )
+                } else if (isPending) {
+                    // Pending Invitation - Accept/Decline Buttons
+                    PendingInvitationActions(
+                        isFreeEvent = event.free,
+                        isProcessingPayment = stripeUiState.isProcessingPayment,
+                        onAccept = {
+                            val myEventUser = eventAttendees.find { it.userId == currentUserId }
+                            if (myEventUser != null) {
+                                viewModel.acceptInvitation(
+                                    eventUserId = myEventUser.id,
+                                    onSuccess = {
+                                        Toast.makeText(
+                                            context,
+                                            "Invitation accepted!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    },
+                                    onError = { error ->
+                                        Toast.makeText(
+                                            context, "Error: $error", Toast.LENGTH_SHORT
+                                        ).show()
+                                    })
+                            }
+                        },
+                        onDecline = {
+                            val myEventUser = eventAttendees.find { it.userId == currentUserId }
+                            if (myEventUser != null) {
+                                viewModel.declineInvitation(
+                                    eventUserId = myEventUser.id,
+                                    onSuccess = {
+                                        Toast.makeText(
+                                            context, "Invitation declined", Toast.LENGTH_SHORT
+                                        ).show()
+                                        onBack()
+                                    },
+                                    onError = { error ->
+                                        Toast.makeText(
+                                            context, "Error: $error", Toast.LENGTH_SHORT
+                                        ).show()
+                                    })
                             }
                         }
-
-                        Button(
-                            onClick = {
-                                // Find the eventUser document for this user
-                                val myEventUser = eventAttendees.find { it.userId == currentUserId }
-                                if (myEventUser != null) {
-                                    viewModel.declineInvitation(
-                                        eventUserId = myEventUser.id,
-                                        onSuccess = {
-                                            Toast.makeText(
-                                                context, "Invitation declined", Toast.LENGTH_SHORT
-                                            ).show()
-                                            onBack() // Go back to events list
-                                        },
-                                        onError = { error ->
-                                            Toast.makeText(
-                                                context, "Error: $error", Toast.LENGTH_SHORT
-                                            ).show()
-                                        })
-                                }
-                            },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(48.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error
-                            )
-                        ) {
-                            Text("Decline")
-                        }
-                    }
+                    )
                 } else if (isDeclined) {
-                    // Declined invitation
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFFD32F2F).copy(alpha = 0.2f)
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "You have declined this event",
-                                color = Color(0xFFD32F2F),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
+                    // Declined Status Card
+                    StatusCard(
+                        message = "You have declined this event",
+                        statusType = StatusType.DECLINED
+                    )
                 } else {
-                    // Not invited - Cannot access
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFFD32F2F).copy(alpha = 0.2f)
-                        )
-                    ) {
-                        Text(
-                            text = "You are not invited to this event",
-                            color = Color(0xFFD32F2F),
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
+                    // Not Invited Status Card
+                    StatusCard(
+                        message = "You are not invited to this event",
+                        statusType = StatusType.NOT_INVITED
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -826,4 +461,470 @@ fun EventTimer(eventDate: String?, eventTime: String?) {
             .fillMaxWidth()
             .padding(8.dp)
     )
+}
+
+// ==================== NEW MODERN COMPOSABLES ====================
+
+// Data class for attendee info
+data class AttendeeInfo(
+    val name: String,
+    val username: String
+)
+
+// Enum for status types
+enum class StatusType {
+    ACCEPTED, PENDING, DECLINED, NOT_INVITED
+}
+
+// Modern Info Card Component
+@Composable
+fun InfoCard(
+    icon: ImageVector,
+    label: String,
+    value: String,
+    onClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(28.dp)
+            )
+            Column {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+    }
+}
+
+// Event Info Section with Grid Layout
+@Composable
+fun EventInfoSection(
+    eventDate: String,
+    eventTime: String?,
+    location: String?,
+    attendeeCount: Int,
+    onLocationClick: () -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            InfoCard(
+                icon = Icons.Default.CalendarMonth,
+                label = "Date",
+                value = eventDate,
+                modifier = Modifier.weight(1f)
+            )
+            if (!eventTime.isNullOrBlank()) {
+                InfoCard(
+                    icon = Icons.Default.AccessTime,
+                    label = "Time",
+                    value = eventTime,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (!location.isNullOrBlank()) {
+                InfoCard(
+                    icon = Icons.Default.Map,
+                    label = "Location",
+                    value = location,
+                    onClick = onLocationClick,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            InfoCard(
+                icon = Icons.Default.People,
+                label = "Attendees",
+                value = attendeeCount.toString(),
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+// Host Chip Component
+@Composable
+fun HostChip(
+    name: String,
+    username: String
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFFFC107).copy(alpha = 0.09f)
+        ),
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Star,
+                contentDescription = "Host",
+                tint = Color(0xFFFFC107),
+                modifier = Modifier.size(20.dp)
+            )
+            Column {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "@$username",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                )
+            }
+        }
+    }
+}
+
+// Attendee Chip Component
+@Composable
+fun AttendeeChip(
+    name: String,
+    username: String
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
+        ),
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = "Attending",
+                tint = MaterialTheme.colorScheme.onSecondary,
+                modifier = Modifier.size(18.dp)
+            )
+            Column {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSecondary,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = "@$username",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.7f)
+                )
+            }
+        }
+    }
+}
+
+// Attendees Section
+@Composable
+fun AttendeesSection(
+    hostName: String,
+    hostUsername: String,
+    attendees: List<AttendeeInfo>
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Attendees",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold
+            )
+
+            // Host chip
+            HostChip(name = hostName, username = hostUsername)
+
+            // Attendee chips
+            if (attendees.isEmpty()) {
+                Text(
+                    text = "No other attendees yet",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            } else {
+                attendees.forEach { attendee ->
+                    AttendeeChip(name = attendee.name, username = attendee.username)
+                }
+            }
+        }
+    }
+}
+
+// Creator Action Buttons
+@Composable
+fun CreatorActionButtons(
+    onInviteUsers: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Invite Users Button
+        FilledTonalButton(
+            onClick = onInviteUsers,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.filledTonalButtonColors(
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary
+            )
+        ) {
+            Icon(
+                imageVector = Icons.Default.PersonAdd,
+                contentDescription = "Invite Users",
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = "Invite Users",
+                style = MaterialTheme.typography.titleSmall
+            )
+        }
+
+        // Edit and Delete Row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Button(
+                onClick = onEdit,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit",
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Edit",
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
+
+            Button(
+                onClick = onDelete,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Delete",
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
+        }
+    }
+}
+
+// Pending Invitation Actions
+@Composable
+fun PendingInvitationActions(
+    isFreeEvent: Boolean,
+    isProcessingPayment: Boolean,
+    onAccept: () -> Unit,
+    onDecline: () -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = "You're invited!",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+            fontWeight = FontWeight.Bold
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Button(
+                onClick = onAccept,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                ),
+                enabled = !isProcessingPayment,
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                if (isProcessingPayment) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Accept",
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = if (isFreeEvent) "Accept" else "Buy & Accept",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
+            }
+
+            Button(
+                onClick = onDecline,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "Decline",
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
+        }
+    }
+}
+
+// Status Card Component
+@Composable
+fun StatusCard(
+    message: String,
+    statusType: StatusType,
+    icon: ImageVector? = null
+) {
+    val (backgroundColor, textColor, iconColor) = when (statusType) {
+        StatusType.ACCEPTED -> Triple(
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.onPrimaryContainer,
+            MaterialTheme.colorScheme.primary
+        )
+        StatusType.PENDING -> Triple(
+            MaterialTheme.colorScheme.tertiaryContainer,
+            MaterialTheme.colorScheme.onTertiaryContainer,
+            MaterialTheme.colorScheme.tertiary
+        )
+        StatusType.DECLINED, StatusType.NOT_INVITED -> Triple(
+            MaterialTheme.colorScheme.errorContainer,
+            MaterialTheme.colorScheme.onErrorContainer,
+            MaterialTheme.colorScheme.error
+        )
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = backgroundColor
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = message,
+                    tint = iconColor,
+                    modifier = Modifier.size(28.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+            }
+            Text(
+                text = message,
+                color = textColor,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
 }
