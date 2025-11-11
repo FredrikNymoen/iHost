@@ -355,7 +355,7 @@ fun EventDetailScreen(
                             text = "No attendees yet",
                             style = MaterialTheme.typography.bodySmall,
                             fontSize = 12.sp,
-                            color = Color(0xFFB0B0B0)
+                            color = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.6f)
                         )
                     } else {
                         confirmedAttendees.filter { eventUser ->
@@ -446,7 +446,7 @@ fun EventDetailScreen(
                                 .weight(1f)
                                 .height(48.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF00BCD4)
+                                containerColor = MaterialTheme.colorScheme.primary
                             )
                         ) {
                             Icon(
@@ -467,7 +467,7 @@ fun EventDetailScreen(
                                 .weight(1f)
                                 .height(48.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFD32F2F)
+                                containerColor = MaterialTheme.colorScheme.error
                             )
                         ) {
                             Icon(
@@ -579,7 +579,7 @@ fun EventDetailScreen(
                                 .weight(1f)
                                 .height(48.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF4CAF50)
+                                containerColor = MaterialTheme.colorScheme.primary
                             ),
                             enabled = !stripeUiState.isProcessingPayment
                         ) {
@@ -624,7 +624,7 @@ fun EventDetailScreen(
                                 .weight(1f)
                                 .height(48.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFD32F2F)
+                                containerColor = MaterialTheme.colorScheme.error
                             )
                         ) {
                             Text("Decline")
@@ -694,87 +694,86 @@ fun EventDetailHeader(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight(),  // Expands with content
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            .wrapContentHeight(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
-        Column(  // Use Column to stack image and description
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
         ) {
-            // Image Section with Timer overlay
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(250.dp)
-                    .background(MaterialTheme.colorScheme.tertiary)
+                    .wrapContentHeight()
             ) {
-                val firstImageUrl = eventImages?.firstOrNull()?.path
-
-                if (firstImageUrl != null) {
-                    AsyncImage(
-                        model = firstImageUrl,
-                        contentDescription = "Event image",
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(16.dp)),
-                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
-                    )
-                } else {
-                    // Show gradient background when no image
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(
-                                brush = androidx.compose.ui.graphics.Brush.linearGradient(
-                                    colors = listOf(
-                                        MaterialTheme.colorScheme.secondary,
-                                        MaterialTheme.colorScheme.tertiary
-                                    )
-                                )
-                            )
-                    )
-                }
-
-                // Timer overlay at TOP of image with background
+                // Image Section with Timer and dark overlay
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.TopCenter)  // Position at top
-                        .padding(16.dp)
+                        .height(300.dp)
                 ) {
+                    val firstImageUrl = eventImages?.firstOrNull()?.path
+
+                    // Background image or gradient
+                    if (firstImageUrl != null) {
+                        AsyncImage(
+                            model = firstImageUrl,
+                            contentDescription = "Event image",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        )
+                    } else {
+                        // Show gradient background when no image
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                                        colors = listOf(
+                                            MaterialTheme.colorScheme.primary,
+                                            MaterialTheme.colorScheme.secondary
+                                        )
+                                    )
+                                )
+                        )
+                    }
+
+                    // Dark overlay on entire image
                     Box(
                         modifier = Modifier
-                            .wrapContentSize()
-                            .background(
-                                color = Color.Black.copy(alpha = 0.2f),  // 20% visibility black background
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.35f))
+                    )
+
+                    // Timer centered on image
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
                     ) {
                         EventTimer(event.eventDate, event.eventTime)
                     }
                 }
-            }
 
-            // Description below image - Expands with text
-            if (event.description != null) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()  // Expands downward with text
-                        .background(MaterialTheme.colorScheme.tertiary)
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = event.description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onTertiary,
-                        fontSize = 14.sp,
-                        lineHeight = 20.sp
-                    )
+                // Description below image
+                if (event.description != null) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(20.dp)
+                    ) {
+                        Text(
+                            text = event.description,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 15.sp,
+                            lineHeight = 22.sp
+                        )
+                    }
                 }
             }
         }
@@ -819,12 +818,12 @@ fun EventTimer(eventDate: String?, eventTime: String?) {
 
     Text(
         text = timeRemaining,
-        fontSize = 24.sp,
+        fontSize = 32.sp,
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
+        color = Color.White,
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-
     )
 }
