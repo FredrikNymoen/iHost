@@ -53,7 +53,7 @@ fun PersonalInfoScreen(
     ) {
         // Title
         Text(
-            text = "Personlig informasjon",
+            text = "Personal Information",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
@@ -62,7 +62,7 @@ fun PersonalInfoScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Fortell oss litt om deg",
+            text = "Tell us a bit about yourself",
             fontSize = 16.sp,
             color = MaterialTheme.colorScheme.onBackground
         )
@@ -73,7 +73,7 @@ fun PersonalInfoScreen(
         OutlinedTextField(
             value = registrationState.firstName,
             onValueChange = { viewModel.updateRegistrationField("firstName", it) },
-            label = { Text("Fornavn", color = MaterialTheme.colorScheme.onSurface) },
+            label = { Text("First Name", color = MaterialTheme.colorScheme.onSurface) },
             leadingIcon = {
                 Icon(
                     Icons.Default.Person,
@@ -97,7 +97,7 @@ fun PersonalInfoScreen(
         OutlinedTextField(
             value = registrationState.lastName,
             onValueChange = { viewModel.updateRegistrationField("lastName", it) },
-            label = { Text("Etternavn (Valgfritt)", color = MaterialTheme.colorScheme.onSurface) },
+            label = { Text("Last Name (Optional)", color = MaterialTheme.colorScheme.onSurface) },
             leadingIcon = {
                 Icon(
                     Icons.Default.Person,
@@ -121,7 +121,7 @@ fun PersonalInfoScreen(
         OutlinedTextField(
             value = registrationState.email,
             onValueChange = { viewModel.updateRegistrationField("email", it) },
-            label = { Text("E-post", color = MaterialTheme.colorScheme.onSurface) },
+            label = { Text("Email", color = MaterialTheme.colorScheme.onSurface) },
             leadingIcon = {
                 Icon(
                     Icons.Default.Email,
@@ -151,7 +151,7 @@ fun PersonalInfoScreen(
             enabled = registrationState.firstName.isNotBlank() &&
                     registrationState.email.isNotBlank(),
         ) {
-            Text(text = "Neste")
+            Text(text = "Next")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -162,12 +162,12 @@ fun PersonalInfoScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Har du allerede en konto?",
+                text = "Already have an account?",
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.width(4.dp))
             TextButton(onClick = onNavigateToLogin) {
-                Text("Logg inn", color = MaterialTheme.colorScheme.primary)
+                Text("Log In", color = MaterialTheme.colorScheme.primary)
             }
         }
 

@@ -271,7 +271,7 @@ fun AddEventScreen(
         OutlinedTextField(
             value = title,
             onValueChange = { title = it },
-            label = { Text("Event tittel", color = MaterialTheme.colorScheme.onSurface) },
+            label = { Text("Event Title", color = MaterialTheme.colorScheme.onSurface) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 32.dp)
@@ -288,7 +288,7 @@ fun AddEventScreen(
         OutlinedTextField(
             value = description,
             onValueChange = { description = it },
-            label = { Text("Beskrivelse (valgfritt)", color = MaterialTheme.colorScheme.onSurface) },
+            label = { Text("Description (optional)", color = MaterialTheme.colorScheme.onSurface) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
@@ -306,7 +306,7 @@ fun AddEventScreen(
         OutlinedTextField(
             value = eventDate,
             onValueChange = { eventDate = it },
-            label = { Text("Dato (YYYY-MM-DD)", color = MaterialTheme.colorScheme.onSurface) },
+            label = { Text("Date (YYYY-MM-DD)", color = MaterialTheme.colorScheme.onSurface) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
@@ -322,7 +322,7 @@ fun AddEventScreen(
         OutlinedTextField(
             value = eventTime,
             onValueChange = { eventTime = it },
-            label = { Text("Tid (HH:mm) (valgfritt)", color = MaterialTheme.colorScheme.onSurface) },
+            label = { Text("Time (HH:mm) (optional)", color = MaterialTheme.colorScheme.onSurface) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
@@ -338,7 +338,7 @@ fun AddEventScreen(
         OutlinedTextField(
             value = location,
             onValueChange = { location = it },
-            label = { Text("Sted (valgfritt)", color = MaterialTheme.colorScheme.onSurface) },
+            label = { Text("Location (optional)", color = MaterialTheme.colorScheme.onSurface) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
@@ -452,7 +452,7 @@ fun AddEventScreen(
                             .padding(end = 8.dp)
                     )
                     Text(
-                        "Opprett event",
+                        "Create Event",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )

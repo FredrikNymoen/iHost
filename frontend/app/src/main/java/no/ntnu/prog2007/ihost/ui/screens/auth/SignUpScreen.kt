@@ -65,13 +65,13 @@ fun SignUpScreen(
 
         // Check length
         if (value.length !in 4..12) {
-            usernameError = "Brukernavn må være mellom 4 og 12 tegn"
+            usernameError = "Username must be between 4 and 12 characters"
             return
         }
 
         // Check for illegal characters
         if (!value.matches(Regex("^[a-zA-z0-9_]+$"))) {
-            usernameError = "Brukernavn kan kun inneholde bokstaver, tall og understrek"
+            usernameError = "Username can only contain letters, numbers and underscores"
             return
         }
 
@@ -87,7 +87,7 @@ fun SignUpScreen(
                 isCheckingUsername = false // Done checking
                 isUsernameAvailable = available // Update availability state
                 // Set error message if not available
-                usernameError = if (!available) "Brukernavnet er allerede tatt" else null
+                usernameError = if (!available) "Username is already taken" else null
             }
 
         }
@@ -119,14 +119,14 @@ fun SignUpScreen(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Tilbake",
+                    contentDescription = "Back",
                     tint = MaterialTheme.colorScheme.onBackground
                 )
             }
         }
         // Title
         Text(
-            text = "Opprett konto",
+            text = "Create Account",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,
@@ -136,7 +136,7 @@ fun SignUpScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Velg brukernavn og passord",
+            text = "Choose a username and password",
             fontSize = 16.sp,
             color = MaterialTheme.colorScheme.onBackground
         )
@@ -168,7 +168,7 @@ fun SignUpScreen(
                 username = it
                 validateUsername(it)
             },
-            label = { Text("Brukernavn", color = MaterialTheme.colorScheme.onSurface) },
+            label = { Text("Username", color = MaterialTheme.colorScheme.onSurface) },
             leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Username", tint = MaterialTheme.colorScheme.onSurface) },
             trailingIcon = { // Show loading, check or error icon based on state
                 when {
@@ -182,14 +182,14 @@ fun SignUpScreen(
                     isUsernameAvailable == true -> { // Green check icon if username is available
                         Icon(
                             Icons.Default.Check,
-                            contentDescription = "Brukernavn tilgjengelig",
+                            contentDescription = "Username available",
                             tint = Color.Green
                         )
                     }
                     isUsernameAvailable == false -> { // Red close icon if username is taken
                         Icon(
                             Icons.Default.Close,
-                            contentDescription = "Brukernavn ikke tilgjengelig",
+                            contentDescription = "Username not available",
                             tint = Color.Red
                         )
                     }
@@ -226,14 +226,14 @@ fun SignUpScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Passord", color = MaterialTheme.colorScheme.onSurface) },
+            label = { Text("Password", color = MaterialTheme.colorScheme.onSurface) },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password", tint = MaterialTheme.colorScheme.onSurface) },
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(
                         if (passwordVisible) Icons.Default.VisibilityOff
                         else Icons.Default.Visibility,
-                        contentDescription = if (passwordVisible) "Skjul passord" else "Vis passord",
+                        contentDescription = if (passwordVisible) "Hide password" else "Show password",
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -260,14 +260,14 @@ fun SignUpScreen(
         OutlinedTextField(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
-            label = { Text("Bekreft passord", color = MaterialTheme.colorScheme.onSurface) },
+            label = { Text("Confirm Password", color = MaterialTheme.colorScheme.onSurface) },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Confirm Password", tint = MaterialTheme.colorScheme.onSurface) },
             trailingIcon = {
                 IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                     Icon(
                         if (confirmPasswordVisible) Icons.Default.VisibilityOff
                         else Icons.Default.Visibility,
-                        contentDescription = if (confirmPasswordVisible) "Skjul passord" else "Vis passord",
+                        contentDescription = if (confirmPasswordVisible) "Hide password" else "Show password",
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -291,7 +291,7 @@ fun SignUpScreen(
 
         if (confirmPassword.isNotEmpty() && password != confirmPassword) {
             Text(
-                text = "Passordene stemmer ikke overens",
+                text = "Passwords do not match",
                 color = MaterialTheme.colorScheme.error,
                 fontSize = 12.sp,
                 modifier = Modifier.align(Alignment.Start)
@@ -318,7 +318,7 @@ fun SignUpScreen(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             } else {
-                Text("Registrer deg", fontSize = 16.sp)
+                Text("Sign Up", fontSize = 16.sp)
             }
         }
 
@@ -330,12 +330,12 @@ fun SignUpScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Har du allerede en konto?",
+                text = "Already have an account?",
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.width(4.dp))
             TextButton(onClick = onNavigateToLogin) {
-                Text("Logg inn", color = MaterialTheme.colorScheme.primary)
+                Text("Log In", color = MaterialTheme.colorScheme.primary)
             }
         }
     }

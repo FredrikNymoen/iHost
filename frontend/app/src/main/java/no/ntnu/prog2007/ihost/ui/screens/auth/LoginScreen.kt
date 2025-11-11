@@ -49,7 +49,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Logg inn for å se dine events",
+            text = "Log in to see your events",
             fontSize = 16.sp,
             color = MaterialTheme.colorScheme.onBackground
         )
@@ -78,7 +78,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("E-post", color = MaterialTheme.colorScheme.onSurface) },
+            label = { Text("Email", color = MaterialTheme.colorScheme.onSurface) },
             leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email", tint = MaterialTheme.colorScheme.onSurface) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             singleLine = true,
@@ -98,14 +98,14 @@ fun LoginScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Passord", color = MaterialTheme.colorScheme.onSurface) },
+            label = { Text("Password", color = MaterialTheme.colorScheme.onSurface) },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password", tint = MaterialTheme.colorScheme.onSurface) },
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(
                         if (passwordVisible) Icons.Default.VisibilityOff
                         else Icons.Default.Visibility,
-                        contentDescription = if (passwordVisible) "Skjul passord" else "Vis passord",
+                        contentDescription = if (passwordVisible) "Hide password" else "Show password",
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -140,7 +140,7 @@ fun LoginScreen(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             } else {
-                Text("Logg inn", fontSize = 16.sp)
+                Text("Log In", fontSize = 16.sp)
             }
         }
 
@@ -152,12 +152,12 @@ fun LoginScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Har du ikke konto?",
+                text = "Don't have an account?",
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.width(4.dp))
             TextButton(onClick = onNavigateToSignUp) {
-                Text("Registrer deg", color = MaterialTheme.colorScheme.primary)
+                Text("Sign Up", color = MaterialTheme.colorScheme.primary)
             }
         }
     }

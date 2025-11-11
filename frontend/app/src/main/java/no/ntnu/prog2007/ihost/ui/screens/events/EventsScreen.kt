@@ -296,7 +296,7 @@ fun EventsScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                "Ingen events funnet",
+                                "No events found",
                                 color = MaterialTheme.colorScheme.onBackground,
                                 style = MaterialTheme.typography.bodyLarge
                             )
@@ -334,7 +334,7 @@ fun ErrorMessage(
         modifier = Modifier.padding(16.dp),
         action = {
             TextButton(onClick = onDismiss) {
-                Text("Lukk")
+                Text("Close")
             }
         }
     ) {

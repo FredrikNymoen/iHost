@@ -63,7 +63,7 @@ fun ProfileScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Laster profil...",
+                        text = "Loading profile...",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -103,7 +103,7 @@ fun ProfileScreen(
             }
         } else if (user != null) {
             Text(
-                text = user.displayName ?: "Bruker",
+                text = user.displayName ?: "User",
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
@@ -125,7 +125,7 @@ fun ProfileScreen(
                         .fillMaxWidth()
                         .padding(16.dp)
                 ) {
-                    ProfileInfoItem(label = "Brukernavn", value = user.displayName ?: "N/A")
+                    ProfileInfoItem(label = "Username", value = user.displayName ?: "N/A")
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = 8.dp),
                         thickness = DividerDefaults.Thickness,
@@ -135,7 +135,7 @@ fun ProfileScreen(
                         val firstName = userProfile.firstName
                         val lastName = userProfile.lastName ?: ""
                         ProfileInfoItem(
-                            "Navn",
+                            "Name",
                             if (lastName.isNotEmpty()) "$firstName $lastName" else firstName
                         )
                         HorizontalDivider(
@@ -144,15 +144,15 @@ fun ProfileScreen(
                             color = DividerDefaults.color
                         )
                     }
-                    ProfileInfoItem(label = "E-post", value = user.email ?: "N/A")
+                    ProfileInfoItem(label = "Email", value = user.email ?: "N/A")
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = 8.dp),
                         thickness = DividerDefaults.Thickness,
                         color = DividerDefaults.color
                     )
                     ProfileInfoItem(
-                        label = "E-post bekreftet",
-                        value = if (user.isEmailVerified) "Ja" else "Nei"
+                        label = "Email Verified",
+                        value = if (user.isEmailVerified) "Yes" else "No"
                     )
                 }
             }
@@ -171,11 +171,11 @@ fun ProfileScreen(
                     containerColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Text("Logg ut")
+                Text("Log Out")
             }
         } else {
             Text(
-                text = "Ikke logget inn",
+                text = "Not logged in",
                 style = MaterialTheme.typography.bodyMedium
             )
         }

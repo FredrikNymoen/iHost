@@ -17,9 +17,9 @@ sealed class Screen(
     val selectedIcon: ImageVector? = null,
     val unselectedIcon: ImageVector? = null
 ) {
-    object Login : Screen("login", "Logg inn")
-    object SignUp : Screen("signup", "Registrer deg")
-    object PersonalInfo : Screen("personal_info", "Personlig informasjon")
+    object Login : Screen("login", "Log in")
+    object SignUp : Screen("signup", "Register")
+    object PersonalInfo : Screen("personal_info", "Personal info")
     object Events : Screen(
         "events",
         "Events",
@@ -29,7 +29,7 @@ sealed class Screen(
 
     object AddEvent : Screen(
         "add_event",
-        "Nytt event",
+        "Add event",
         selectedIcon = Icons.Default.AddCircle,
         unselectedIcon = Icons.Outlined.AddCircleOutline
     )
@@ -40,7 +40,7 @@ sealed class Screen(
 
     object Profile : Screen(
         "profile",
-        "Profil",
+        "Profile",
         selectedIcon = Icons.Default.Person,
         unselectedIcon = Icons.Outlined.Person
     )
