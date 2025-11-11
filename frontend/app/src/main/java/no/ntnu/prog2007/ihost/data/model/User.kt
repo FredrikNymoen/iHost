@@ -44,6 +44,13 @@ data class CreateUserRequest(
     val photoUrl: String? = null
 )
 
+data class UpdateUserRequest(
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val photoUrl: String? = null,
+    val phoneNumber: String? = null
+)
+
 data class AuthResponse(
     @SerializedName("uid")
     val uid: String? = null,

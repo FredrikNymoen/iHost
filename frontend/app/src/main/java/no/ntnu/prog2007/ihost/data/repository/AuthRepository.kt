@@ -131,4 +131,28 @@ class AuthRepository(
         Log.e("AuthRepository", "Username availability check error: ${e.message}", e)
         Result.failure(e)
     }
+
+    /**
+     * Update user profile on backend
+     */
+    suspend fun updateUserProfile(
+        uid: String,
+        firstName: String? = null,
+        lastName: String? = null,
+        photoUrl: String? = null,
+        phoneNumber: String? = null
+    ): Result<User> = try {
+        val updateRequest = no.ntnu.prog2007.ihost.data.model.UpdateUserRequest(
+            firstName = firstName,
+            lastName = lastName,
+            photoUrl = photoUrl,
+            phoneNumber = phoneNumber
+        )
+        val updatedUser = apiService.updateUserProfile(uid, updateRequest)
+        Log.d("AuthRepository", "User profile updated successfully for UID: $uid")
+        Result.success(updatedUser)
+    } catch (e: Exception) {
+        Log.e("AuthRepository", "Error updating user profile: ${e.message}", e)
+        Result.failure(e)
+    }
 }

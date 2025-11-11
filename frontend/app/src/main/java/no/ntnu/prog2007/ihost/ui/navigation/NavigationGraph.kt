@@ -152,6 +152,7 @@ fun NavigationGraph(
         composable(Screen.Profile.route) {
             ProfileScreen(
                 authViewModel = authViewModel,
+                eventViewModel = eventViewModel,
                 onLogOut = {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }

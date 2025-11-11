@@ -233,4 +233,61 @@ class AuthViewModel : ViewModel() {
     suspend fun getIdToken(): String? {
         return authRepository.getIdToken()
     }
+
+    /**
+     * Update user profile (firstName, lastName, photoUrl, phoneNumber)
+     * @param firstName New first name (optional)
+     * @param lastName New last name (optional)
+     * @param photoUrl New photo URL (optional)
+     * @param phoneNumber New phone number (optional)
+     */
+    fun updateUserProfile(
+        firstName: String? = null,
+        lastName: String? = null,
+        photoUrl: String? = null,
+        phoneNumber: String? = null
+    ) {
+        viewModelScope.launch {
+            val uid = _uiState.value.currentUser?.uid ?: return@launch
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            try {
+                val result = authRepository.updateUserProfile(
+                    uid = uid,
+                    firstName = firstName,
+                    lastName = lastName,
+                    photoUrl = photoUrl,
+                    phoneNumber = phoneNumber
+                )
+
+                result.onSuccess { updatedUser ->
+                    _uiState.update {
+                        it.copy(
+                            userProfile = updatedUser,
+                            isLoading = false
+                        )
+                    }
+                    Log.d("AuthViewModel", "User profile updated successfully")
+                }
+
+                result.onFailure { error ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Failed to update profile: ${error.localizedMessage}"
+                        )
+                    }
+                    Log.e("AuthViewModel", "Error updating profile: ${error.message}")
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Error updating profile: ${e.localizedMessage}"
+                    )
+                }
+                Log.e("AuthViewModel", "Exception updating profile: ${e.message}", e)
+            }
+        }
+    }
 }

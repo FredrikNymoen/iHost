@@ -106,6 +106,13 @@ interface ApiService {
     // Username availability check
     @GET("api/auth/username-available/{username}")
     suspend fun isUsernameAvailable(@Path("username") username: String): Map<String, Boolean>
+
+    // Update user profile
+    @PUT("api/auth/user/{uid}")
+    suspend fun updateUserProfile(
+        @Path("uid") uid: String,
+        @Body request: UpdateUserRequest
+    ): User
 }
 
 data class ImageUploadResponse(
