@@ -11,14 +11,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material3.*
@@ -32,9 +34,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEventScreen(
     viewModel: EventViewModel,
@@ -47,7 +52,8 @@ fun AddEventScreen(
     var eventDate by remember { mutableStateOf(LocalDate.now().format(DateTimeFormatter.ISO_DATE)) }
     var eventTime by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
-    var showDatePicker by remember { mutableStateOf(false) }
+    var showDatePickerDialog by remember { mutableStateOf(false) }
+    var showTimePickerDialog by remember { mutableStateOf(false) }
     var isFree by remember { mutableStateOf(true) }
     //var price by remember { mutableStateOf("") }
 
@@ -185,9 +191,69 @@ fun AddEventScreen(
         )
     }
 
+    // DatePicker Dialog
+    if (showDatePickerDialog) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = LocalDate.parse(eventDate).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        )
+
+        DatePickerDialog(
+            onDismissRequest = { showDatePickerDialog = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val selectedDate = Instant.ofEpochMilli(millis)
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate()
+                        eventDate = selectedDate.format(DateTimeFormatter.ISO_DATE)
+                    }
+                    showDatePickerDialog = false
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePickerDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
+    // TimePicker Dialog
+    if (showTimePickerDialog) {
+        val timePickerState = rememberTimePickerState(
+            initialHour = if (eventTime.isNotEmpty()) eventTime.split(":")[0].toIntOrNull() ?: 12 else 12,
+            initialMinute = if (eventTime.isNotEmpty()) eventTime.split(":").getOrNull(1)?.toIntOrNull() ?: 0 else 0,
+            is24Hour = true
+        )
+
+        TimePickerDialog(
+            onDismissRequest = { showTimePickerDialog = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    eventTime = String.format("%02d:%02d", timePickerState.hour, timePickerState.minute)
+                    showTimePickerDialog = false
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimePickerDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            TimePicker(state = timePickerState)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .imePadding()
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -216,12 +282,12 @@ fun AddEventScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(
-                                color = Color(0xFF4A90E2),
+                                color = MaterialTheme.colorScheme.surface,
                                 shape = RoundedCornerShape(12.dp)
                             )
                             .border(
                                 width = 2.dp,
-                                color = Color(0xFFFFC107),
+                                color = MaterialTheme.colorScheme.primary,
                                 shape = RoundedCornerShape(12.dp)
                             ),
                         contentScale = androidx.compose.ui.layout.ContentScale.Crop
@@ -232,7 +298,7 @@ fun AddEventScreen(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(8.dp)
-                        .background(Color.Red, RoundedCornerShape(50))
+                        .background(MaterialTheme.colorScheme.error, RoundedCornerShape(50))
                 ) {
                     Icon(
                         Icons.Default.Close,
@@ -305,33 +371,53 @@ fun AddEventScreen(
 
         OutlinedTextField(
             value = eventDate,
-            onValueChange = { eventDate = it },
-            label = { Text("Date (YYYY-MM-DD)", color = MaterialTheme.colorScheme.onSurface) },
+            onValueChange = { },
+            label = { Text("Date", color = MaterialTheme.colorScheme.onSurface) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            enabled = !uiState.isLoading,
+                .padding(bottom = 16.dp)
+                .clickable { showDatePickerDialog = true },
+            enabled = false,
+            readOnly = true,
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Default.CalendarToday,
+                    contentDescription = "Select date",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
             textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
-                cursorColor = MaterialTheme.colorScheme.primary
+                disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                disabledBorderColor = MaterialTheme.colorScheme.primary,
+                disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+                disabledTrailingIconColor = MaterialTheme.colorScheme.primary
             )
         )
 
         OutlinedTextField(
             value = eventTime,
-            onValueChange = { eventTime = it },
-            label = { Text("Time (HH:mm) (optional)", color = MaterialTheme.colorScheme.onSurface) },
+            onValueChange = { },
+            label = { Text("Time (optional)", color = MaterialTheme.colorScheme.onSurface) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            enabled = !uiState.isLoading,
+                .padding(bottom = 16.dp)
+                .clickable { showTimePickerDialog = true },
+            enabled = false,
+            readOnly = true,
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Default.AccessTime,
+                    contentDescription = "Select time",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
             textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
-                cursorColor = MaterialTheme.colorScheme.primary
+                disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                disabledBorderColor = MaterialTheme.colorScheme.primary,
+                disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+                disabledTrailingIconColor = MaterialTheme.colorScheme.primary
             )
         )
 
@@ -462,4 +548,22 @@ fun AddEventScreen(
 
         Spacer(modifier = Modifier.weight(1f))
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TimePickerDialog(
+    onDismissRequest: () -> Unit,
+    confirmButton: @Composable () -> Unit,
+    dismissButton: @Composable () -> Unit,
+    content: @Composable () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = confirmButton,
+        dismissButton = dismissButton,
+        text = {
+            content()
+        }
+    )
 }
