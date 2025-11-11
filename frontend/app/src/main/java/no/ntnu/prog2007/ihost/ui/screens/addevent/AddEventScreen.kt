@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.setValue
@@ -33,6 +34,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
+import com.google.android.gms.maps.model.LatLng
+import no.ntnu.prog2007.ihost.ui.components.LocationPickerDialog
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import java.time.Instant
 import java.time.LocalDate
@@ -52,6 +55,7 @@ fun AddEventScreen(
     var eventDate by remember { mutableStateOf(LocalDate.now().format(DateTimeFormatter.ISO_DATE)) }
     var eventTime by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
+    var locationLatLng by remember { mutableStateOf<LatLng?>(null) }
     var showDatePickerDialog by remember { mutableStateOf(false) }
     var showTimePickerDialog by remember { mutableStateOf(false) }
     var isFree by remember { mutableStateOf(true) }
@@ -250,6 +254,18 @@ fun AddEventScreen(
         }
     }
 
+    // LocationPicker Dialog
+    if (showLocationPicker) {
+        LocationPickerDialog(
+            initialLocation = location,
+            onDismiss = { showLocationPicker = false },
+            onLocationSelected = { selectedLocation, latLng ->
+                location = selectedLocation
+                locationLatLng = latLng
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -423,17 +439,27 @@ fun AddEventScreen(
 
         OutlinedTextField(
             value = location,
-            onValueChange = { location = it },
+            onValueChange = { },
             label = { Text("Location (optional)", color = MaterialTheme.colorScheme.onSurface) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            enabled = !uiState.isLoading,
+                .padding(bottom = 16.dp)
+                .clickable { showLocationPicker = true },
+            enabled = false,
+            readOnly = true,
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = "Select location",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
             textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
-                cursorColor = MaterialTheme.colorScheme.primary
+                disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                disabledBorderColor = MaterialTheme.colorScheme.primary,
+                disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+                disabledTrailingIconColor = MaterialTheme.colorScheme.primary
             )
         )
         //Price frizzed until future implementation, until paymant system will work coractly
