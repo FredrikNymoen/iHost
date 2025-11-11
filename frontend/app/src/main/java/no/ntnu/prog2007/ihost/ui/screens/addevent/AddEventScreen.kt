@@ -198,12 +198,12 @@ fun AddEventScreen(
                 .width(300.dp)
                 .height(150.dp)
                 .background(
-                    color = Color(0xFF4A90E2),
+                    color = MaterialTheme.colorScheme.tertiary,
                     shape = RoundedCornerShape(12.dp)
                 )
                 .border(
                     width = 2.dp,
-                    color = Color(0xFFFFC107),
+                    color = MaterialTheme.colorScheme.secondary,
                     shape = RoundedCornerShape(12.dp)
                 ),
             contentAlignment = Alignment.Center
