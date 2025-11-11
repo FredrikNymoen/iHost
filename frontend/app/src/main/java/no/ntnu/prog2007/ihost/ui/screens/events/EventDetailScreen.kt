@@ -120,7 +120,7 @@ fun EventDetailScreen(
                 title = {
                     Text(
                         event?.title ?: "Event Details",
-                        color = Color(0xFFFFC107),
+                        color = MaterialTheme.colorScheme.primary,
                         fontSize = 36.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -129,7 +129,7 @@ fun EventDetailScreen(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = Color(0xFFFFC107)
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
@@ -152,7 +152,7 @@ fun EventDetailScreen(
                     }) {
                         Icon(
                             imageVector = Icons.Filled.Share,
-                            tint = Color(0xFFFFC107),
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp),
                             contentDescription = "Localized description"
                         )
@@ -188,7 +188,7 @@ fun EventDetailScreen(
                             Icon(
                                 imageVector = Icons.Default.CalendarMonth,
                                 contentDescription = "Date",
-                                tint = Color(0xFFFFC107),
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(36.dp),
                             )
                             Text(
@@ -199,7 +199,7 @@ fun EventDetailScreen(
                                     .align(alignment = Alignment.CenterVertically),
                                 text = event.eventDate,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White
+                                color = MaterialTheme.colorScheme.onBackground
 
                             )
                         }
@@ -211,7 +211,7 @@ fun EventDetailScreen(
                                 Icon(
                                     imageVector = Icons.Default.AccessTime,
                                     contentDescription = "Time",
-                                    tint = Color(0xFFFFC107),
+                                    tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(36.dp)
                                 )
                                 Text(
@@ -222,7 +222,7 @@ fun EventDetailScreen(
                                         .align(alignment = Alignment.CenterVertically),
                                     text = event.eventTime,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = Color.White
+                                    color = MaterialTheme.colorScheme.onBackground
                                 )
                             }
                         }
@@ -245,7 +245,7 @@ fun EventDetailScreen(
                                         .padding(end = 12.dp)
                                         .weight(1f),  // Takes remaining space
                                     text = event.location,
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onBackground,
                                     textAlign = androidx.compose.ui.text.style.TextAlign.End,
                                     maxLines = 2,  // Allow 2 lines
                                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
@@ -253,7 +253,7 @@ fun EventDetailScreen(
                                 Icon(
                                     imageVector = Icons.Default.Map,
                                     contentDescription = "Location",
-                                    tint = Color(0xFFFFC107),
+                                    tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier
                                         .size(36.dp)
                                         .clickable {  // Make the icon clickable
@@ -302,12 +302,12 @@ fun EventDetailScreen(
                                     .align(alignment = Alignment.CenterVertically),
                                 text = "${confirmedAttendees.size}",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White
+                                color = MaterialTheme.colorScheme.onBackground
                             )
                             Icon(
                                 imageVector = Icons.Default.Person,
                                 contentDescription = "Attendees",
-                                tint = Color(0xFFFFC107),
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(24.dp),
                             )
 
@@ -326,7 +326,7 @@ fun EventDetailScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = Color(0xFF0C5CA7), shape = RoundedCornerShape(8.dp)
+                            color = MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(8.dp)
                         )
                         .padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -339,14 +339,14 @@ fun EventDetailScreen(
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = "Host",
-                            tint = Color(0xFFFFC107),
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
                             text = "${attendeeFirsNames[event.creatorUid]} ${attendeeLastNames[event.creatorUid]} (${attendeeUserNames[event.creatorUid]})" ?: "Loading...",
                             style = MaterialTheme.typography.bodySmall,
                             fontSize = 11.sp,
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.onSecondary
                         )
                     }
 
@@ -377,7 +377,7 @@ fun EventDetailScreen(
                                         text = "${attendeeFirsNames[eventUser.userId]} ${attendeeLastNames[eventUser.userId]}(${attendeeUserNames[eventUser.userId]})" ?: "Loading...",
                                         style = MaterialTheme.typography.bodySmall,
                                         fontSize = 11.sp,
-                                        color = Color.White
+                                        color = MaterialTheme.colorScheme.onSecondary
                                     )
                                 }
                             }
@@ -423,7 +423,7 @@ fun EventDetailScreen(
                             .height(48.dp)
                             .padding(bottom = 12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF0C5CA7)
+                            containerColor = MaterialTheme.colorScheme.secondary
                         )
                     ) {
                         Icon(
@@ -516,7 +516,7 @@ fun EventDetailScreen(
                     Text(
                         text = "You're invited!",
                         style = MaterialTheme.typography.titleMedium,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
@@ -680,7 +680,7 @@ fun EventDetailScreen(
             Box(
                 modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = Color(0xFFFFC107))
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         }
     }
@@ -708,7 +708,7 @@ fun EventDetailHeader(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(250.dp)
-                    .background(Color(0xFF003D73))  // ADD THIS - same color as description
+                    .background(MaterialTheme.colorScheme.tertiary)
             ) {
                 val firstImageUrl = eventImages?.firstOrNull()?.path
 
@@ -730,8 +730,8 @@ fun EventDetailHeader(
                             .background(
                                 brush = androidx.compose.ui.graphics.Brush.linearGradient(
                                     colors = listOf(
-                                        Color(0xFF0C5CA7),
-                                        Color(0xFF003D73)
+                                        MaterialTheme.colorScheme.secondary,
+                                        MaterialTheme.colorScheme.tertiary
                                     )
                                 )
                             )
@@ -765,13 +765,13 @@ fun EventDetailHeader(
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentHeight()  // Expands downward with text
-                        .background(Color(0xFF003D73))
+                        .background(MaterialTheme.colorScheme.tertiary)
                         .padding(16.dp)
                 ) {
                     Text(
                         text = event.description,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onTertiary,
                         fontSize = 14.sp,
                         lineHeight = 20.sp
                     )

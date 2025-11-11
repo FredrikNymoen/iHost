@@ -28,8 +28,6 @@ import coil3.compose.AsyncImage
 import no.ntnu.prog2007.ihost.data.model.EventWithMetadata
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
-import no.ntnu.prog2007.ihost.ui.theme.MediumBlue
-import no.ntnu.prog2007.ihost.ui.theme.Gold
 
 @Composable
 fun EventItem(
@@ -63,7 +61,7 @@ fun EventItem(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MediumBlue)
+                .background(MaterialTheme.colorScheme.surface)
         ) {
             Row(
                 modifier = Modifier
@@ -196,13 +194,13 @@ fun EventItem(
                             androidx.compose.material3.Icon(
                                 imageVector = Icons.Default.People,
                                 contentDescription = "Attendees",
-                                tint = Color(0xFFFFC107),
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(14.dp)
                             )
                             Text(
                                 text = "$attendeeCount",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp
                             )
@@ -213,7 +211,7 @@ fun EventItem(
                     Text(
                         text = event.title,
                         style = MaterialTheme.typography.titleMedium,
-                        color = Color(0xFFFFC107),
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
                         maxLines = 1,
@@ -225,7 +223,7 @@ fun EventItem(
                         Text(
                             text = event.description,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                             fontSize = 12.sp,
@@ -245,7 +243,7 @@ fun EventItem(
                         Text(
                             text = event.eventDate,
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color.White.copy(alpha = 0.8f),
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                             fontSize = 11.sp
                         )
 
@@ -254,13 +252,13 @@ fun EventItem(
                             Text(
                                 text = "•",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color.White.copy(alpha = 0.5f),
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                                 fontSize = 11.sp
                             )
                             Text(
                                 text = event.eventTime,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color.White.copy(alpha = 0.8f),
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                                 fontSize = 11.sp
                             )
                         }
@@ -326,8 +324,8 @@ fun EventItem(
                                 .background(
                                     brush = Brush.linearGradient(
                                         colors = listOf(
-                                            Color(0xFF0C5CA7),
-                                            Color(0xFF003D73)
+                                            MaterialTheme.colorScheme.surface,
+                                            MaterialTheme.colorScheme.primary
                                         )
                                     )
                                 ),
@@ -336,7 +334,7 @@ fun EventItem(
                             androidx.compose.material3.Icon(
                                 imageVector = androidx.compose.material.icons.Icons.Default.Event,
                                 contentDescription = "No image",
-                                tint = Color.White.copy(alpha = 0.6f),
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                 modifier = Modifier.size(40.dp)
                             )
                         }

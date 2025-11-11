@@ -29,7 +29,7 @@ fun JoinEventDialog(
     Dialog(onDismissRequest = onDismiss) {
         Surface( // The main container for the dialog
             shape = RoundedCornerShape(16.dp),
-            color = Color.Blue // Background color of the dialog
+            color = MaterialTheme.colorScheme.surface // Background color of the dialog
         ) {
             Column( // Layout the dialog content vertically
                 modifier = Modifier
@@ -41,7 +41,7 @@ fun JoinEventDialog(
                     text = "Join Event with Code",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -53,16 +53,16 @@ fun JoinEventDialog(
                         codeInput = it
                         isError = false // Reset error state on input change
                     },
-                    label = { Text("Enter Share Code", color = Color.White) },
+                    label = { Text("Enter Share Code", color = MaterialTheme.colorScheme.onSurface) },
                     isError = isError,
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isLoading,
-                    textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
+                    textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFFFFC107),
-                        unfocusedBorderColor = Color(0xFFFFC107),
-                        cursorColor = Color(0xFFFFC107)
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                        cursorColor = MaterialTheme.colorScheme.primary
                     )
                 )
 
@@ -87,7 +87,7 @@ fun JoinEventDialog(
                         onClick = onDismiss,
                         enabled = !isLoading
                     ) {
-                        Text("Cancel", color = Color.White)
+                        Text("Cancel", color = MaterialTheme.colorScheme.onSurface)
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))
@@ -102,24 +102,24 @@ fun JoinEventDialog(
                             }
                         },
                         enabled = codeInput.isNotBlank() && !isLoading,
-                        colors = ButtonDefaults.buttonColors( // Colors copied from AddEventScreen.kt
-                            containerColor = Color(0xFFFFC107),
-                            contentColor = Color(0xFF001D3D),
-                            disabledContainerColor = Color(0xFFB8860B),
-                            disabledContentColor = Color(0xFF001D3D)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                            disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f)
                         )
                     ) {
                         if (isLoading) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(28.dp),
-                                color = Color(0xFF001D3D),
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 strokeWidth = 3.dp
                             )
                         } else {
                             Text(
                                 "Join Event",
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = MaterialTheme.colorScheme.onPrimary
                             )
                         }
                     }

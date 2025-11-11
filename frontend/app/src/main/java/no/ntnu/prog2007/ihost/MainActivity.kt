@@ -29,9 +29,7 @@ import no.ntnu.prog2007.ihost.service.StripePaymentService
 import no.ntnu.prog2007.ihost.ui.components.BottomNavigationBar
 import no.ntnu.prog2007.ihost.ui.navigation.NavigationGraph
 import no.ntnu.prog2007.ihost.ui.navigation.Screen
-import no.ntnu.prog2007.ihost.ui.theme.DarkBlue
 import no.ntnu.prog2007.ihost.ui.theme.IHostTheme
-import no.ntnu.prog2007.ihost.ui.theme.LightBlue
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.StripeViewModel
@@ -104,7 +102,10 @@ fun IHostApp() {
                            currentRoute?.startsWith("event_detail") != true
 
     val gradientBrush = Brush.verticalGradient(
-        colors = listOf(LightBlue, DarkBlue)
+        colors = listOf(
+            MaterialTheme.colorScheme.background,
+            MaterialTheme.colorScheme.surface
+        )
     )
 
     androidx.compose.foundation.layout.Box(
@@ -119,11 +120,11 @@ fun IHostApp() {
                         title = {
                             Text(
                                 bottomNavScreens.find { it.route == currentRoute }?.title ?: "",
-                                color = Color(0xFFFFC107)
+                                color = MaterialTheme.colorScheme.primary
                             )
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = DarkBlue
+                            containerColor = MaterialTheme.colorScheme.surface
                         )
                     )
                 }

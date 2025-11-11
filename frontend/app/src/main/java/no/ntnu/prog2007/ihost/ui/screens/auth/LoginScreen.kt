@@ -43,7 +43,7 @@ fun LoginScreen(
             text = "iHost",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFFFFC107)
+            color = MaterialTheme.colorScheme.primary
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -51,7 +51,7 @@ fun LoginScreen(
         Text(
             text = "Logg inn for å se dine events",
             fontSize = 16.sp,
-            color = Color.White
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -78,17 +78,17 @@ fun LoginScreen(
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("E-post", color = Color.White) },
-            leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email", tint = Color.White) },
+            label = { Text("E-post", color = MaterialTheme.colorScheme.onSurface) },
+            leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email", tint = MaterialTheme.colorScheme.onSurface) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             enabled = !uiState.isLoading,
-            textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
+            textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFFFFC107),
-                unfocusedBorderColor = Color(0xFFFFC107),
-                cursorColor = Color(0xFFFFC107)
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                cursorColor = MaterialTheme.colorScheme.primary
             )
         )
 
@@ -98,15 +98,15 @@ fun LoginScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Passord", color = Color.White) },
-            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password", tint = Color.White) },
+            label = { Text("Passord", color = MaterialTheme.colorScheme.onSurface) },
+            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password", tint = MaterialTheme.colorScheme.onSurface) },
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(
                         if (passwordVisible) Icons.Default.VisibilityOff
                         else Icons.Default.Visibility,
                         contentDescription = if (passwordVisible) "Skjul passord" else "Vis passord",
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
             },
@@ -116,11 +116,11 @@ fun LoginScreen(
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             enabled = !uiState.isLoading,
-            textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
+            textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFFFFC107),
-                unfocusedBorderColor = Color(0xFFFFC107),
-                cursorColor = Color(0xFFFFC107)
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                cursorColor = MaterialTheme.colorScheme.primary
             )
         )
 
@@ -153,11 +153,11 @@ fun LoginScreen(
         ) {
             Text(
                 text = "Har du ikke konto?",
-                color = Color.White
+                color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.width(4.dp))
             TextButton(onClick = onNavigateToSignUp) {
-                Text("Registrer deg", color = Color(0xFFFFC107))
+                Text("Registrer deg", color = MaterialTheme.colorScheme.primary)
             }
         }
     }

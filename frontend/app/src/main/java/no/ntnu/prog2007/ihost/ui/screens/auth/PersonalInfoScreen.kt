@@ -56,7 +56,7 @@ fun PersonalInfoScreen(
             text = "Personlig informasjon",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFFFFC107)
+            color = MaterialTheme.colorScheme.primary
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -64,7 +64,7 @@ fun PersonalInfoScreen(
         Text(
             text = "Fortell oss litt om deg",
             fontSize = 16.sp,
-            color = Color.White
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -73,21 +73,21 @@ fun PersonalInfoScreen(
         OutlinedTextField(
             value = registrationState.firstName,
             onValueChange = { viewModel.updateRegistrationField("firstName", it) },
-            label = { Text("Fornavn", color = Color.White) },
+            label = { Text("Fornavn", color = MaterialTheme.colorScheme.onSurface) },
             leadingIcon = {
                 Icon(
                     Icons.Default.Person,
                     contentDescription = "First Name Icon",
-                    tint = Color.White
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
-            textStyle = LocalTextStyle.current.copy(color = Color.White),
+            textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFFFFC107),
-                unfocusedBorderColor = Color(0xFFFFC107),
-                cursorColor = Color(0xFFFFC107)
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                cursorColor = MaterialTheme.colorScheme.primary
             )
         )
 
@@ -97,21 +97,21 @@ fun PersonalInfoScreen(
         OutlinedTextField(
             value = registrationState.lastName,
             onValueChange = { viewModel.updateRegistrationField("lastName", it) },
-            label = { Text("Etternavn (Valgfritt)", color = Color.White) },
+            label = { Text("Etternavn (Valgfritt)", color = MaterialTheme.colorScheme.onSurface) },
             leadingIcon = {
                 Icon(
                     Icons.Default.Person,
                     contentDescription = "Last Name Icon",
-                    tint = Color.White
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
-            textStyle = LocalTextStyle.current.copy(color = Color.White),
+            textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFFFFC107),
-                unfocusedBorderColor = Color(0xFFFFC107),
-                cursorColor = Color(0xFFFFC107)
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                cursorColor = MaterialTheme.colorScheme.primary
             )
         )
 
@@ -121,22 +121,22 @@ fun PersonalInfoScreen(
         OutlinedTextField(
             value = registrationState.email,
             onValueChange = { viewModel.updateRegistrationField("email", it) },
-            label = { Text("E-post", color = Color.White) },
+            label = { Text("E-post", color = MaterialTheme.colorScheme.onSurface) },
             leadingIcon = {
                 Icon(
                     Icons.Default.Email,
                     contentDescription = "Email Icon",
-                    tint = Color.White
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             modifier = Modifier.fillMaxWidth(),
-            textStyle = LocalTextStyle.current.copy(color = Color.White),
+            textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFFFFC107),
-                unfocusedBorderColor = Color(0xFFFFC107),
-                cursorColor = Color(0xFFFFC107)
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                cursorColor = MaterialTheme.colorScheme.primary
             )
         )
 
@@ -163,11 +163,11 @@ fun PersonalInfoScreen(
         ) {
             Text(
                 text = "Har du allerede en konto?",
-                color = Color.White
+                color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.width(4.dp))
             TextButton(onClick = onNavigateToLogin) {
-                Text("Logg inn", color = Color(0xFFFFC107))
+                Text("Logg inn", color = MaterialTheme.colorScheme.primary)
             }
         }
 

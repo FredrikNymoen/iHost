@@ -120,7 +120,7 @@ fun SignUpScreen(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Tilbake",
-                    tint = Color.White
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
             }
         }
@@ -129,7 +129,7 @@ fun SignUpScreen(
             text = "Opprett konto",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFFFFC107),
+            color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
@@ -138,7 +138,7 @@ fun SignUpScreen(
         Text(
             text = "Velg brukernavn og passord",
             fontSize = 16.sp,
-            color = Color.White
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -168,15 +168,15 @@ fun SignUpScreen(
                 username = it
                 validateUsername(it)
             },
-            label = { Text("Brukernavn", color = Color.White) },
-            leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Username", tint = Color.White) },
+            label = { Text("Brukernavn", color = MaterialTheme.colorScheme.onSurface) },
+            leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Username", tint = MaterialTheme.colorScheme.onSurface) },
             trailingIcon = { // Show loading, check or error icon based on state
                 when {
                     isCheckingUsername -> { // Show loading indicator
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
                             strokeWidth = 2.dp,
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                     isUsernameAvailable == true -> { // Green check icon if username is available
@@ -200,11 +200,11 @@ fun SignUpScreen(
                 .fillMaxWidth()
                 .focusRequester(nameFocusRequester),
             enabled = !uiState.isLoading,
-            textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
+            textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFFFFC107),
-                unfocusedBorderColor = Color(0xFFFFC107),
-                cursorColor = Color(0xFFFFC107)
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                cursorColor = MaterialTheme.colorScheme.primary
             )
         )
 
@@ -226,15 +226,15 @@ fun SignUpScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Passord", color = Color.White) },
-            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password", tint = Color.White) },
+            label = { Text("Passord", color = MaterialTheme.colorScheme.onSurface) },
+            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password", tint = MaterialTheme.colorScheme.onSurface) },
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(
                         if (passwordVisible) Icons.Default.VisibilityOff
                         else Icons.Default.Visibility,
                         contentDescription = if (passwordVisible) "Skjul passord" else "Vis passord",
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
             },
@@ -246,11 +246,11 @@ fun SignUpScreen(
                 .fillMaxWidth()
                 .focusRequester(passwordFocusRequester),
             enabled = !uiState.isLoading,
-            textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
+            textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFFFFC107),
-                unfocusedBorderColor = Color(0xFFFFC107),
-                cursorColor = Color(0xFFFFC107)
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                cursorColor = MaterialTheme.colorScheme.primary
             )
         )
 
@@ -260,15 +260,15 @@ fun SignUpScreen(
         OutlinedTextField(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
-            label = { Text("Bekreft passord", color = Color.White) },
-            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Confirm Password", tint = Color.White) },
+            label = { Text("Bekreft passord", color = MaterialTheme.colorScheme.onSurface) },
+            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Confirm Password", tint = MaterialTheme.colorScheme.onSurface) },
             trailingIcon = {
                 IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                     Icon(
                         if (confirmPasswordVisible) Icons.Default.VisibilityOff
                         else Icons.Default.Visibility,
                         contentDescription = if (confirmPasswordVisible) "Skjul passord" else "Vis passord",
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
             },
@@ -281,11 +281,11 @@ fun SignUpScreen(
                 .fillMaxWidth()
                 .focusRequester(confirmPasswordFocusRequester),
             enabled = !uiState.isLoading,
-            textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
+            textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFFFFC107),
-                unfocusedBorderColor = Color(0xFFFFC107),
-                cursorColor = Color(0xFFFFC107)
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                cursorColor = MaterialTheme.colorScheme.primary
             )
         )
 
@@ -331,11 +331,11 @@ fun SignUpScreen(
         ) {
             Text(
                 text = "Har du allerede en konto?",
-                color = Color.White
+                color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.width(4.dp))
             TextButton(onClick = onNavigateToLogin) {
-                Text("Logg inn", color = Color(0xFFFFC107))
+                Text("Logg inn", color = MaterialTheme.colorScheme.primary)
             }
         }
     }

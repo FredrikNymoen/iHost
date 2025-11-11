@@ -75,18 +75,18 @@ fun InviteUsersScreen(
         containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text("Invite Users", color = Color.White) },
+                title = { Text("Invite Users", color = MaterialTheme.colorScheme.onSurface) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF001D3D)
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
         },
@@ -116,13 +116,13 @@ fun InviteUsersScreen(
                             }
                         )
                     },
-                    containerColor = Color(0xFFFFC107),
-                    contentColor = Color(0xFF001D3D)
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
                     if (isSending) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
-                            color = Color(0xFF001D3D),
+                            color = MaterialTheme.colorScheme.onPrimary,
                             strokeWidth = 2.dp
                         )
                     } else {
@@ -151,7 +151,7 @@ fun InviteUsersScreen(
                 isLoading -> {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
-                        color = Color(0xFFFFC107)
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
 
@@ -165,15 +165,15 @@ fun InviteUsersScreen(
                     ) {
                         Text(
                             text = errorMessage ?: "Unknown error",
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onBackground,
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = onBack,
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFFFC107),
-                                contentColor = Color(0xFF001D3D)
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
                             )
                         ) {
                             Text("Go Back")
@@ -188,7 +188,7 @@ fun InviteUsersScreen(
                     ) {
                         Text(
                             text = "All users have been invited",
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onBackground,
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
@@ -203,12 +203,12 @@ fun InviteUsersScreen(
                         if (selectedUserIds.isNotEmpty()) {
                             Surface(
                                 modifier = Modifier.fillMaxWidth(),
-                                color = Color(0xFF001D3D)
+                                color = MaterialTheme.colorScheme.surface
                             ) {
                                 Text(
                                     text = "${selectedUserIds.size} user(s) selected",
                                     modifier = Modifier.padding(16.dp),
-                                    color = Color(0xFFFFC107),
+                                    color = MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -223,11 +223,11 @@ fun InviteUsersScreen(
                                 .align(Alignment.CenterHorizontally),
                             shape = RoundedCornerShape(12.dp),
                             enabled = !uiState.isLoading,
-                            textStyle = LocalTextStyle.current.copy(color = Color.White),
+                            textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color(0xFFFFC107),
-                                unfocusedBorderColor = Color(0xFFFFC107),
-                                cursorColor = Color(0xFFFFC107)
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                                cursorColor = MaterialTheme.colorScheme.primary
                             )
                         )
 
@@ -274,7 +274,7 @@ fun UserItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onToggle),
-        color = if (isSelected) Color(0xFF0C5CA7) else Color(0xFF001D3D),
+        color = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(12.dp),
         tonalElevation = 4.dp
     ) {
@@ -295,14 +295,14 @@ fun UserItem(
                     modifier = Modifier
                         .size(48.dp)
                         .background(
-                            color = Color(0xFFFFC107),
+                            color = MaterialTheme.colorScheme.primary,
                             shape = CircleShape
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = user.username.firstOrNull()?.uppercase() ?: "?",
-                        color = Color(0xFF001D3D),
+                        color = MaterialTheme.colorScheme.onPrimary,
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp
                     )
@@ -311,13 +311,13 @@ fun UserItem(
                 Column {
                     Text(
                         text = user.firstName + " " + (user.lastName ?: ""),
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )
                     Text(
                         text = user.username,
-                        color = Color.White.copy(alpha = 0.7f),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         fontSize = 14.sp
                     )
 
@@ -328,13 +328,13 @@ fun UserItem(
             if (isSelected) {
                 Surface(
                     modifier = Modifier.size(32.dp),
-                    color = Color(0xFFFFC107),
+                    color = MaterialTheme.colorScheme.primary,
                     shape = CircleShape
                 ) {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = "Selected",
-                        tint = Color(0xFF001D3D),
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.padding(6.dp)
                     )
                 }
@@ -343,7 +343,7 @@ fun UserItem(
                     modifier = Modifier
                         .size(32.dp)
                         .background(
-                            color = Color.White.copy(alpha = 0.2f),
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
                             shape = CircleShape
                         )
                 )

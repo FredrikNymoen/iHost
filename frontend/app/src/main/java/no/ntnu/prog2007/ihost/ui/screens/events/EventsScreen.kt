@@ -79,8 +79,8 @@ fun EventsScreen(
             ) {
                 FloatingActionButton( // Button to join event with code
                     onClick = { showJoinDialog = true },
-                    containerColor = Color(0xFFFFC107), // Gold color
-                    contentColor = Color(0xFF001D3D), // Dark blue text
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                     elevation = FloatingActionButtonDefaults.elevation(
                         defaultElevation = 6.dp,
                         pressedElevation = 12.dp
@@ -94,8 +94,8 @@ fun EventsScreen(
 
                 FloatingActionButton( // Button to refresh events
                     onClick = { viewModel.loadEvents() },
-                    containerColor = Color(0xFF0C5CA7), // Medium blue
-                    contentColor = Color.White,
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary,
                     elevation = FloatingActionButtonDefaults.elevation(
                         defaultElevation = 6.dp,
                         pressedElevation = 12.dp
@@ -135,8 +135,8 @@ fun EventsScreen(
                             .weight(1f)
                             .fillMaxHeight(),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (selectedTab == 0) Color(0xFF001D3D) else Color(0xFF0C5CA7),
-                            contentColor = if (selectedTab == 0) Color(0xFFFFC107) else Color.White
+                            containerColor = if (selectedTab == 0) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surface,
+                            contentColor = if (selectedTab == 0) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary
                         ),
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
                         elevation = ButtonDefaults.buttonElevation(
@@ -157,8 +157,8 @@ fun EventsScreen(
                             .weight(1f)
                             .fillMaxHeight(),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (selectedTab == 1) Color(0xFF001D3D) else Color(0xFF0C5CA7),
-                            contentColor = if (selectedTab == 1) Color(0xFFFFC107) else Color.White
+                            containerColor = if (selectedTab == 1) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surface,
+                            contentColor = if (selectedTab == 1) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary
                         ),
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
                         elevation = ButtonDefaults.buttonElevation(
@@ -186,7 +186,7 @@ fun EventsScreen(
                         text = java.time.LocalDate.now().format(
                             java.time.format.DateTimeFormatter.ofPattern("dd.MM.yy")
                         ),
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onBackground,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                     )
@@ -195,7 +195,7 @@ fun EventsScreen(
                     Surface(
                         modifier = Modifier.height(36.dp),
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(18.dp),
-                        color = Color(0xFF0C5CA7)
+                        color = MaterialTheme.colorScheme.secondary
                     ) {
                         Row(
                             modifier = Modifier.padding(4.dp),
@@ -206,7 +206,7 @@ fun EventsScreen(
                                 onClick = { timeFilter = 0 },
                                 modifier = Modifier.height(28.dp),
                                 shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
-                                color = if (timeFilter == 0) Color(0xFFFFC107) else Color.Transparent
+                                color = if (timeFilter == 0) MaterialTheme.colorScheme.primary else Color.Transparent
                             ) {
                                 Box(
                                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -216,7 +216,7 @@ fun EventsScreen(
                                         "Future",
                                         fontSize = 13.sp,
                                         fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
-                                        color = if (timeFilter == 0) Color(0xFF001D3D) else Color.White
+                                        color = if (timeFilter == 0) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary
                                     )
                                 }
                             }
@@ -226,7 +226,7 @@ fun EventsScreen(
                                 onClick = { timeFilter = 1 },
                                 modifier = Modifier.height(28.dp),
                                 shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
-                                color = if (timeFilter == 1) Color(0xFFFFC107) else Color.Transparent
+                                color = if (timeFilter == 1) MaterialTheme.colorScheme.primary else Color.Transparent
                             ) {
                                 Box(
                                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -236,7 +236,7 @@ fun EventsScreen(
                                         "Past",
                                         fontSize = 13.sp,
                                         fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
-                                        color = if (timeFilter == 1) Color(0xFF001D3D) else Color.White
+                                        color = if (timeFilter == 1) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary
                                     )
                                 }
                             }
@@ -254,7 +254,7 @@ fun EventsScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = Color(0xFFFFC107))
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                 }
                 uiState.errorMessage != null -> {
@@ -297,7 +297,7 @@ fun EventsScreen(
                         ) {
                             Text(
                                 "Ingen events funnet",
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.onBackground,
                                 style = MaterialTheme.typography.bodyLarge
                             )
                         }

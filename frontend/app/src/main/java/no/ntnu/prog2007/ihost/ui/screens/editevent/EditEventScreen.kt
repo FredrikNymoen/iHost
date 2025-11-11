@@ -142,7 +142,7 @@ fun EditEventScreen(
             title = {
                 Text(
                     "Select Image Source",
-                    color = Color(0xFFFFC107),
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold
                 )
             },
@@ -153,7 +153,7 @@ fun EditEventScreen(
                 ) {
                     Text(
                         "How would you like to add an image?",
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             },
@@ -169,8 +169,8 @@ fun EditEventScreen(
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF0C5CA7),
-                            contentColor = Color.White
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.onSecondary
                         )
                     ) {
                         Icon(
@@ -192,8 +192,8 @@ fun EditEventScreen(
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFFFC107),
-                            contentColor = Color(0xFF001D3D)
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
                         )
                     ) {
                         Icon(
@@ -210,23 +210,23 @@ fun EditEventScreen(
                 TextButton(
                     onClick = { showImageSourceDialog = false }
                 ) {
-                    Text("Cancel", color = Color.White)
+                    Text("Cancel", color = MaterialTheme.colorScheme.onSurface)
                 }
             },
-            containerColor = Color(0xFF001D3D)
+            containerColor = MaterialTheme.colorScheme.surface
         )
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Edit Event", color = Color.White) },
+                title = { Text("Edit Event", color = MaterialTheme.colorScheme.onSurface) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = "Back",
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
@@ -305,13 +305,13 @@ fun EditEventScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "Change Event Image",
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium
                         )
                         Text(
                             text = "(Optional)",
-                            color = Color.White.copy(alpha = 0.7f),
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                             fontSize = 12.sp
                         )
                     }
@@ -321,88 +321,88 @@ fun EditEventScreen(
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
-                label = { Text("Event tittel", color = Color.White) },
+                label = { Text("Event tittel", color = MaterialTheme.colorScheme.onSurface) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 32.dp)
                     .padding(bottom = 16.dp),
                 enabled = !uiState.isLoading,
-                textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
+                textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFFFFC107),
-                    unfocusedBorderColor = Color(0xFFFFC107),
-                    cursorColor = Color(0xFFFFC107)
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                    cursorColor = MaterialTheme.colorScheme.primary
                 )
             )
 
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text("Beskrivelse (valgfritt)", color = Color.White) },
+                label = { Text("Beskrivelse (valgfritt)", color = MaterialTheme.colorScheme.onSurface) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
                     .heightIn(min = 80.dp),
                 minLines = 3,
                 enabled = !uiState.isLoading,
-                textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
+                textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFFFFC107),
-                    unfocusedBorderColor = Color(0xFFFFC107),
-                    cursorColor = Color(0xFFFFC107)
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                    cursorColor = MaterialTheme.colorScheme.primary
                 )
             )
 
             OutlinedTextField(
                 value = eventDate,
                 onValueChange = { eventDate = it },
-                label = { Text("Dato (YYYY-MM-DD)", color = Color.White) },
+                label = { Text("Dato (YYYY-MM-DD)", color = MaterialTheme.colorScheme.onSurface) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
                 enabled = !uiState.isLoading,
-                textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
+                textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFFFFC107),
-                    unfocusedBorderColor = Color(0xFFFFC107),
-                    cursorColor = Color(0xFFFFC107)
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                    cursorColor = MaterialTheme.colorScheme.primary
                 )
             )
 
             OutlinedTextField(
                 value = eventTime,
                 onValueChange = { eventTime = it },
-                label = { Text("Tid (HH:mm) (valgfritt)", color = Color.White) },
+                label = { Text("Tid (HH:mm) (valgfritt)", color = MaterialTheme.colorScheme.onSurface) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
                 enabled = !uiState.isLoading,
-                textStyle = LocalTextStyle.current.copy(color = Color.White),
+                textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFFFFC107),
-                    unfocusedBorderColor = Color(0xFFFFC107),
-                    cursorColor = Color(0xFFFFC107)
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                    cursorColor = MaterialTheme.colorScheme.primary
                 )
             )
 
             OutlinedTextField(
                 value = location,
                 onValueChange = { location = it },
-                label = { Text("Sted (valgfritt)", color = Color.White) },
+                label = { Text("Sted (valgfritt)", color = MaterialTheme.colorScheme.onSurface) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
-                textStyle = LocalTextStyle.current.copy(color = Color.White),
+                textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFFFFC107),
-                    unfocusedBorderColor = Color(0xFFFFC107),
-                    cursorColor = Color(0xFFFFC107)
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                    cursorColor = MaterialTheme.colorScheme.primary
                 ),
                 trailingIcon = {
                     Icon(
                         imageVector = Icons.Default.LocationOn,
                         contentDescription = "Pick location",
-                        tint = Color(0xFFFFC107)
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             )
@@ -414,7 +414,7 @@ fun EditEventScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Gratis event", color = Color.White)
+                Text("Gratis event", color = MaterialTheme.colorScheme.onBackground)
                 Switch(
                     checked = isFree,
                     onCheckedChange = { isFree = it },
@@ -486,10 +486,10 @@ fun EditEventScreen(
                         .height(60.dp),
                     enabled = title.isNotEmpty() && eventDate.isNotEmpty() && !uiState.isLoading,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFFC107),
-                        contentColor = Color(0xFF001D3D),
-                        disabledContainerColor = Color(0xFFB8860B),
-                        disabledContentColor = Color(0xFF001D3D)
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                        disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f)
                     ),
                     shape = RoundedCornerShape(12.dp),
                     elevation = ButtonDefaults.buttonElevation(
@@ -500,7 +500,7 @@ fun EditEventScreen(
                     if (uiState.isLoading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(28.dp),
-                            color = Color(0xFF001D3D),
+                            color = MaterialTheme.colorScheme.onPrimary,
                             strokeWidth = 3.dp
                         )
                     } else {
