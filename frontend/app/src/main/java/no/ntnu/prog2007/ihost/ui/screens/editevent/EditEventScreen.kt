@@ -56,7 +56,11 @@ fun EditEventScreen(
     // Pre-fill form with existing event data
     var title by remember { mutableStateOf(event?.title ?: "") }
     var description by remember { mutableStateOf(event?.description ?: "") }
-    var eventDate by remember { mutableStateOf(event?.eventDate ?: LocalDate.now().format(DateTimeFormatter.ISO_DATE)) }
+    var eventDate by remember {
+        mutableStateOf(
+            event?.eventDate ?: LocalDate.now().format(DateTimeFormatter.ISO_DATE)
+        )
+    }
     var eventTime by remember { mutableStateOf(event?.eventTime ?: "") }
     var location by remember { mutableStateOf(event?.location ?: "") }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -338,7 +342,12 @@ fun EditEventScreen(
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text("Description (optional)", color = MaterialTheme.colorScheme.onSurface) },
+                label = {
+                    Text(
+                        "Description (optional)",
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
@@ -372,7 +381,12 @@ fun EditEventScreen(
             OutlinedTextField(
                 value = eventTime,
                 onValueChange = { eventTime = it },
-                label = { Text("Time (HH:mm) (optional)", color = MaterialTheme.colorScheme.onSurface) },
+                label = {
+                    Text(
+                        "Time (HH:mm) (optional)",
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
@@ -388,7 +402,12 @@ fun EditEventScreen(
             OutlinedTextField(
                 value = location,
                 onValueChange = { location = it },
-                label = { Text("Location (optional)", color = MaterialTheme.colorScheme.onSurface) },
+                label = {
+                    Text(
+                        "Location (optional)",
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
@@ -406,44 +425,44 @@ fun EditEventScreen(
                     )
                 }
             )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Free Event", color = MaterialTheme.colorScheme.onBackground)
-                Switch(
-                    checked = isFree,
-                    onCheckedChange = { isFree = it },
-                    enabled = !uiState.isLoading,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-            // This code is documented until Payment system will be implemented right way.
             /*
-            if (!isFree) {
-                OutlinedTextField(
-                    value = price,
-                    onValueChange = { price = it },
-                    label = { Text("Pris (kr)", color = Color.White) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    enabled = !uiState.isLoading,
-                    textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFFFFC107),
-                        unfocusedBorderColor = Color(0xFFFFC107),
-                        cursorColor = Color(0xFFFFC107)
-                    ),
-                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
-                    )
-                )
-            }*/
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("Free Event", color = MaterialTheme.colorScheme.onBackground)
+                            Switch(
+                                checked = isFree,
+                                onCheckedChange = { isFree = it },
+                                enabled = !uiState.isLoading,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                        // This code is documented until Payment system will be implemented right way.
+
+                        if (!isFree) {
+                            OutlinedTextField(
+                                value = price,
+                                onValueChange = { price = it },
+                                label = { Text("Pris (kr)", color = Color.White) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp),
+                                enabled = !uiState.isLoading,
+                                textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color(0xFFFFC107),
+                                    unfocusedBorderColor = Color(0xFFFFC107),
+                                    cursorColor = Color(0xFFFFC107)
+                                ),
+                                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                                    keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
+                                )
+                            )
+                        }*/
 
             if (uiState.errorMessage != null) {
                 Text(
