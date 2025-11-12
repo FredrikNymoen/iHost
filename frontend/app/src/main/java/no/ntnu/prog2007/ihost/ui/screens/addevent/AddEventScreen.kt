@@ -39,6 +39,8 @@ import no.ntnu.prog2007.ihost.ui.components.LocationPickerDialog
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -50,15 +52,21 @@ fun AddEventScreen(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+
+    // Norwegian timezone
+    val norwegianZone = ZoneId.of("Europe/Oslo")
+    val nowInNorway = LocalDateTime.now(norwegianZone)
+
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var eventDate by remember { mutableStateOf(LocalDate.now().format(DateTimeFormatter.ISO_DATE)) }
+    var eventDate by remember { mutableStateOf(nowInNorway.toLocalDate().format(DateTimeFormatter.ISO_DATE)) }
     var eventTime by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
     var locationLatLng by remember { mutableStateOf<LatLng?>(null) }
     var showDatePickerDialog by remember { mutableStateOf(false) }
     var showTimePickerDialog by remember { mutableStateOf(false) }
     var isFree by remember { mutableStateOf(true) }
+    var dateTimeError by remember { mutableStateOf<String?>(null) }
     //var price by remember { mutableStateOf("") }
 
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -198,7 +206,18 @@ fun AddEventScreen(
     // DatePicker Dialog
     if (showDatePickerDialog) {
         val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = LocalDate.parse(eventDate).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            initialSelectedDateMillis = LocalDate.parse(eventDate).atStartOfDay(norwegianZone).toInstant().toEpochMilli(),
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    // Convert UTC millis to Norwegian date
+                    val selectedDate = Instant.ofEpochMilli(utcTimeMillis)
+                        .atZone(norwegianZone)
+                        .toLocalDate()
+                    val todayInNorway = nowInNorway.toLocalDate()
+                    // Only allow today or future dates
+                    return !selectedDate.isBefore(todayInNorway)
+                }
+            }
         )
 
         DatePickerDialog(
@@ -207,9 +226,19 @@ fun AddEventScreen(
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
                         val selectedDate = Instant.ofEpochMilli(millis)
-                            .atZone(ZoneId.systemDefault())
+                            .atZone(norwegianZone)
                             .toLocalDate()
                         eventDate = selectedDate.format(DateTimeFormatter.ISO_DATE)
+
+                        // Validate if time is also set
+                        if (eventTime.isNotEmpty()) {
+                            val eventDateTime = LocalDateTime.of(selectedDate, LocalTime.parse(eventTime))
+                            if (eventDateTime.isBefore(nowInNorway)) {
+                                dateTimeError = "Event time cannot be in the past"
+                            } else {
+                                dateTimeError = null
+                            }
+                        }
                     }
                     showDatePickerDialog = false
                 }) {
@@ -229,8 +258,8 @@ fun AddEventScreen(
     // TimePicker Dialog
     if (showTimePickerDialog) {
         val timePickerState = rememberTimePickerState(
-            initialHour = if (eventTime.isNotEmpty()) eventTime.split(":")[0].toIntOrNull() ?: 12 else 12,
-            initialMinute = if (eventTime.isNotEmpty()) eventTime.split(":").getOrNull(1)?.toIntOrNull() ?: 0 else 0,
+            initialHour = if (eventTime.isNotEmpty()) eventTime.split(":")[0].toIntOrNull() ?: nowInNorway.hour else nowInNorway.hour,
+            initialMinute = if (eventTime.isNotEmpty()) eventTime.split(":").getOrNull(1)?.toIntOrNull() ?: nowInNorway.minute else nowInNorway.minute,
             is24Hour = true
         )
 
@@ -238,7 +267,17 @@ fun AddEventScreen(
             onDismissRequest = { showTimePickerDialog = false },
             confirmButton = {
                 TextButton(onClick = {
-                    eventTime = String.format("%02d:%02d", timePickerState.hour, timePickerState.minute)
+                    val selectedTime = String.format("%02d:%02d", timePickerState.hour, timePickerState.minute)
+                    val selectedDate = LocalDate.parse(eventDate)
+                    val eventDateTime = LocalDateTime.of(selectedDate, LocalTime.parse(selectedTime))
+
+                    // Validate that the date-time is not in the past
+                    if (eventDateTime.isBefore(nowInNorway)) {
+                        dateTimeError = "Event time cannot be in the past"
+                    } else {
+                        eventTime = selectedTime
+                        dateTimeError = null
+                    }
                     showTimePickerDialog = false
                 }) {
                     Text("OK")
@@ -440,7 +479,7 @@ fun AddEventScreen(
         OutlinedTextField(
             value = location,
             onValueChange = { },
-            label = { Text("Location (optional)", color = MaterialTheme.colorScheme.onSurface) },
+            label = { Text("Location", color = MaterialTheme.colorScheme.onSurface) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
@@ -460,7 +499,8 @@ fun AddEventScreen(
                 disabledBorderColor = MaterialTheme.colorScheme.primary,
                 disabledLabelColor = MaterialTheme.colorScheme.onSurface,
                 disabledTrailingIconColor = MaterialTheme.colorScheme.primary
-            )
+            ),
+            isError = location.isEmpty()
         )
         //Price frizzed until future implementation, until paymant system will work coractly
         /*
@@ -502,6 +542,15 @@ fun AddEventScreen(
             )
         }
         */
+        if (dateTimeError != null) {
+            Text(
+                text = dateTimeError!!,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+
         if (uiState.errorMessage != null) {
             Text(
                 text = uiState.errorMessage!!,
@@ -519,6 +568,19 @@ fun AddEventScreen(
         ) {
             Button(
                 onClick = {
+                    // Final validation before creating event
+                    val selectedDate = LocalDate.parse(eventDate)
+                    val eventDateTime = if (eventTime.isNotEmpty()) {
+                        LocalDateTime.of(selectedDate, LocalTime.parse(eventTime))
+                    } else {
+                        selectedDate.atStartOfDay()
+                    }
+
+                    if (eventDateTime.isBefore(nowInNorway)) {
+                        dateTimeError = "Event time cannot be in the past"
+                        return@Button
+                    }
+
                     val priceValue = 0.0 // TODO: change price value to value from field after payment system implemented
                     viewModel.createEvent(
                         context = context,
@@ -526,7 +588,7 @@ fun AddEventScreen(
                         description = description.ifEmpty { null },
                         eventDate = eventDate,
                         eventTime = eventTime.ifEmpty { null },
-                        location = location.ifEmpty { null },
+                        location = location,
                         free = isFree,
                         price = priceValue,
                         imageUri = selectedImageUri
@@ -536,7 +598,11 @@ fun AddEventScreen(
                 modifier = Modifier
                     .weight(1f)
                     .height(60.dp),
-                enabled = title.isNotEmpty() && eventDate.isNotEmpty() && !uiState.isLoading,
+                enabled = title.isNotEmpty()
+                        && eventDate.isNotEmpty()
+                        && location.isNotEmpty()
+                        && dateTimeError == null
+                        && !uiState.isLoading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
