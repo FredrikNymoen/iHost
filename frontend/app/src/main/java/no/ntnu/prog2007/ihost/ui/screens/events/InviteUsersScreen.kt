@@ -316,7 +316,7 @@ fun UserItem(
                         fontSize = 16.sp
                     )
                     Text(
-                        text = user.username,
+                        text = "@${user.username}",
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         fontSize = 14.sp
                     )
