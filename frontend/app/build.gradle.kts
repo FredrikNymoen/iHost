@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -18,6 +21,18 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Read Google Maps API key from local.properties
+        val localProperties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.inputStream().use { localProperties.load(it) }
+        }
+
+        // Add API key to BuildConfig and manifest placeholders
+        val mapsApiKey = localProperties.getProperty("GOOGLE_MAPS_API_KEY") ?: ""
+        buildConfigField("String", "GOOGLE_MAPS_API_KEY", "\"$mapsApiKey\"")
+        manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = mapsApiKey
     }
 
     buildTypes {
@@ -38,6 +53,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
 }

@@ -1,0 +1,14 @@
+## Template for local.properties
+# Copy this file to local.properties and add your actual values
+#
+# This file should *NOT* be checked into Version Control Systems,
+# as it contains information specific to your local configuration.
+
+# Location of the Android SDK
+sdk.dir=YOUR_SDK_PATH_HERE
+
+# Google Maps API Key
+# Get your API key from: https://console.cloud.google.com/
+# Enable "Maps SDK for Android" API
+# Restrict the key to your app's package name for security
+GOOGLE_MAPS_API_KEY=YOUR_API_KEY_HERE
