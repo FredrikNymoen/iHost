@@ -2,6 +2,8 @@ package no.ntnu.prog2007.ihost.data.remote
 
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.tasks.await
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -17,18 +19,7 @@ object RetrofitClient {
         @Throws(IOException::class)
         override fun intercept(chain: Interceptor.Chain): Response {
             val originalRequest = chain.request()
-
-            // Get Firebase token synchronously - this is a blocking operation
-            val token = try {
-                val firebaseUser = Firebase.auth.currentUser
-                if (firebaseUser != null) {
-                    firebaseUser.getIdToken(false).result.token
-                } else {
-                    null
-                }
-            } catch (e: Exception) {
-                null
-            }
+            val token = getFirebaseToken()
 
             // Add Authorization header if token exists
             val requestBuilder = originalRequest.newBuilder()
@@ -37,6 +28,29 @@ object RetrofitClient {
             }
 
             return chain.proceed(requestBuilder.build())
+        }
+
+        /**
+         * Fetches the current Firebase ID token.
+         * @return The Firebase ID token, or null if user is not authenticated or an error occurs
+         */
+        private fun getFirebaseToken(): String? {
+            return try {
+                val firebaseUser = Firebase.auth.currentUser
+                if (firebaseUser != null) {
+                    // Use runBlocking with await() for proper async handling
+                    // This is acceptable in OkHttp interceptors as they run on IO threads
+                    runBlocking {
+                        firebaseUser.getIdToken(false).await().token
+                    }
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
+                // Log the error for debugging
+                android.util.Log.e("RetrofitClient", "Failed to get Firebase token", e)
+                null
+            }
         }
     }
 
