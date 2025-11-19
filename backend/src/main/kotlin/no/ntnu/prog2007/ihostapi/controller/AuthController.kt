@@ -6,6 +6,7 @@ import jakarta.validation.Valid
 import no.ntnu.prog2007.ihostapi.model.AuthResponse
 import no.ntnu.prog2007.ihostapi.model.CreateUserRequest
 import no.ntnu.prog2007.ihostapi.model.ErrorResponse
+import no.ntnu.prog2007.ihostapi.model.UpdateUserRequest
 import no.ntnu.prog2007.ihostapi.model.User
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -13,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -229,6 +231,69 @@ class AuthController(
                         message = errorMessage
                     )
                 )
+        }
+    }
+
+    /**
+     * Update user profile
+     * Only the user can update their own profile
+     */
+    @PutMapping("/user/{uid}")
+    fun updateUserProfile(
+        @PathVariable uid: String,
+        @Valid @RequestBody request: UpdateUserRequest
+    ): ResponseEntity<Any> {
+        return try {
+            // Get UID from securiy context
+            val currentUserId = SecurityContextHolder.getContext().authentication.principal as? String
+                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
+
+            // Verify user is updating their own profile
+            if (currentUserId != uid) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ErrorResponse("FORBIDDEN", "You can only update your own profile"))
+            }
+
+            // Fetch users document from db
+            val userDoc = firestore.collection(USERS_COLLECTION)
+                .document(uid)
+                .get()
+                .get()
+
+            if (!userDoc.exists()) { // Not found
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ErrorResponse("NOT_FOUND", "User not found"))
+            }
+
+            val currentUser = userDoc.toObject(User::class.java)
+                ?: return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ErrorResponse("ERROR", "Could not parse user data"))
+
+            val now = LocalDateTime.now()
+            val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+            val timestamp = now.format(formatter)
+
+            // Update only non-null fields
+            val updatedUser = currentUser.copy(
+                firstName = request.firstName ?: currentUser.firstName,
+                lastName = request.lastName ?: currentUser.lastName,
+                photoUrl = request.photoUrl ?: currentUser.photoUrl,
+                phoneNumber = request.phoneNumber ?: currentUser.phoneNumber,
+                updatedAt = timestamp
+            )
+
+            firestore.collection(USERS_COLLECTION)
+                .document(uid)
+                .set(updatedUser)
+                .get()
+
+            logger.info("User profile updated: $uid")
+            ResponseEntity.ok(updatedUser)
+        } catch (e: Exception) {
+            logger.warning("Error updating user profile $uid: ${e.message}")
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ErrorResponse("ERROR", "Could not update user profile"))
         }
     }
 

@@ -38,3 +38,13 @@ data class AuthResponse(
     val username: String,
     val message: String = "Bruker opprettet"
 )
+
+/**
+ * Request for updating user profile
+ */
+data class UpdateUserRequest(
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val photoUrl: String? = null,
+    val phoneNumber: String? = null
+)
