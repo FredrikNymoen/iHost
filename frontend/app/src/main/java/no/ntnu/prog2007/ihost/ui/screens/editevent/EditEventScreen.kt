@@ -1,41 +1,81 @@
 package no.ntnu.prog2007.ihost.ui.screens.editevent
 
-import coil3.compose.AsyncImage
+import android.Manifest
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import android.Manifest
-import androidx.compose.runtime.remember
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.draw.clip
-import no.ntnu.prog2007.ihost.data.model.EventWithMetadata
+import coil3.compose.AsyncImage
+import no.ntnu.prog2007.ihost.ui.components.LocationPickerDialog
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,6 +89,9 @@ fun EditEventScreen(
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
 
+    var showDatePickerDialog by remember { mutableStateOf(false) }
+    var showTimePickerDialog by remember { mutableStateOf(false) }
+
     // Get the event from state
     val eventWithMetadata = uiState.events.find { it.id == eventId }
     val event = eventWithMetadata?.event
@@ -56,11 +99,7 @@ fun EditEventScreen(
     // Pre-fill form with existing event data
     var title by remember { mutableStateOf(event?.title ?: "") }
     var description by remember { mutableStateOf(event?.description ?: "") }
-    var eventDate by remember {
-        mutableStateOf(
-            event?.eventDate ?: LocalDate.now().format(DateTimeFormatter.ISO_DATE)
-        )
-    }
+    var eventDate by remember { mutableStateOf(event?.eventDate ?: LocalDate.now().format(DateTimeFormatter.ISO_DATE)) }
     var eventTime by remember { mutableStateOf(event?.eventTime ?: "") }
     var location by remember { mutableStateOf(event?.location ?: "") }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -221,6 +260,79 @@ fun EditEventScreen(
         )
     }
 
+    // DatePicker Dialog
+    if (showDatePickerDialog) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = LocalDate.parse(eventDate).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        )
+
+        DatePickerDialog(
+            onDismissRequest = { showDatePickerDialog = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val selectedDate = Instant.ofEpochMilli(millis)
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate()
+                        eventDate = selectedDate.format(DateTimeFormatter.ISO_DATE)
+                    }
+                    showDatePickerDialog = false
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePickerDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
+    // TimePicker Dialog
+    if (showTimePickerDialog) {
+        val timePickerState = rememberTimePickerState(
+            initialHour = if (eventTime.isNotEmpty()) eventTime.split(":")[0].toIntOrNull() ?: 0 else 0,
+            initialMinute = if (eventTime.isNotEmpty()) eventTime.split(":").getOrNull(1)?.toIntOrNull() ?: 0 else 0,
+            is24Hour = true
+        )
+
+        TimePickerDialog(
+            onDismissRequest = { showTimePickerDialog = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    eventTime = String.format("%02d:%02d", timePickerState.hour, timePickerState.minute)
+                    showTimePickerDialog = false
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimePickerDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            TimePicker(state = timePickerState)
+        }
+    }
+
+    // LocationPicker Dialog
+    if (showLocationPicker) {
+        LocationPickerDialog(
+            initialLocation = location,
+            onDismiss = { showLocationPicker = false },
+            onLocationSelected = { selectedLocation, latLng ->
+                location = selectedLocation
+                showLocationPicker = false
+            }
+        )
+    }
+
+
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -342,12 +454,7 @@ fun EditEventScreen(
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
-                label = {
-                    Text(
-                        "Description (optional)",
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
+                label = { Text("Description (optional)", color = MaterialTheme.colorScheme.onSurface) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
@@ -364,58 +471,72 @@ fun EditEventScreen(
 
             OutlinedTextField(
                 value = eventDate,
-                onValueChange = { eventDate = it },
-                label = { Text("Date (YYYY-MM-DD)", color = MaterialTheme.colorScheme.onSurface) },
+                onValueChange = { },
+                label = { Text("Date", color = MaterialTheme.colorScheme.onSurface) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                enabled = !uiState.isLoading,
-                textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
+                    .padding(bottom = 16.dp)
+                    .clickable { showDatePickerDialog = true },
+                enabled = false,
+                readOnly = true,
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.CalendarToday,
+                        contentDescription = "Select date",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
+                textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.primary,
-                    cursorColor = MaterialTheme.colorScheme.primary
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.primary,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.primary
                 )
             )
 
             OutlinedTextField(
                 value = eventTime,
-                onValueChange = { eventTime = it },
-                label = {
-                    Text(
-                        "Time (HH:mm) (optional)",
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
+                onValueChange = { },
+                label = { Text("Time (optional)", color = MaterialTheme.colorScheme.onSurface) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                enabled = !uiState.isLoading,
+                    .padding(bottom = 16.dp)
+                    .clickable { showTimePickerDialog = true },
+                enabled = false,
+                readOnly = true,
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.AccessTime,
+                        contentDescription = "Select time",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
                 textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.primary,
-                    cursorColor = MaterialTheme.colorScheme.primary
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.primary,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.primary
                 )
             )
 
             OutlinedTextField(
                 value = location,
-                onValueChange = { location = it },
-                label = {
-                    Text(
-                        "Location (optional)",
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
+                onValueChange = { },
+                label = { Text("Location (optional)", color = MaterialTheme.colorScheme.onSurface) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 16.dp)
+                    .clickable { showLocationPicker = true },
+                enabled = false,
+                readOnly = true,
                 textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.primary,
-                    cursorColor = MaterialTheme.colorScheme.primary
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.primary,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.primary
                 ),
                 trailingIcon = {
                     Icon(
@@ -425,44 +546,44 @@ fun EditEventScreen(
                     )
                 }
             )
-            /*
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text("Free Event", color = MaterialTheme.colorScheme.onBackground)
-                            Switch(
-                                checked = isFree,
-                                onCheckedChange = { isFree = it },
-                                enabled = !uiState.isLoading,
-                                modifier = Modifier.padding(start = 8.dp)
-                            )
-                        }
-                        // This code is documented until Payment system will be implemented right way.
 
-                        if (!isFree) {
-                            OutlinedTextField(
-                                value = price,
-                                onValueChange = { price = it },
-                                label = { Text("Pris (kr)", color = Color.White) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(bottom = 16.dp),
-                                enabled = !uiState.isLoading,
-                                textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = Color(0xFFFFC107),
-                                    unfocusedBorderColor = Color(0xFFFFC107),
-                                    cursorColor = Color(0xFFFFC107)
-                                ),
-                                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                                    keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
-                                )
-                            )
-                        }*/
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Free Event", color = MaterialTheme.colorScheme.onBackground)
+                Switch(
+                    checked = isFree,
+                    onCheckedChange = { isFree = it },
+                    enabled = !uiState.isLoading,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+            // This code is documented until Payment system will be implemented right way.
+            /*
+            if (!isFree) {
+                OutlinedTextField(
+                    value = price,
+                    onValueChange = { price = it },
+                    label = { Text("Pris (kr)", color = Color.White) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    enabled = !uiState.isLoading,
+                    textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = Color.White),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFFFFC107),
+                        unfocusedBorderColor = Color(0xFFFFC107),
+                        cursorColor = Color(0xFFFFC107)
+                    ),
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
+                    )
+                )
+            }*/
 
             if (uiState.errorMessage != null) {
                 Text(
@@ -542,4 +663,22 @@ fun EditEventScreen(
             Spacer(modifier = Modifier.weight(1f))
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TimePickerDialog(
+    onDismissRequest: () -> Unit,
+    confirmButton: @Composable () -> Unit,
+    dismissButton: @Composable () -> Unit,
+    content: @Composable () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = confirmButton,
+        dismissButton = dismissButton,
+        text = {
+            content()
+        }
+    )
 }
