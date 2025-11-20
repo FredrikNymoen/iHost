@@ -28,8 +28,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
+import no.ntnu.prog2007.ihost.data.model.getOtherUserId
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 
@@ -37,12 +39,15 @@ import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 fun ProfileScreen(
     authViewModel: AuthViewModel,
     eventViewModel: EventViewModel,
-    onLogOut: () -> Unit
+    friendViewModel: no.ntnu.prog2007.ihost.viewmodel.FriendViewModel,
+    onLogOut: () -> Unit,
+    onNavigateToAddFriend: () -> Unit
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val uiState by authViewModel.uiState.collectAsState()
     val eventUiState by eventViewModel.uiState.collectAsState()
+    val friendUiState by friendViewModel.uiState.collectAsState()
     val user = uiState.currentUser
     val userProfile = uiState.userProfile
     val isProfileLoading = uiState.isProfileLoading
@@ -65,6 +70,7 @@ fun ProfileScreen(
     LaunchedEffect(Unit) {
         authViewModel.loadUserProfile()
         eventViewModel.ensureEventsLoaded()
+        friendViewModel.loadFriendships()
     }
 
     // Gradient background matching MainActivity
@@ -254,6 +260,14 @@ fun ProfileScreen(
                     modifier = Modifier.weight(1f)
                 )
             }
+
+            // 4.5 Friends Section
+            FriendsSection(
+                friendViewModel = friendViewModel,
+                authViewModel = authViewModel,
+                friendUiState = friendUiState,
+                onNavigateToAddFriend = onNavigateToAddFriend
+            )
 
             // 5. Profile Info Card
             Card(
@@ -690,4 +704,321 @@ fun ChangeAvatarDialog(
             }
         }
     )
+}
+
+@Composable
+fun FriendsSection(
+    friendViewModel: no.ntnu.prog2007.ihost.viewmodel.FriendViewModel,
+    authViewModel: AuthViewModel,
+    friendUiState: no.ntnu.prog2007.ihost.viewmodel.FriendUiState,
+    onNavigateToAddFriend: () -> Unit
+) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val currentUserId = authViewModel.uiState.collectAsState().value.currentUser?.uid
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp)
+    ) {
+        // Friends header with Add button
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Friends (${friendUiState.friends.size})",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Button(
+                onClick = onNavigateToAddFriend,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PersonAdd,
+                    contentDescription = "Add Friend",
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Add Friend")
+            }
+        }
+
+        // Pending friend requests
+        if (friendUiState.pendingRequests.isNotEmpty()) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp)
+                ) {
+                    Text(
+                        text = "Friend Requests (${friendUiState.pendingRequests.size})",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    friendUiState.pendingRequests.forEach { friendship ->
+                        val requesterUser = friendUiState.userDetailsMap[friendship.user1Id]
+                        if (requesterUser != null) {
+                            FriendRequestItem(
+                                user = requesterUser,
+                                onAccept = {
+                                    friendViewModel.acceptFriendRequest(
+                                        friendshipId = friendship.id,
+                                        onSuccess = {
+                                            android.widget.Toast.makeText(
+                                                context,
+                                                "Accepted friend request from ${requesterUser.firstName}",
+                                                android.widget.Toast.LENGTH_SHORT
+                                            ).show()
+                                        },
+                                        onError = { error ->
+                                            android.widget.Toast.makeText(
+                                                context,
+                                                "Error: $error",
+                                                android.widget.Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    )
+                                },
+                                onDecline = {
+                                    friendViewModel.declineFriendRequest(
+                                        friendshipId = friendship.id,
+                                        onSuccess = {
+                                            android.widget.Toast.makeText(
+                                                context,
+                                                "Declined friend request",
+                                                android.widget.Toast.LENGTH_SHORT
+                                            ).show()
+                                        },
+                                        onError = { error ->
+                                            android.widget.Toast.makeText(
+                                                context,
+                                                "Error: $error",
+                                                android.widget.Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    )
+                                }
+                            )
+                            if (friendship != friendUiState.pendingRequests.last()) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.2f)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Friends list
+        if (friendUiState.friends.isEmpty()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No friends yet. Add some friends!",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+            }
+        } else {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp)
+                ) {
+                    friendUiState.friends.take(5).forEach { friendship ->
+                        val friendUserId = if (currentUserId != null)
+                            friendship.getOtherUserId(currentUserId)
+                        else null
+                        val friendUser = friendUserId?.let { friendUiState.userDetailsMap[it] }
+
+                        if (friendUser != null) {
+                            FriendItem(user = friendUser)
+                            if (friendship != friendUiState.friends.take(5).last()) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+                                )
+                            }
+                        }
+                    }
+
+                    if (friendUiState.friends.size > 5) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+                        )
+                        Text(
+                            text = "+ ${friendUiState.friends.size - 5} more friends",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun FriendRequestItem(
+    user: no.ntnu.prog2007.ihost.data.model.User,
+    onAccept: () -> Unit,
+    onDecline: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f)
+        ) {
+            if (user.photoUrl != null) {
+                AsyncImage(
+                    model = user.photoUrl,
+                    contentDescription = "Profile picture",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(MaterialTheme.colorScheme.primary, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = user.username.firstOrNull()?.uppercase() ?: "?",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Column {
+                Text(
+                    text = "${user.firstName} ${user.lastName ?: ""}".trim(),
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+                Text(
+                    text = "@${user.username}",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
+                )
+            }
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            IconButton(
+                onClick = onAccept,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = "Accept",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            IconButton(
+                onClick = onDecline,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Decline",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun FriendItem(user: no.ntnu.prog2007.ihost.data.model.User) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (user.photoUrl != null) {
+            AsyncImage(
+                model = user.photoUrl,
+                contentDescription = "Profile picture",
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(MaterialTheme.colorScheme.primary, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = user.username.firstOrNull()?.uppercase() ?: "?",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Column {
+            Text(
+                text = "${user.firstName} ${user.lastName ?: ""}".trim(),
+                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = "@${user.username}",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        }
+    }
 }

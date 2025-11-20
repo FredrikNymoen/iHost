@@ -34,6 +34,7 @@ import no.ntnu.prog2007.ihost.ui.theme.IHostTheme
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.StripeViewModel
+import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,6 +62,7 @@ fun IHostApp() {
     val authViewModel: AuthViewModel = viewModel()
     val eventViewModel: EventViewModel = viewModel { EventViewModel(authViewModel) }
     val stripeViewModel: StripeViewModel = viewModel()
+    val friendViewModel: FriendViewModel = viewModel { FriendViewModel(authViewModel) }
 
     val authUiState by authViewModel.uiState.collectAsState()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -74,24 +76,29 @@ fun IHostApp() {
 
     // Navigate when auth state changes
     LaunchedEffect(authUiState.isLoggedIn, authUiState.isLoading, currentRoute) {
-        if (authUiState.isLoggedIn && !authUiState.isLoading && !hasNavigatedOnLogin) {
+        if (authUiState.isLoggedIn && !authUiState.isLoading) {
             // User just logged in/signed up and loading is done
             // Navigate if we're on Login/SignUp screen OR if route is still null (app just started)
-            if (currentRoute == null || currentRoute in listOf(Screen.Login.route, Screen.SignUp.route)) {
-                hasNavigatedOnLogin = true
-                // Load fresh events for the new user
-                eventViewModel.loadEvents()
-                // Navigate to Events
-                navController.navigate(Screen.Events.route) {
-                    popUpTo(Screen.Login.route) { inclusive = true }
+            if (currentRoute == null || currentRoute in listOf(Screen.Login.route, Screen.SignUp.route, Screen.PersonalInfo.route)) {
+                if (!hasNavigatedOnLogin) {
+                    hasNavigatedOnLogin = true
+                    // Load fresh events for the new user
+                    eventViewModel.loadEvents()
+                    // Navigate to Events
+                    navController.navigate(Screen.Events.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
                 }
             }
-        } else if (!authUiState.isLoggedIn && currentRoute != null && currentRoute !in listOf(Screen.Login.route, Screen.SignUp.route)) {
-            // User logged out - reset event data and navigate back to Login
+        } else if (!authUiState.isLoggedIn) {
+            // Reset flag when user is logged out
             hasNavigatedOnLogin = false
-            eventViewModel.resetEvents()
-            navController.navigate(Screen.Login.route) {
-                popUpTo(0) { inclusive = true }
+            // If user logged out and not on auth screens, navigate back to Login
+            if (currentRoute != null && currentRoute !in listOf(Screen.Login.route, Screen.SignUp.route, Screen.PersonalInfo.route)) {
+                eventViewModel.resetEvents()
+                navController.navigate(Screen.Login.route) {
+                    popUpTo(0) { inclusive = true }
+                }
             }
         }
     }
@@ -109,7 +116,8 @@ fun IHostApp() {
                            currentRoute != Screen.SignUp.route &&
                            currentRoute?.startsWith("event_detail") != true &&
                            currentRoute?.startsWith("edit_event") != true &&
-                           currentRoute?.startsWith("invite_users") != true
+                           currentRoute?.startsWith("invite_users") != true &&
+                           currentRoute != Screen.AddFriend.route
 
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
@@ -145,6 +153,7 @@ fun IHostApp() {
                 authViewModel = authViewModel,
                 eventViewModel = eventViewModel,
                 stripeViewModel = stripeViewModel,
+                friendViewModel = friendViewModel,
                 modifier = Modifier.padding(padding),
                 startDestination = startDestination
             )

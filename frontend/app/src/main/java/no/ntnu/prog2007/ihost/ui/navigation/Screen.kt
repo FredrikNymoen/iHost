@@ -52,4 +52,6 @@ sealed class Screen(
     object InviteUsers : Screen("invite_users/{eventId}", "Invite Users") {
         fun createRoute(eventId: String) = "invite_users/$eventId"
     }
+
+    object AddFriend : Screen("add_friend", "Add Friend")
 }

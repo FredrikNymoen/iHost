@@ -120,6 +120,36 @@ interface ApiService {
     suspend fun uploadProfilePhoto(
         @Part file: MultipartBody.Part
     ): ProfilePhotoUploadResponse
+
+    // Friendship endpoints
+    @POST("api/friendships/request")
+    suspend fun sendFriendRequest(
+        @Body request: FriendRequestRequest
+    ): Friendship
+
+    @POST("api/friendships/{friendshipId}/accept")
+    suspend fun acceptFriendRequest(
+        @Path("friendshipId") friendshipId: String
+    ): Friendship
+
+    @POST("api/friendships/{friendshipId}/decline")
+    suspend fun declineFriendRequest(
+        @Path("friendshipId") friendshipId: String
+    ): Friendship
+
+    @DELETE("api/friendships/{friendshipId}")
+    suspend fun removeFriend(
+        @Path("friendshipId") friendshipId: String
+    ): Map<String, Any>
+
+    @GET("api/friendships/pending")
+    suspend fun getPendingRequests(): List<Friendship>
+
+    @GET("api/friendships/friends")
+    suspend fun getFriends(): List<Friendship>
+
+    @GET("api/friendships/sent")
+    suspend fun getSentRequests(): List<Friendship>
 }
 
 data class ImageUploadResponse(
@@ -145,4 +175,9 @@ data class ProfilePhotoUploadResponse(
     val message: String,
     @SerializedName("photoUrl")
     val photoUrl: String
+)
+
+data class FriendRequestRequest(
+    @SerializedName("toUserId")
+    val toUserId: String
 )
