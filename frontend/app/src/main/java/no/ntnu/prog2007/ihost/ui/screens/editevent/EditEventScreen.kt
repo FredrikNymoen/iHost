@@ -368,15 +368,14 @@ fun EditEventScreen(
                     .width(300.dp)
                     .height(150.dp)
                     .background(
-                        color = Color(0xFF4A90E2),
+                        color = MaterialTheme.colorScheme.tertiary,
                         shape = RoundedCornerShape(12.dp)
                     )
                     .border(
                         width = 2.dp,
-                        color = Color(0xFFFFC107),
+                        color = MaterialTheme.colorScheme.secondary,
                         shape = RoundedCornerShape(12.dp)
-                    )
-                    .clickable { showImageSourceDialog = true },
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 if (selectedImageUri != null) {
@@ -385,7 +384,15 @@ fun EditEventScreen(
                         contentDescription = "Event image preview",
                         modifier = Modifier
                             .fillMaxSize()
-                            .clip(RoundedCornerShape(12.dp)),
+                            .background(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .border(
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(12.dp)
+                            ),
                         contentScale = androidx.compose.ui.layout.ContentScale.Crop
                     )
                     // Remove image button
@@ -394,11 +401,7 @@ fun EditEventScreen(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .padding(8.dp)
-                            .size(32.dp)
-                            .background(
-                                color = Color.Red.copy(alpha = 0.7f),
-                                shape = androidx.compose.foundation.shape.CircleShape
-                            )
+                            .background(MaterialTheme.colorScheme.error, RoundedCornerShape(50))
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
@@ -410,25 +413,22 @@ fun EditEventScreen(
                 } else {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable(onClick = { showImageSourceDialog = true })
                     ) {
                         Icon(
                             imageVector = Icons.Default.AddAPhoto,
                             contentDescription = "Add photo",
-                            tint = Color.White,
-                            modifier = Modifier.size(48.dp)
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(40.dp)
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Change Event Image",
-                            color = MaterialTheme.colorScheme.onSurface,
+                            text = "Tap to change event image",
                             fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = "(Optional)",
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                            fontSize = 12.sp
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
