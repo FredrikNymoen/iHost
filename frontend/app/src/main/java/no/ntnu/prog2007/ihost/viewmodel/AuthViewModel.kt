@@ -1,5 +1,7 @@
 package no.ntnu.prog2007.ihost.viewmodel
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,7 +15,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.ntnu.prog2007.ihost.data.model.User
+import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
 import no.ntnu.prog2007.ihost.data.repository.AuthRepository
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
+import java.io.FileOutputStream
 
 data class AuthUiState(
     val currentUser: FirebaseUser? = null,
@@ -232,6 +240,53 @@ class AuthViewModel : ViewModel() {
 
     suspend fun getIdToken(): String? {
         return authRepository.getIdToken()
+    }
+
+    /**
+     * Upload a profile photo to Cloudinary
+     * @param context Android context for accessing content resolver
+     * @param imageUri URI of the image to upload
+     * @return The Cloudinary URL of the uploaded image, or null if upload fails
+     */
+    suspend fun uploadProfilePhoto(context: Context, imageUri: Uri): String? {
+        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+        return try {
+            Log.d("AuthViewModel", "Starting profile photo upload for URI: $imageUri")
+
+            // Get input stream from URI
+            val inputStream = context.contentResolver.openInputStream(imageUri)
+                ?: throw IllegalArgumentException("Cannot open image URI")
+
+            // Create a temporary file
+            val file = File(context.cacheDir, "profile_upload_${System.currentTimeMillis()}.jpg")
+            FileOutputStream(file).use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+            inputStream.close()
+
+            // Create multipart request body
+            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+            val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
+
+            // Upload to backend
+            val response = RetrofitClient.apiService.uploadProfilePhoto(body)
+
+            // Clean up temporary file
+            file.delete()
+
+            Log.d("AuthViewModel", "Profile photo uploaded successfully: ${response.photoUrl}")
+            _uiState.update { it.copy(isLoading = false) }
+            response.photoUrl
+        } catch (e: Exception) {
+            Log.e("AuthViewModel", "Error uploading profile photo: ${e.message}", e)
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    errorMessage = "Failed to upload photo: ${e.localizedMessage}"
+                )
+            }
+            null
+        }
     }
 
     /**

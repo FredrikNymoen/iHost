@@ -13,6 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -62,21 +65,29 @@ fun IHostApp() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    // Track if we've already handled initial navigation
+    var hasNavigatedOnLogin by remember { mutableStateOf(false) }
+
     // Initial start destination
     val startDestination = Screen.Login.route
 
     // Navigate when auth state changes
     LaunchedEffect(authUiState.isLoggedIn, authUiState.isLoading) {
-        if (authUiState.isLoggedIn && !authUiState.isLoading) {
-            // User logged in/signed up and loading is done
-            // Load fresh events for the new user
-            eventViewModel.loadEvents()
-            // Navigate to Events
-            navController.navigate(Screen.Events.route) {
-                popUpTo(Screen.Login.route) { inclusive = true }
+        if (authUiState.isLoggedIn && !authUiState.isLoading && !hasNavigatedOnLogin) {
+            // User just logged in/signed up and loading is done
+            // Only navigate if we're currently on Login or SignUp screen
+            if (currentRoute in listOf(Screen.Login.route, Screen.SignUp.route)) {
+                hasNavigatedOnLogin = true
+                // Load fresh events for the new user
+                eventViewModel.loadEvents()
+                // Navigate to Events
+                navController.navigate(Screen.Events.route) {
+                    popUpTo(Screen.Login.route) { inclusive = true }
+                }
             }
         } else if (!authUiState.isLoggedIn && currentRoute !in listOf(Screen.Login.route, Screen.SignUp.route)) {
             // User logged out - reset event data and navigate back to Login
+            hasNavigatedOnLogin = false
             eventViewModel.resetEvents()
             navController.navigate(Screen.Login.route) {
                 popUpTo(0) { inclusive = true }

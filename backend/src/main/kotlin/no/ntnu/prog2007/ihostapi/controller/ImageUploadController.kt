@@ -123,6 +123,64 @@ class ImageUploadController(
     }
 
     /**
+     * Upload a profile photo to Cloudinary and update user document
+     * Uploads image to Cloudinary and then updates the photoUrl field in user's Firestore document
+     *
+     * @param file The profile photo file to upload
+     * @return Response with photo URL
+     */
+    @PostMapping("/upload-profile")
+    fun uploadProfilePhoto(
+        @RequestParam("file") file: MultipartFile
+    ): ResponseEntity<Any> {
+        return try {
+            // Verify authentication
+            val uid = SecurityContextHolder.getContext().authentication.principal as? String
+                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
+
+            logger.info("Uploading profile photo for user: $uid")
+
+            // Upload to Cloudinary in user_images folder
+            val photoUrl = cloudinaryService.uploadImage(file, folder = "user_images")
+
+            logger.info("Profile photo uploaded to Cloudinary: $photoUrl")
+
+            // Update user document with new photoUrl
+            val userDocRef = firestore.collection("users").document(uid)
+            val userDoc = userDocRef.get().get()
+
+            if (!userDoc.exists()) {
+                logger.warning("User document not found for UID: $uid")
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ErrorResponse("NOT_FOUND", "User not found"))
+            }
+
+            // Update photoUrl field
+            userDocRef.update("photoUrl", photoUrl).get()
+
+            logger.info("User document updated with new photoUrl for user: $uid")
+
+            ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(mapOf(
+                    "message" to "Profile photo uploaded successfully",
+                    "photoUrl" to photoUrl
+                ))
+        } catch (e: IllegalArgumentException) {
+            logger.warning("Invalid profile photo upload request: ${e.message}")
+            ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse("INVALID_FILE", e.message ?: "Invalid file"))
+        } catch (e: Exception) {
+            logger.severe("Error uploading profile photo: ${e.message}")
+            ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ErrorResponse("UPLOAD_FAILED", e.message ?: "Failed to upload profile photo"))
+        }
+    }
+
+    /**
      * Delete an image from both Cloudinary and Firestore
      * Only the uploader can delete the image
      *

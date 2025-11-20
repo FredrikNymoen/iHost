@@ -113,6 +113,13 @@ interface ApiService {
         @Path("uid") uid: String,
         @Body request: UpdateUserRequest
     ): User
+
+    // Upload profile photo
+    @Multipart
+    @POST("api/images/upload-profile")
+    suspend fun uploadProfilePhoto(
+        @Part file: MultipartBody.Part
+    ): ProfilePhotoUploadResponse
 }
 
 data class ImageUploadResponse(
@@ -131,4 +138,11 @@ data class EventImage(
     val eventId: String,
     @SerializedName("createdAt")
     val createdAt: String
+)
+
+data class ProfilePhotoUploadResponse(
+    @SerializedName("message")
+    val message: String,
+    @SerializedName("photoUrl")
+    val photoUrl: String
 )
