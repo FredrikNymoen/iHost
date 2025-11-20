@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
 import no.ntnu.prog2007.ihost.data.model.getOtherUserId
+import no.ntnu.prog2007.ihost.ui.components.UserCardWithTwoActions
+import no.ntnu.prog2007.ihost.ui.components.UserCardWithIconAction
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 
@@ -788,9 +790,12 @@ fun FriendsSection(
                     friendUiState.pendingRequests.forEach { friendship ->
                         val requesterUser = friendUiState.userDetailsMap[friendship.user1Id]
                         if (requesterUser != null) {
-                            FriendRequestItem(
+                            UserCardWithTwoActions(
                                 user = requesterUser,
-                                onAccept = {
+                                firstIcon = Icons.Default.Check,
+                                firstIconTint = MaterialTheme.colorScheme.primary,
+                                firstIconDescription = "Accept",
+                                onFirstIconClick = {
                                     friendViewModel.acceptFriendRequest(
                                         friendshipId = friendship.id,
                                         onSuccess = {
@@ -809,7 +814,10 @@ fun FriendsSection(
                                         }
                                     )
                                 },
-                                onDecline = {
+                                secondIcon = Icons.Default.Close,
+                                secondIconTint = MaterialTheme.colorScheme.error,
+                                secondIconDescription = "Decline",
+                                onSecondIconClick = {
                                     friendViewModel.declineFriendRequest(
                                         friendshipId = friendship.id,
                                         onSuccess = {
@@ -827,7 +835,10 @@ fun FriendsSection(
                                             ).show()
                                         }
                                     )
-                                }
+                                },
+                                backgroundColor = MaterialTheme.colorScheme.secondary,
+                                textColor = MaterialTheme.colorScheme.onSecondary,
+                                showCard = false
                             )
                             if (friendship != friendUiState.pendingRequests.last()) {
                                 HorizontalDivider(
@@ -866,9 +877,12 @@ fun FriendsSection(
                     friendUiState.sentRequests.forEach { friendship ->
                         val recipientUser = friendUiState.userDetailsMap[friendship.user2Id]
                         if (recipientUser != null) {
-                            SentRequestItem(
+                            UserCardWithIconAction(
                                 user = recipientUser,
-                                onCancel = {
+                                icon = Icons.Default.Close,
+                                iconTint = MaterialTheme.colorScheme.error,
+                                iconDescription = "Cancel request",
+                                onIconClick = {
                                     friendViewModel.removeFriend(
                                         friendshipId = friendship.id,
                                         onSuccess = {
@@ -886,7 +900,10 @@ fun FriendsSection(
                                             ).show()
                                         }
                                     )
-                                }
+                                },
+                                backgroundColor = MaterialTheme.colorScheme.tertiary,
+                                textColor = MaterialTheme.colorScheme.onTertiary,
+                                showCard = false
                             )
                             if (friendship != friendUiState.sentRequests.last()) {
                                 HorizontalDivider(
@@ -898,152 +915,6 @@ fun FriendsSection(
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun FriendRequestItem(
-    user: no.ntnu.prog2007.ihost.data.model.User,
-    onAccept: () -> Unit,
-    onDecline: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.weight(1f)
-        ) {
-            if (user.photoUrl != null) {
-                AsyncImage(
-                    model = user.photoUrl,
-                    contentDescription = "Profile picture",
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(MaterialTheme.colorScheme.primary, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = user.username.firstOrNull()?.uppercase() ?: "?",
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Column {
-                Text(
-                    text = "${user.firstName} ${user.lastName ?: ""}".trim(),
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSecondary
-                )
-                Text(
-                    text = "@${user.username}",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.7f)
-                )
-            }
-        }
-
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            IconButton(
-                onClick = onAccept,
-                modifier = Modifier.size(36.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = "Accept",
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-            IconButton(
-                onClick = onDecline,
-                modifier = Modifier.size(36.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Decline",
-                    tint = MaterialTheme.colorScheme.error
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun SentRequestItem(
-    user: no.ntnu.prog2007.ihost.data.model.User,
-    onCancel: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.weight(1f)
-        ) {
-            if (user.photoUrl != null) {
-                AsyncImage(
-                    model = user.photoUrl,
-                    contentDescription = "Profile picture",
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(MaterialTheme.colorScheme.primary, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = user.username.firstOrNull()?.uppercase() ?: "?",
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Column {
-                Text(
-                    text = "${user.firstName} ${user.lastName ?: ""}".trim(),
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onTertiary
-                )
-                Text(
-                    text = "@${user.username}",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onTertiary.copy(alpha = 0.7f)
-                )
-            }
-        }
-
-        // Cancel button
-        IconButton(
-            onClick = onCancel,
-            modifier = Modifier.size(36.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Cancel request",
-                tint = MaterialTheme.colorScheme.error
-            )
         }
     }
 }

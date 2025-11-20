@@ -28,6 +28,7 @@ import no.ntnu.prog2007.ihost.data.model.getOtherUserId
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
+import no.ntnu.prog2007.ihost.ui.components.UserCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -258,15 +259,47 @@ fun InviteUsersScreen(
                                     searchQuery, true
                                 )
 
-                            }) { user ->
-                                UserItem(
+                            }, key = { it.uid }) { user ->
+                                UserCard(
                                     user = user,
-                                    isSelected = user.uid in selectedUserIds,
-                                    onToggle = {
+                                    backgroundColor = if (user.uid in selectedUserIds)
+                                        MaterialTheme.colorScheme.secondary
+                                    else
+                                        MaterialTheme.colorScheme.surface,
+                                    textColor = if (user.uid in selectedUserIds)
+                                        MaterialTheme.colorScheme.onSecondary
+                                    else
+                                        MaterialTheme.colorScheme.onSurface,
+                                    onClick = {
                                         selectedUserIds = if (user.uid in selectedUserIds) {
                                             selectedUserIds - user.uid
                                         } else {
                                             selectedUserIds + user.uid
+                                        }
+                                    },
+                                    trailingContent = {
+                                        if (user.uid in selectedUserIds) {
+                                            Surface(
+                                                modifier = Modifier.size(32.dp),
+                                                color = MaterialTheme.colorScheme.primary,
+                                                shape = CircleShape
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Check,
+                                                    contentDescription = "Selected",
+                                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                                    modifier = Modifier.padding(6.dp)
+                                                )
+                                            }
+                                        } else {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(32.dp)
+                                                    .background(
+                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                                                        shape = CircleShape
+                                                    )
+                                            )
                                         }
                                     }
                                 )
@@ -274,94 +307,6 @@ fun InviteUsersScreen(
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun UserItem(
-    user: User,
-    isSelected: Boolean,
-    onToggle: () -> Unit
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onToggle),
-        color = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(12.dp),
-        tonalElevation = 4.dp
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.weight(1f)
-            ) {
-                // User avatar placeholder
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = user.username.firstOrNull()?.uppercase() ?: "?",
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
-                }
-
-                Column {
-                    Text(
-                        text = user.firstName + " " + (user.lastName ?: ""),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                    Text(
-                        text = "@${user.username}",
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                        fontSize = 14.sp
-                    )
-
-                }
-            }
-
-            // Checkbox
-            if (isSelected) {
-                Surface(
-                    modifier = Modifier.size(32.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = CircleShape
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Selected",
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.padding(6.dp)
-                    )
-                }
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
-                            shape = CircleShape
-                        )
-                )
             }
         }
     }

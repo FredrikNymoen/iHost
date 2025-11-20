@@ -23,6 +23,7 @@ import no.ntnu.prog2007.ihost.data.model.User
 import no.ntnu.prog2007.ihost.data.model.getOtherUserId
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
+import no.ntnu.prog2007.ihost.ui.components.UserCardWithIconAction
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -131,9 +132,12 @@ fun FriendsListScreen(
                             val friendUser = friendUserId?.let { friendUiState.userDetailsMap[it] }
 
                             if (friendUser != null) {
-                                FriendListItem(
+                                UserCardWithIconAction(
                                     user = friendUser,
-                                    onRemove = {
+                                    icon = Icons.Default.PersonRemove,
+                                    iconTint = MaterialTheme.colorScheme.error,
+                                    iconDescription = "Remove friend",
+                                    onIconClick = {
                                         friendViewModel.removeFriend(
                                             friendshipId = friendship.id,
                                             onSuccess = {
@@ -157,87 +161,6 @@ fun FriendsListScreen(
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun FriendListItem(
-    user: User,
-    onRemove: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f)
-            ) {
-                // User avatar
-                if (user.photoUrl != null) {
-                    AsyncImage(
-                        model = user.photoUrl,
-                        contentDescription = "Profile picture",
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .background(MaterialTheme.colorScheme.primary, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = user.username.firstOrNull()?.uppercase() ?: "?",
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Column {
-                    Text(
-                        text = "${user.firstName} ${user.lastName ?: ""}".trim(),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = "@${user.username}",
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                }
-            }
-
-            // Remove button
-            IconButton(
-                onClick = onRemove,
-                modifier = Modifier.size(40.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.PersonRemove,
-                    contentDescription = "Remove friend",
-                    tint = MaterialTheme.colorScheme.error
-                )
             }
         }
     }

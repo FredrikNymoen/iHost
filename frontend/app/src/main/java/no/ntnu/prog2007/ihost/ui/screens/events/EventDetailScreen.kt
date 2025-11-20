@@ -49,6 +49,7 @@ import androidx.compose.foundation.layout.FlowRow
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.delay
 import java.time.temporal.ChronoUnit
+import no.ntnu.prog2007.ihost.ui.components.UserCard
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -608,13 +609,13 @@ fun HostChip(
                 Text(
                     text = name,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "@$username",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
             }
         }
@@ -643,20 +644,20 @@ fun AttendeeChip(
             Icon(
                 imageVector = Icons.Default.Check,
                 contentDescription = "Attending",
-                tint = MaterialTheme.colorScheme.onSecondary,
+                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(18.dp)
             )
             Column {
                 Text(
                     text = name,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSecondary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
                     text = "@$username",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
             }
         }
