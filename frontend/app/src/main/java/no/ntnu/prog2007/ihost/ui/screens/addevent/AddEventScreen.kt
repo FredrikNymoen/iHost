@@ -309,7 +309,7 @@ fun AddEventScreen(
         modifier = Modifier
             .fillMaxSize()
             .imePadding()
-            .padding(16.dp)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
@@ -395,7 +395,7 @@ fun AddEventScreen(
             label = { Text("Event Title", color = MaterialTheme.colorScheme.onSurface) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 32.dp)
+                .padding(top = 18.dp)
                 .padding(bottom = 16.dp),
             enabled = !uiState.isLoading,
             textStyle = androidx.compose.material3.LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),

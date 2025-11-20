@@ -112,14 +112,18 @@ fun EventsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(
+                    start = padding.calculateStartPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
+                    end = padding.calculateEndPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
+                    bottom = padding.calculateBottomPadding()
+                    // Skip top padding to reduce space between topBar and content
+                )
         ) {
             // Top section: Tabs and filters with minimal padding
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 0.dp)
-                    .padding(top = 4.dp)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
                 // Tab buttons: Invites vs My events
                 Row(
@@ -245,7 +249,6 @@ fun EventsScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
 
             // Events list
             when {

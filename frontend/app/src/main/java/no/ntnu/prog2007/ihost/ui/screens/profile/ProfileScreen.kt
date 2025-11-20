@@ -81,8 +81,12 @@ fun ProfileScreen(
             .fillMaxSize()
             .background(gradientBrush)
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(
+                start = 16.dp,
+                end = 16.dp,
+                bottom = 16.dp
+            ),
+            horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Show loading indicator if profile is loading
         if (isProfileLoading || (user != null && userProfile == null)) {
@@ -144,7 +148,7 @@ fun ProfileScreen(
             // 1. Avatar Section with Edit Icon
             Box(
                 modifier = Modifier
-                    .padding(top = 32.dp, bottom = 16.dp)
+                    .padding(vertical = 12.dp)
                     .size(150.dp)
                     .clickable(enabled = !uiState.isLoading) { showChangeAvatarDialog = true }
             ) {
