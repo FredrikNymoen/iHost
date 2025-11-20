@@ -24,17 +24,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import no.ntnu.prog2007.ihost.data.model.User
+import no.ntnu.prog2007.ihost.data.model.getOtherUserId
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
+import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
+import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InviteUsersScreen(
     eventId: String,
     viewModel: EventViewModel,
+    friendViewModel: FriendViewModel,
+    authViewModel: AuthViewModel,
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+    val friendUiState by friendViewModel.uiState.collectAsState()
+    val currentUserId = authViewModel.uiState.collectAsState().value.currentUser?.uid
 
     var users by remember { mutableStateOf<List<User>>(emptyList()) }
     var currentEventAttendees by remember { mutableStateOf<List<String>>(emptyList()) }
@@ -51,18 +58,26 @@ fun InviteUsersScreen(
         searchQuery = searchText  // Then update the actual search query
     }
 
-    // Load users and current attendees
-    LaunchedEffect(eventId) {
+    // Load friends and current attendees
+    LaunchedEffect(eventId, friendUiState.friends, currentUserId) {
         isLoading = true
         try {
-            // Fetch all users
-            users = viewModel.getAllUsers()
+            // Get friends from friendViewModel
+            val friendUsers = if (currentUserId != null) {
+                friendUiState.friends.mapNotNull { friendship ->
+                    val friendUserId = friendship.getOtherUserId(currentUserId)
+                    friendUiState.userDetailsMap[friendUserId]
+                }
+            } else {
+                emptyList()
+            }
+            users = friendUsers
 
             // Get current event attendees from UI state
             val eventAttendees = uiState.eventAttendees[eventId] ?: emptyList()
             currentEventAttendees = eventAttendees.map { it.userId }
         } catch (e: Exception) {
-            errorMessage = "Failed to load users: ${e.message}"
+            errorMessage = "Failed to load friends: ${e.message}"
         } finally {
             isLoading = false
         }
@@ -187,7 +202,7 @@ fun InviteUsersScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "All users have been invited",
+                            text = if (users.isEmpty()) "You have no friends to invite" else "All friends have been invited",
                             color = MaterialTheme.colorScheme.onBackground,
                             style = MaterialTheme.typography.bodyLarge
                         )

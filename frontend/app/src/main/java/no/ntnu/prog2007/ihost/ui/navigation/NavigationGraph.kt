@@ -136,6 +136,8 @@ fun NavigationGraph(
             InviteUsersScreen(
                 eventId = eventId,
                 viewModel = eventViewModel,
+                friendViewModel = friendViewModel,
+                authViewModel = authViewModel,
                 onBack = {
                     navController.popBackStack()
                 }
