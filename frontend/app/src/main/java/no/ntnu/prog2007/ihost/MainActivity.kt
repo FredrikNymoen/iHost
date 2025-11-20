@@ -72,11 +72,11 @@ fun IHostApp() {
     val startDestination = Screen.Login.route
 
     // Navigate when auth state changes
-    LaunchedEffect(authUiState.isLoggedIn, authUiState.isLoading) {
+    LaunchedEffect(authUiState.isLoggedIn, authUiState.isLoading, currentRoute) {
         if (authUiState.isLoggedIn && !authUiState.isLoading && !hasNavigatedOnLogin) {
             // User just logged in/signed up and loading is done
-            // Only navigate if we're currently on Login or SignUp screen
-            if (currentRoute in listOf(Screen.Login.route, Screen.SignUp.route)) {
+            // Navigate if we're on Login/SignUp screen OR if route is still null (app just started)
+            if (currentRoute == null || currentRoute in listOf(Screen.Login.route, Screen.SignUp.route)) {
                 hasNavigatedOnLogin = true
                 // Load fresh events for the new user
                 eventViewModel.loadEvents()
@@ -85,7 +85,7 @@ fun IHostApp() {
                     popUpTo(Screen.Login.route) { inclusive = true }
                 }
             }
-        } else if (!authUiState.isLoggedIn && currentRoute !in listOf(Screen.Login.route, Screen.SignUp.route)) {
+        } else if (!authUiState.isLoggedIn && currentRoute != null && currentRoute !in listOf(Screen.Login.route, Screen.SignUp.route)) {
             // User logged out - reset event data and navigate back to Login
             hasNavigatedOnLogin = false
             eventViewModel.resetEvents()

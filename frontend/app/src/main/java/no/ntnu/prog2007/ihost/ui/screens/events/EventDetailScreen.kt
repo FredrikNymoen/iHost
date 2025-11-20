@@ -878,9 +878,9 @@ fun StatusCard(
 ) {
     val (backgroundColor, textColor, iconColor) = when (statusType) {
         StatusType.ACCEPTED -> Triple(
-            MaterialTheme.colorScheme.primaryContainer,
-            MaterialTheme.colorScheme.onPrimaryContainer,
-            MaterialTheme.colorScheme.primary
+            MaterialTheme.colorScheme.secondary,
+            MaterialTheme.colorScheme.onSecondary,
+            MaterialTheme.colorScheme.onSecondary
         )
         StatusType.PENDING -> Triple(
             MaterialTheme.colorScheme.tertiaryContainer,
