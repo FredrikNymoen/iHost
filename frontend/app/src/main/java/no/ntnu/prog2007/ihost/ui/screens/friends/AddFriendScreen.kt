@@ -172,7 +172,10 @@ fun AddFriendScreen(
                                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                items(filteredUsers) { user ->
+                                items(
+                                    items = filteredUsers,
+                                    key = { user -> user.uid }
+                                ) { user ->
                                     UserItemWithAddButton(
                                         user = user,
                                         onAddFriend = {
