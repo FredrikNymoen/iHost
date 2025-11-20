@@ -33,7 +33,7 @@ class FirebaseTokenFilter(private val firebaseAuth: FirebaseAuth) : OncePerReque
         if (token != null) {
             try {
                 // Verify token with Firebase
-                val decodedToken = firebaseAuth.verifyIdToken(token)
+                val decodedToken = firebaseAuth.verifyIdToken(token, true)
 
                 // Create authentication with user UID
                 val authentication = UsernamePasswordAuthenticationToken(
@@ -45,7 +45,8 @@ class FirebaseTokenFilter(private val firebaseAuth: FirebaseAuth) : OncePerReque
                 // Set authentication in security context
                 SecurityContextHolder.getContext().authentication = authentication
             } catch (e: Exception) {
-                log.warning("Token verification failed: ${e.message}")
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token")
+                return
             }
         }
 
