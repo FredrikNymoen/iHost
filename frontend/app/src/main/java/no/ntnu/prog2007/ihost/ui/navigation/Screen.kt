@@ -54,4 +54,5 @@ sealed class Screen(
     }
 
     object AddFriend : Screen("add_friend", "Add Friend")
+    object FriendsList : Screen("friends_list", "Friends")
 }

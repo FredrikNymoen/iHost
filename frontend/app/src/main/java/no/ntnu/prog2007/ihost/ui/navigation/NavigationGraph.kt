@@ -17,6 +17,7 @@ import no.ntnu.prog2007.ihost.ui.screens.auth.PersonalInfoScreen
 import no.ntnu.prog2007.ihost.ui.screens.editevent.EditEventScreen
 import no.ntnu.prog2007.ihost.ui.screens.profile.ProfileScreen
 import no.ntnu.prog2007.ihost.ui.screens.friends.AddFriendScreen
+import no.ntnu.prog2007.ihost.ui.screens.friends.FriendsListScreen
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.StripeViewModel
@@ -164,6 +165,9 @@ fun NavigationGraph(
                 },
                 onNavigateToAddFriend = {
                     navController.navigate(Screen.AddFriend.route)
+                },
+                onNavigateToFriendsList = {
+                    navController.navigate(Screen.FriendsList.route)
                 }
             )
         }
@@ -177,6 +181,15 @@ fun NavigationGraph(
                 }
             )
         }
-        //composable(Screen.Login)
+
+        composable(Screen.FriendsList.route) {
+            FriendsListScreen(
+                friendViewModel = friendViewModel,
+                authViewModel = authViewModel,
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
     }
 }

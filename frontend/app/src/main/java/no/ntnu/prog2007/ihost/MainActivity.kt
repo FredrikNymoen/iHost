@@ -117,7 +117,8 @@ fun IHostApp() {
                            currentRoute?.startsWith("event_detail") != true &&
                            currentRoute?.startsWith("edit_event") != true &&
                            currentRoute?.startsWith("invite_users") != true &&
-                           currentRoute != Screen.AddFriend.route
+                           currentRoute != Screen.AddFriend.route &&
+                           currentRoute != Screen.FriendsList.route
 
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
