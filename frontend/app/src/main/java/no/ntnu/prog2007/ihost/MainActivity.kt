@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -106,7 +107,9 @@ fun IHostApp() {
     val shouldShowBottomNav = currentRoute in bottomNavScreens.map { it.route }
     val shouldShowHeader = currentRoute != Screen.Login.route &&
                            currentRoute != Screen.SignUp.route &&
-                           currentRoute?.startsWith("event_detail") != true
+                           currentRoute?.startsWith("event_detail") != true &&
+                           currentRoute?.startsWith("edit_event") != true &&
+                           currentRoute?.startsWith("invite_users") != true
 
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
@@ -115,7 +118,7 @@ fun IHostApp() {
         )
     )
 
-    androidx.compose.foundation.layout.Box(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(gradientBrush)
