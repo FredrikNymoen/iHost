@@ -267,13 +267,13 @@ fun ProfileScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 StatCard(
-                    title = "Events Created",
+                    title = "Events Created (All Time)",
                     count = eventsCreated,
                     icon = Icons.Default.Event,
                     modifier = Modifier.weight(1f)
                 )
                 StatCard(
-                    title = "Invitations",
+                    title = "Invitations (All Time)",
                     count = eventsInvitedTo,
                     icon = Icons.Default.MailOutline,
                     modifier = Modifier.weight(1f)
