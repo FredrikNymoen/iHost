@@ -284,8 +284,8 @@ fun ProfileScreen(
                 )
             }
 
-            // 5. Friends Section
-            FriendsSection(
+            // 5. Friends Section - Modern Cards
+            ModernFriendsSection(
                 friendViewModel = friendViewModel,
                 authViewModel = authViewModel,
                 friendUiState = friendUiState,
@@ -714,7 +714,7 @@ fun ChangeAvatarDialog(
 }
 
 @Composable
-fun FriendsSection(
+fun ModernFriendsSection(
     friendViewModel: no.ntnu.prog2007.ihost.viewmodel.FriendViewModel,
     authViewModel: AuthViewModel,
     friendUiState: no.ntnu.prog2007.ihost.viewmodel.FriendUiState,
@@ -726,77 +726,117 @@ fun FriendsSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp)
+            .padding(bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Friends section header
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        // Friends count and action buttons
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            shape = RoundedCornerShape(16.dp)
         ) {
-            // View Friends button
-            Button(
-                onClick = onNavigateToFriendsList,
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "${friendUiState.friends.size} Friends",
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
-                )
-                Icon(
-                    imageVector = Icons.Default.People,
-                    contentDescription = "View Friends",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+                // Friends count
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable(onClick = onNavigateToFriendsList)
+                        .padding(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.People,
+                        contentDescription = "Friends",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Column {
+                        Text(
+                            text = "${friendUiState.friends.size}",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Friends",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
 
-            // Add Friend button
-            Button(
-                onClick = onNavigateToAddFriend,
-                modifier = Modifier.height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.PersonAdd,
-                    contentDescription = "Add Friend",
-                    modifier = Modifier.size(20.dp)
-                )
+                // Add Friend button
+                FilledTonalButton(
+                    onClick = onNavigateToAddFriend,
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PersonAdd,
+                        contentDescription = "Add Friend",
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Add",
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
             }
         }
 
         // Pending friend requests (received)
         if (friendUiState.pendingRequests.isNotEmpty()) {
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
+                modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondary
+                    containerColor = Color(0xFFEFEBE9) // Light brown
                 ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                shape = RoundedCornerShape(16.dp)
             ) {
                 Column(
-                    modifier = Modifier.padding(12.dp)
+                    modifier = Modifier.padding(16.dp)
                 ) {
-                    Text(
-                        text = "Friend Requests (${friendUiState.pendingRequests.size})",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSecondary,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Friend Requests",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF4E342E) // Dark brown
+                        )
+                        Surface(
+                            color = Color(0xFF8D6E63), // Medium brown
+                            shape = CircleShape
+                        ) {
+                            Text(
+                                text = "${friendUiState.pendingRequests.size}",
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    }
 
                     friendUiState.pendingRequests.forEach { friendship ->
                         val requesterUser = friendUiState.userDetailsMap[friendship.user1Id]
@@ -847,14 +887,14 @@ fun FriendsSection(
                                         }
                                     )
                                 },
-                                backgroundColor = MaterialTheme.colorScheme.secondary,
-                                textColor = MaterialTheme.colorScheme.onSecondary,
+                                backgroundColor = Color(0xFFEFEBE9), // Light brown
+                                textColor = Color(0xFF4E342E), // Dark brown
                                 showCard = false
                             )
                             if (friendship != friendUiState.pendingRequests.last()) {
                                 HorizontalDivider(
-                                    modifier = Modifier.padding(vertical = 8.dp),
-                                    color = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.2f)
+                                    modifier = Modifier.padding(vertical = 12.dp),
+                                    color = Color(0xFF4E342E).copy(alpha = 0.2f) // Dark brown with transparency
                                 )
                             }
                         }
@@ -866,24 +906,42 @@ fun FriendsSection(
         // Sent friend requests (pending)
         if (friendUiState.sentRequests.isNotEmpty()) {
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
+                modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary
+                    containerColor = Color(0xFFD7CCC8) // Lighter brown
                 ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                shape = RoundedCornerShape(16.dp)
             ) {
                 Column(
-                    modifier = Modifier.padding(12.dp)
+                    modifier = Modifier.padding(16.dp)
                 ) {
-                    Text(
-                        text = "Sent Requests (${friendUiState.sentRequests.size})",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onTertiary,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Sent Requests",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF3E2723) // Darker brown
+                        )
+                        Surface(
+                            color = Color(0xFF6D4C41), // Dark brown
+                            shape = CircleShape
+                        ) {
+                            Text(
+                                text = "${friendUiState.sentRequests.size}",
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    }
 
                     friendUiState.sentRequests.forEach { friendship ->
                         val recipientUser = friendUiState.userDetailsMap[friendship.user2Id]
@@ -912,14 +970,14 @@ fun FriendsSection(
                                         }
                                     )
                                 },
-                                backgroundColor = MaterialTheme.colorScheme.tertiary,
-                                textColor = MaterialTheme.colorScheme.onTertiary,
+                                backgroundColor = Color(0xFFD7CCC8), // Lighter brown
+                                textColor = Color(0xFF3E2723), // Darker brown
                                 showCard = false
                             )
                             if (friendship != friendUiState.sentRequests.last()) {
                                 HorizontalDivider(
-                                    modifier = Modifier.padding(vertical = 8.dp),
-                                    color = MaterialTheme.colorScheme.onTertiary.copy(alpha = 0.2f)
+                                    modifier = Modifier.padding(vertical = 12.dp),
+                                    color = Color(0xFF3E2723).copy(alpha = 0.2f) // Darker brown with transparency
                                 )
                             }
                         }
