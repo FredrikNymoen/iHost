@@ -110,14 +110,8 @@ fun EventsScreen(
         }
     ) { padding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    start = padding.calculateStartPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                    end = padding.calculateEndPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                    bottom = padding.calculateBottomPadding()
-                    // Skip top padding to reduce space between topBar and content
-                )
+            modifier = Modifier.fillMaxSize()
+                // Skip all scaffold padding to avoid colored boxes
         ) {
             // Top section: Tabs and filters with minimal padding
             Column(

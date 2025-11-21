@@ -104,12 +104,12 @@ fun EventDetailScreen(
         val lastNames = mutableMapOf<String, String>()
 
         for (eventUser in eventAttendees) {
-            val userName = viewModel.getUserUserName(eventUser.userId)
-            val firstName = viewModel.getUserFirstName(eventUser.userId)
-            val lastName = viewModel.getUserLastName(eventUser.userId)
-            userNames[eventUser.userId] = userName
-            firstNames[eventUser.userId] = firstName
-            lastNames[eventUser.userId] = if (lastName != null) lastName else ""
+            val user = viewModel.getUserByUid(eventUser.userId)
+            if (user != null) {
+                userNames[eventUser.userId] = user.username
+                firstNames[eventUser.userId] = user.firstName
+                lastNames[eventUser.userId] = user.lastName ?: ""
+            }
         }
         attendeeUserNames = userNames
         attendeeFirsNames = firstNames
