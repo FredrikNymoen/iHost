@@ -69,11 +69,17 @@ fun ProfileScreen(
         eventUiState.events.count { it.userRole != "CREATOR" }
     }
 
-    // Load profile data when the screen is displayed
-    LaunchedEffect(Unit) {
-        authViewModel.loadUserProfile()
-        eventViewModel.ensureEventsLoaded()
-        friendViewModel.loadFriendships()
+    // Load profile data only if not already loaded
+    LaunchedEffect(user) {
+        if (user != null) {
+            if (userProfile == null && !isProfileLoading) {
+                authViewModel.loadUserProfile()
+            }
+            eventViewModel.ensureEventsLoaded()
+            if (friendUiState.friends.isEmpty() && !friendUiState.isLoading) {
+                friendViewModel.loadFriendships()
+            }
+        }
     }
 
     // Gradient background matching MainActivity

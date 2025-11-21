@@ -60,8 +60,15 @@ fun InviteUsersScreen(
         searchQuery = searchText  // Then update the actual search query
     }
 
+    // Ensure friends are loaded
+    LaunchedEffect(Unit) {
+        if (friendUiState.friends.isEmpty() && !friendUiState.isLoading) {
+            friendViewModel.loadFriendships()
+        }
+    }
+
     // Load friends and current attendees
-    LaunchedEffect(eventId, friendUiState.friends, currentUserId) {
+    LaunchedEffect(eventId, friendUiState.friends, friendUiState.userDetailsMap, currentUserId) {
         isLoading = true
         try {
             // Get friends from friendViewModel
