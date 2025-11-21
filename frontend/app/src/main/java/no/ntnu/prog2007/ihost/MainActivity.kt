@@ -71,15 +71,26 @@ fun IHostApp() {
     // Track if we've already handled initial navigation
     var hasNavigatedOnLogin by remember { mutableStateOf(false) }
 
-    // Initial start destination
-    val startDestination = Screen.Login.route
+    // Determine start destination based on login state
+    val startDestination = if (authUiState.isLoggedIn) {
+        Screen.Events.route
+    } else {
+        Screen.Login.route
+    }
+
+    // Load events on app start if already logged in
+    LaunchedEffect(Unit) {
+        if (authUiState.isLoggedIn) {
+            eventViewModel.ensureEventsLoaded()
+        }
+    }
 
     // Navigate when auth state changes
     LaunchedEffect(authUiState.isLoggedIn, authUiState.isLoading, currentRoute) {
         if (authUiState.isLoggedIn && !authUiState.isLoading) {
             // User just logged in/signed up and loading is done
-            // Navigate if we're on Login/SignUp screen OR if route is still null (app just started)
-            if (currentRoute == null || currentRoute in listOf(Screen.Login.route, Screen.SignUp.route, Screen.PersonalInfo.route)) {
+            // Navigate if we're on Login/SignUp screen
+            if (currentRoute in listOf(Screen.Login.route, Screen.SignUp.route, Screen.PersonalInfo.route)) {
                 if (!hasNavigatedOnLogin) {
                     hasNavigatedOnLogin = true
                     // Load fresh events for the new user

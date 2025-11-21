@@ -35,7 +35,7 @@ class SplashActivity : Activity() {
         )
 
         // Set background color BEFORE setContentView
-        window.decorView.setBackgroundColor(Color.parseColor("#60a5fa"))
+        window.decorView.setBackgroundColor(Color.parseColor("#EFE5DC"))
 
         // Set the content view
         setContentView(R.layout.activity_screen)
@@ -78,9 +78,8 @@ class SplashActivity : Activity() {
 
     private fun animateBackgroundColor() {
         val colorAnimator = ValueAnimator.ofArgb(
-
-            Color.parseColor("#F6E8E0"), // light brown
-            Color.parseColor("#D0B8AC")  // soft brown
+            Color.parseColor("#EFE5DC"), // surface color (WarmCream)
+            Color.parseColor("#EFE5DC")  // same surface color
         )
         colorAnimator.duration = 1000
         colorAnimator.addUpdateListener { animator ->
