@@ -1,6 +1,7 @@
 package no.ntnu.prog2007.ihost.ui.screens.events.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -14,12 +15,18 @@ import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.WatchLater
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -50,295 +57,284 @@ fun EventItem(
     val isPending = eventWithMetadata.userStatus == "PENDING"
     val isDeclined = eventWithMetadata.userStatus == "DECLINED"
 
+    // Get host information
+    var hostUser by remember { mutableStateOf<no.ntnu.prog2007.ihost.data.model.User?>(null) }
+
+    LaunchedEffect(event.creatorUid) {
+        hostUser = viewModel.getUserByUid(event.creatorUid)
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .height(140.dp),
+            .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
-        Box(
+        Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surface)
         ) {
-            Row(
+            // Event image section
+            val firstImageUrl = eventImages?.firstOrNull()?.path
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .fillMaxWidth()
+                    .height(140.dp)
             ) {
-                // Left side - Event details
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .padding(end = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // Status badge and attendee count at top
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                if (firstImageUrl != null) {
+                    AsyncImage(
+                        model = firstImageUrl,
+                        contentDescription = "Event image",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        MaterialTheme.colorScheme.primary,
+                                        MaterialTheme.colorScheme.secondary
+                                    )
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
                     ) {
-                        // Status badge
-                        if (isCreator) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                modifier = Modifier
-                                    .background(
-                                        color = Color(0xFF00BCD4).copy(alpha = 0.3f),
-                                        shape = RoundedCornerShape(4.dp)
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Event,
-                                    contentDescription = "Creator",
-                                    tint = Color(0xFF00BCD4),
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Text(
-                                    text = "host",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Color(0xFF00BCD4),
-                                    fontSize = 10.sp
-                                )
-                            }
-                        } else if (isAccepted) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                modifier = Modifier
-                                    .background(
-                                        color = Color(0xFF4CAF50).copy(alpha = 0.3f),
-                                        shape = RoundedCornerShape(4.dp)
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = "Accepted",
-                                    tint = Color(0xFF4CAF50),
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Text(
-                                    text = "accepted",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Color(0xFF4CAF50),
-                                    fontSize = 10.sp
-                                )
-                            }
-                        } else if (isPending) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                modifier = Modifier
-                                    .background(
-                                        color = Color(0xFFFFC107).copy(alpha = 0.3f),
-                                        shape = RoundedCornerShape(4.dp)
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.WatchLater,
-                                    contentDescription = "Pending",
-                                    tint = Color(0xFFFFC107),
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Text(
-                                    text = "invited",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Color(0xFFFFC107),
-                                    fontSize = 10.sp
-                                )
-                            }
-                        } else if (isDeclined) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                modifier = Modifier
-                                    .background(
-                                        color = Color(0xFFD32F2F).copy(alpha = 0.3f),
-                                        shape = RoundedCornerShape(4.dp)
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "Declined",
-                                    tint = Color(0xFFD32F2F),
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Text(
-                                    text = "declined",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Color(0xFFD32F2F),
-                                    fontSize = 10.sp
-                                )
-                            }
-                        } else {
-                            // Empty space if no status badge
-                            Spacer(modifier = Modifier.width(1.dp))
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Event,
+                            contentDescription = "No image",
+                            tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f),
+                            modifier = Modifier.size(48.dp)
+                        )
+                    }
+                }
+            }
 
-                        // Attendee count
+            // Event details section
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Top row: Status and attendee count
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Status badge (without colors)
+                    if (isCreator) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier
+                                .border(
+                                    width = 1.dp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                                    shape = RoundedCornerShape(4.dp)
+                                )
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
-                            androidx.compose.material3.Icon(
-                                imageVector = Icons.Default.People,
-                                contentDescription = "Attendees",
-                                tint = MaterialTheme.colorScheme.primary,
+                            Icon(
+                                imageVector = Icons.Default.Event,
+                                contentDescription = "Creator",
+                                tint = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.size(14.dp)
                             )
                             Text(
-                                text = "$attendeeCount",
+                                text = "host",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurface,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp
+                                fontSize = 10.sp
                             )
                         }
-                    }
-
-                    // Title
-                    Text(
-                        text = event.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                    // Description
-                    if (event.description != null) {
-                        Text(
-                            text = event.description,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            fontSize = 12.sp,
-                            modifier = Modifier.weight(1f, fill = false)
-                        )
+                    } else if (isAccepted) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier
+                                .border(
+                                    width = 1.dp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                                    shape = RoundedCornerShape(4.dp)
+                                )
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Accepted",
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = "accepted",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontSize = 10.sp
+                            )
+                        }
+                    } else if (isPending) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier
+                                .border(
+                                    width = 1.dp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                                    shape = RoundedCornerShape(4.dp)
+                                )
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.WatchLater,
+                                contentDescription = "Pending",
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = "invited",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontSize = 10.sp
+                            )
+                        }
+                    } else if (isDeclined) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier
+                                .border(
+                                    width = 1.dp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                                    shape = RoundedCornerShape(4.dp)
+                                )
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Declined",
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = "declined",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontSize = 10.sp
+                            )
+                        }
                     } else {
-                        Spacer(modifier = Modifier.weight(1f))
+                        Spacer(modifier = Modifier.width(1.dp))
                     }
 
-                    // Bottom row: Date, Time, and Price
+                    // Attendee count
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        // Date
-                        Text(
-                            text = event.eventDate,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                            fontSize = 11.sp
+                        Icon(
+                            imageVector = Icons.Default.People,
+                            contentDescription = "Attendees",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
                         )
-
-                        // Time
-                        if (event.eventTime != null) {
-                            Text(
-                                text = "•",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                                fontSize = 11.sp
-                            )
-                            Text(
-                                text = event.eventTime,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                                fontSize = 11.sp
-                            )
-                        }
-
-                        //Functionality frizzed until functionality for payment system will be implemented.
-                        // Price indicator
-                        /*
-                        if (!event.free) {
-                            Text(
-                                text = "•",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color.White.copy(alpha = 0.5f),
-                                fontSize = 11.sp
-                            )
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(1.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.AttachMoney,
-                                    contentDescription = "Paid event",
-                                    tint = Color(0xFFFF6F00),
-                                    modifier = Modifier.size(10.dp)
-                                )
-                                Text(
-                                    text = "${String.format("%.0f", event.price)} NOK",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Color(0xFFFF6F00),
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    maxLines = 1,
-                                    softWrap = false
-                                )
-                            }
-                        }*/
+                        Text(
+                            text = "$attendeeCount",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp
+                        )
                     }
                 }
 
+                // Title
+                Text(
+                    text = event.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
 
-                // Right side - Event image
-                val firstImageUrl = eventImages?.firstOrNull()?.path
-
-                // Always show event image (or placeholder)
-                Card(
-                    modifier = Modifier
-                        .width(164.dp)
-                        .height(120.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                // Date and time
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    if (firstImageUrl != null) {
+                    Text(
+                        text = event.eventDate,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        fontSize = 12.sp
+                    )
+
+                    if (event.eventTime != null) {
+                        Text(
+                            text = "•",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                            fontSize = 12.sp
+                        )
+                        Text(
+                            text = event.eventTime,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+
+                // Host information
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Host avatar
+                    if (hostUser?.photoUrl != null) {
                         AsyncImage(
-                            model = firstImageUrl,
-                            contentDescription = "Event image",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                            model = hostUser!!.photoUrl,
+                            contentDescription = "Host photo",
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape),
+                            contentScale = ContentScale.Crop
                         )
                     } else {
-                        // Show placeholder gradient when no image
                         Box(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .background(
-                                    brush = Brush.linearGradient(
-                                        colors = listOf(
-                                            MaterialTheme.colorScheme.surface,
-                                            MaterialTheme.colorScheme.primary
-                                        )
-                                    )
-                                ),
+                                .size(32.dp)
+                                .background(MaterialTheme.colorScheme.primary, CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            androidx.compose.material3.Icon(
-                                imageVector = androidx.compose.material.icons.Icons.Default.Event,
-                                contentDescription = "No image",
-                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                modifier = Modifier.size(40.dp)
+                            Text(
+                                text = hostUser?.firstName?.firstOrNull()?.uppercase() ?: "?",
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
                             )
                         }
                     }
+
+                    // Host name
+                    Text(
+                        text = "${hostUser?.firstName ?: "..."} ${hostUser?.lastName ?: ""}".trim(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
         }

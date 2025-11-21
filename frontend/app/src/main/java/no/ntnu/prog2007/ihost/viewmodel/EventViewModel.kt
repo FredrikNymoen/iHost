@@ -388,6 +388,20 @@ class EventViewModel(
     }
 
     /**
+     * Get user by UID
+     * @param uid The user's UID
+     * @return The User object, or null if fetch fails
+     */
+    suspend fun getUserByUid(uid: String): User? {
+        return try {
+            RetrofitClient.apiService.getUserByUid(uid)
+        } catch (e: Exception) {
+            Log.e("EventViewModel", "Error fetching user for $uid: ${e.message}", e)
+            null
+        }
+    }
+
+    /**
      * Get all users
      * @return List of all users
      */
