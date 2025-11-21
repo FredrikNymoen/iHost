@@ -242,7 +242,7 @@ fun ProfileScreen(
             // 4. Email (read-only)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(bottom = 24.dp)
+                modifier = Modifier.padding(bottom = 8.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Email,
@@ -258,6 +258,32 @@ fun ProfileScreen(
                 )
             }
 
+            // Statistics - Minimalist
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "$eventsCreated events created",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = " • ",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                )
+                Text(
+                    text = "$eventsInvitedTo invitations",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
             // 5. Friends Section
             FriendsSection(
                 friendViewModel = friendViewModel,
@@ -266,27 +292,6 @@ fun ProfileScreen(
                 onNavigateToAddFriend = onNavigateToAddFriend,
                 onNavigateToFriendsList = onNavigateToFriendsList
             )
-
-            // 6. Statistics Cards
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                StatCard(
-                    title = "Events Created (All Time)",
-                    count = eventsCreated,
-                    icon = Icons.Default.Event,
-                    modifier = Modifier.weight(1f)
-                )
-                StatCard(
-                    title = "Invitations (All Time)",
-                    count = eventsInvitedTo,
-                    icon = Icons.Default.MailOutline,
-                    modifier = Modifier.weight(1f)
-                )
-            }
 
             // 7. Profile Info Card (Phone Number)
             if (userProfile.phoneNumber != null) {
