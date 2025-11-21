@@ -56,8 +56,22 @@ class FriendshipController(
             val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
             val timestamp = now.format(formatter)
 
-            val friendship = Friendship(
-                id = "", // Will be set after creation
+            val friendshipData = mapOf(
+                "user1Id" to currentUserId,
+                "user2Id" to toUserId,
+                "status" to "PENDING",
+                "requestedBy" to currentUserId,
+                "requestedAt" to timestamp,
+                "respondedAt" to null
+            )
+
+            // Save to Firestore (without id field)
+            val docRef = firestore.collection(FRIENDSHIPS_COLLECTION)
+                .add(friendshipData)
+                .get()
+
+            val createdFriendship = Friendship(
+                id = docRef.id,
                 user1Id = currentUserId,
                 user2Id = toUserId,
                 status = "PENDING",
@@ -65,13 +79,6 @@ class FriendshipController(
                 requestedAt = timestamp,
                 respondedAt = null
             )
-
-            // Save to Firestore
-            val docRef = firestore.collection(FRIENDSHIPS_COLLECTION)
-                .add(friendship)
-                .get()
-
-            val createdFriendship = friendship.copy(id = docRef.id)
 
             logger.info("Friend request sent from $currentUserId to $toUserId")
             ResponseEntity.status(HttpStatus.CREATED).body(createdFriendship)
@@ -126,15 +133,29 @@ class FriendshipController(
             val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
             val timestamp = now.format(formatter)
 
-            val updatedFriendship = friendship.copy(
-                status = "ACCEPTED",
-                respondedAt = timestamp
+            val updateData = mapOf(
+                "user1Id" to friendship.user1Id,
+                "user2Id" to friendship.user2Id,
+                "status" to "ACCEPTED",
+                "requestedBy" to friendship.requestedBy,
+                "requestedAt" to friendship.requestedAt,
+                "respondedAt" to timestamp
             )
 
             firestore.collection(FRIENDSHIPS_COLLECTION)
                 .document(friendshipId)
-                .set(updatedFriendship)
+                .set(updateData)
                 .get()
+
+            val updatedFriendship = Friendship(
+                id = friendshipId,
+                user1Id = friendship.user1Id,
+                user2Id = friendship.user2Id,
+                status = "ACCEPTED",
+                requestedBy = friendship.requestedBy,
+                requestedAt = friendship.requestedAt,
+                respondedAt = timestamp
+            )
 
             logger.info("Friend request accepted: $friendshipId")
             ResponseEntity.ok(updatedFriendship)
@@ -189,15 +210,29 @@ class FriendshipController(
             val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
             val timestamp = now.format(formatter)
 
-            val updatedFriendship = friendship.copy(
-                status = "DECLINED",
-                respondedAt = timestamp
+            val updateData = mapOf(
+                "user1Id" to friendship.user1Id,
+                "user2Id" to friendship.user2Id,
+                "status" to "DECLINED",
+                "requestedBy" to friendship.requestedBy,
+                "requestedAt" to friendship.requestedAt,
+                "respondedAt" to timestamp
             )
 
             firestore.collection(FRIENDSHIPS_COLLECTION)
                 .document(friendshipId)
-                .set(updatedFriendship)
+                .set(updateData)
                 .get()
+
+            val updatedFriendship = Friendship(
+                id = friendshipId,
+                user1Id = friendship.user1Id,
+                user2Id = friendship.user2Id,
+                status = "DECLINED",
+                requestedBy = friendship.requestedBy,
+                requestedAt = friendship.requestedAt,
+                respondedAt = timestamp
+            )
 
             logger.info("Friend request declined: $friendshipId")
             ResponseEntity.ok(updatedFriendship)
