@@ -75,6 +75,7 @@ fun EventsScreen(
         containerColor = Color.Transparent,
         floatingActionButton = { // Setting floating action buttons to a column
             Column(
+                modifier = Modifier.offset(y = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 FloatingActionButton( // Button to join event with code
