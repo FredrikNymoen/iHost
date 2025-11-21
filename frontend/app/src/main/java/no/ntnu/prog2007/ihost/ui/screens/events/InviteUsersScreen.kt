@@ -219,21 +219,6 @@ fun InviteUsersScreen(
                     Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
-
-                        // Selected count
-                        if (selectedUserIds.isNotEmpty()) {
-                            Surface(
-                                modifier = Modifier.fillMaxWidth(),
-                                color = MaterialTheme.colorScheme.surface
-                            ) {
-                                Text(
-                                    text = "${selectedUserIds.size} user(s) selected",
-                                    modifier = Modifier.padding(16.dp),
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
                         OutlinedTextField(
                             value = searchText,
                             onValueChange = { searchText = it },
