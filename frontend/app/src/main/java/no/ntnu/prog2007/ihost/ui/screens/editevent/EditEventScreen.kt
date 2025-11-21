@@ -337,7 +337,7 @@ fun EditEventScreen(
     Scaffold(
         topBar = {
             TopBar(
-                title = { Text("Edit Event", color = MaterialTheme.colorScheme.onSurface) },
+                title = { Text("Edit Event") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(

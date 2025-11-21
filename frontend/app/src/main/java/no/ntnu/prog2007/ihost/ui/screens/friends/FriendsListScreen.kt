@@ -42,10 +42,7 @@ fun FriendsListScreen(
         topBar = {
             TopBar(
                 title = {
-                    Text(
-                        "Friends (${friendUiState.friends.size})",
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    Text("Friends (${friendUiState.friends.size})")
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {

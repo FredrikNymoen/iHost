@@ -121,12 +121,7 @@ fun EventDetailScreen(
             //Toppbar for event description screen
             TopBar(
                 title = {
-                    Text(
-                        event?.title ?: "Event Details",
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 36.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Text(event?.title ?: "Event Details")
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {

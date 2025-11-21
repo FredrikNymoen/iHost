@@ -92,7 +92,7 @@ fun InviteUsersScreen(
         containerColor = Color.Transparent,
         topBar = {
             TopBar(
-                title = { Text("Invite Users", color = MaterialTheme.colorScheme.onSurface) },
+                title = { Text("Invite Users") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(

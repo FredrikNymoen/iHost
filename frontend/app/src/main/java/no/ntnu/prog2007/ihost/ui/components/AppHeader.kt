@@ -21,7 +21,7 @@ fun AppHeader(
             .background(MaterialTheme.colorScheme.surface)
     ) {
         // Add spacing for status bar
-        Spacer(modifier = Modifier.height(13.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         // Header content
         Box(
@@ -44,7 +44,7 @@ fun AppHeader(
                     fontWeight = FontWeight.Bold,
                     fontSize = 28.sp,
                     color = MaterialTheme.colorScheme.primary,
-                    letterSpacing = 0.5.sp
+                    letterSpacing = 0.4.sp
                 )
             }
         }
