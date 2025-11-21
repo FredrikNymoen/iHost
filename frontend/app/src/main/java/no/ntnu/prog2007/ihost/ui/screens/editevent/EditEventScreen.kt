@@ -72,6 +72,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import no.ntnu.prog2007.ihost.ui.components.LocationPickerDialog
+import no.ntnu.prog2007.ihost.ui.components.TopBar
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import java.time.Instant
 import java.time.LocalDate
@@ -335,7 +336,7 @@ fun EditEventScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            TopBar(
                 title = { Text("Edit Event", color = MaterialTheme.colorScheme.onSurface) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -345,10 +346,7 @@ fun EditEventScreen(
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                )
+                }
             )
         },
         containerColor = Color.Transparent

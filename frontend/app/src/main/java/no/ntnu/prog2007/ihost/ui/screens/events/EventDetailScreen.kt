@@ -50,6 +50,7 @@ import coil3.compose.AsyncImage
 import kotlinx.coroutines.delay
 import java.time.temporal.ChronoUnit
 import no.ntnu.prog2007.ihost.ui.components.UserCard
+import no.ntnu.prog2007.ihost.ui.components.TopBar
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -118,7 +119,7 @@ fun EventDetailScreen(
     Scaffold(
         topBar = {
             //Toppbar for event description screen
-            TopAppBar(
+            TopBar(
                 title = {
                     Text(
                         event?.title ?: "Event Details",
@@ -126,7 +127,8 @@ fun EventDetailScreen(
                         fontSize = 36.sp,
                         fontWeight = FontWeight.Medium
                     )
-                }, navigationIcon = {
+                },
+                navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
@@ -137,7 +139,6 @@ fun EventDetailScreen(
                 },
                 // Icon Button to share your event with others
                 actions = {
-
                     IconButton(onClick = {
                         val shareMessage =
                             "Join my event '${event?.title}' on iHost! Use the share code: ${event?.shareCode}"
@@ -159,9 +160,7 @@ fun EventDetailScreen(
                             contentDescription = "Localized description"
                         )
                     }
-                }, colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                )
+                }
             )
         }, containerColor = Color.Transparent
     ) { padding ->

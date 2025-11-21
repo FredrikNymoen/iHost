@@ -29,6 +29,7 @@ import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.ui.components.UserCard
+import no.ntnu.prog2007.ihost.ui.components.TopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,7 +91,7 @@ fun InviteUsersScreen(
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
-            TopAppBar(
+            TopBar(
                 title = { Text("Invite Users", color = MaterialTheme.colorScheme.onSurface) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -100,10 +101,7 @@ fun InviteUsersScreen(
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
+                }
             )
         },
         floatingActionButton = {
