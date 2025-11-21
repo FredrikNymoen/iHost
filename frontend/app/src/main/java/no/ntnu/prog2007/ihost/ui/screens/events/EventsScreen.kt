@@ -309,8 +309,8 @@ fun EventsScreen(
                             compareBy({ it.event.eventDate }, { it.event.eventTime ?: "" })
                         )
                         LazyColumn(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(sortedEvents) { eventWithMetadata ->
                                 EventItem(
