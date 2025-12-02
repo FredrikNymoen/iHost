@@ -1,4 +1,4 @@
-package no.ntnu.prog2007.ihostapi.model
+package no.ntnu.prog2007.ihostapi.model.dto
 
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank

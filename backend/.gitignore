@@ -43,6 +43,8 @@ out/
 .DS_Store
 
 CLAUDE.md
+README.md
+nul
 
 firebase-key.json
 

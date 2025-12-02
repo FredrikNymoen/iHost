@@ -1,4 +1,4 @@
-package no.ntnu.prog2007.ihostapi.model
+package no.ntnu.prog2007.ihostapi.model.entity
 
 import jakarta.validation.constraints.NotBlank
 
@@ -25,12 +25,4 @@ data class Friendship(
     val requestedAt: String? = null,
 
     val respondedAt: String? = null
-)
-
-/**
- * Request model for sending a friend request
- */
-data class FriendRequestRequest(
-    @field:NotBlank(message = "To user ID is required")
-    val toUserId: String = ""
 )

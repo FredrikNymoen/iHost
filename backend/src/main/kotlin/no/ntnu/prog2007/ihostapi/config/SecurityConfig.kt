@@ -1,6 +1,6 @@
 package no.ntnu.prog2007.ihostapi.config
 
-import no.ntnu.prog2007.ihostapi.security.FirebaseTokenFilter
+import no.ntnu.prog2007.ihostapi.security.filter.FirebaseTokenFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity

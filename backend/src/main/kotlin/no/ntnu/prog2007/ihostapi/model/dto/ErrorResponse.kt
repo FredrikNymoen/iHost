@@ -1,4 +1,4 @@
-package no.ntnu.prog2007.ihostapi.model
+package no.ntnu.prog2007.ihostapi.model.dto
 
 /**
  * Standard error response for API endpoints

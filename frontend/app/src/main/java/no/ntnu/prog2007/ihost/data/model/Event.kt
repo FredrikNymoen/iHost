@@ -26,9 +26,6 @@ data class Event(
     @SerializedName("creatorUid")
     val creatorUid: String,
 
-    @SerializedName("creatorName")
-    val creatorName: String? = null,
-
     @SerializedName("free")
     val free: Boolean = true,
 

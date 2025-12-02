@@ -1,4 +1,4 @@
-package no.ntnu.prog2007.ihostapi.security
+package no.ntnu.prog2007.ihostapi.security.filter
 
 import com.google.firebase.auth.FirebaseAuth
 import jakarta.servlet.FilterChain
@@ -17,7 +17,6 @@ import java.util.logging.Logger
  */
 @Component
 class FirebaseTokenFilter(private val firebaseAuth: FirebaseAuth) : OncePerRequestFilter() {
-    private val log = Logger.getLogger(FirebaseTokenFilter::class.java.name)
 
     /**
      * Filter requests to validate Firebase JWT tokens
