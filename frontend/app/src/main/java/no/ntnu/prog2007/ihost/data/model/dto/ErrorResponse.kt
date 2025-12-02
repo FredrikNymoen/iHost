@@ -1,4 +1,4 @@
-package no.ntnu.prog2007.ihost.data.model
+package no.ntnu.prog2007.ihost.data.model.dto
 
 import com.google.gson.annotations.SerializedName
 

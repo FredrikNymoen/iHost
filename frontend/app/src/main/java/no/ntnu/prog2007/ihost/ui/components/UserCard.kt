@@ -16,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import no.ntnu.prog2007.ihost.data.model.User
+import no.ntnu.prog2007.ihost.data.model.domain.User
 
 /**
  * Reusable user card component that displays user information with optional actions

@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.delay
-import no.ntnu.prog2007.ihost.data.model.User
+import no.ntnu.prog2007.ihost.data.model.domain.User
 import no.ntnu.prog2007.ihost.data.model.getOtherUserId
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel

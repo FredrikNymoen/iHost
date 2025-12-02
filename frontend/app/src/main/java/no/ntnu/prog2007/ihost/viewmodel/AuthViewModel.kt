@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import no.ntnu.prog2007.ihost.data.model.User
+import no.ntnu.prog2007.ihost.data.model.domain.User
 import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
 import no.ntnu.prog2007.ihost.data.repository.AuthRepository
 import okhttp3.MediaType.Companion.toMediaTypeOrNull

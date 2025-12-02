@@ -1,13 +1,13 @@
 package no.ntnu.prog2007.ihost.data.repository
 
 import android.util.Log
-import no.ntnu.prog2007.ihost.data.model.Friendship
-import no.ntnu.prog2007.ihost.data.remote.ApiService
-import no.ntnu.prog2007.ihost.data.remote.FriendRequestRequest
+import no.ntnu.prog2007.ihost.data.model.domain.Friendship
+import no.ntnu.prog2007.ihost.data.model.dto.FriendRequestRequest
+import no.ntnu.prog2007.ihost.data.remote.api.FriendshipApi
 import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
 
 class FriendshipRepository(
-    private val apiService: ApiService = RetrofitClient.apiService
+    private val apiService: FriendshipApi = RetrofitClient.friendshipApi
 ) {
 
     /**

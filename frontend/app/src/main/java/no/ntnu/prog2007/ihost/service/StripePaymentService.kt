@@ -7,12 +7,14 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import no.ntnu.prog2007.ihost.data.model.PaymentIntentRequest
-import no.ntnu.prog2007.ihost.data.remote.ApiService
+import no.ntnu.prog2007.ihost.data.repository.StripeRepository
 
-
+/**
+ * Service for handling Stripe payment operations
+ * Uses StripeRepository for API communication
+ */
 class StripePaymentService(
-    private val apiService: ApiService,
+    private val stripeRepository: StripeRepository,
     private val activity: ComponentActivity
 ) {
     companion object {
@@ -76,15 +78,18 @@ class StripePaymentService(
             setCallbacks(onComplete, onFailed)
 
             // 1) Hent publishable key
-            val publishableKey = apiService.getKeys().publishableKey
-                ?: throw IllegalStateException("Publishable key not available")
+            val publishableKeyResult = stripeRepository.getPublishableKey()
+            val publishableKey = publishableKeyResult.getOrElse {
+                throw IllegalStateException("Failed to get publishable key: ${it.message}")
+            }
             PaymentConfiguration.init(activity.applicationContext, publishableKey)
             Log.d(TAG, "PaymentConfiguration initialized")
 
             // 2) Lag PaymentIntent (backend)
-            val paymentIntentResponse = apiService.createPaymentIntent(
-                PaymentIntentRequest(eventId = eventId)
-            )
+            val paymentIntentResult = stripeRepository.createPaymentIntent(eventId)
+            val paymentIntentResponse = paymentIntentResult.getOrElse {
+                throw IllegalStateException("Failed to create payment intent: ${it.message}")
+            }
             val clientSecret = paymentIntentResponse.paymentIntent
             if (clientSecret.isNullOrEmpty()) {
                 throw IllegalStateException("Missing client secret from backend")

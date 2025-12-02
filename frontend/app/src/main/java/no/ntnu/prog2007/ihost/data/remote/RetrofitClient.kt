@@ -4,6 +4,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
+import no.ntnu.prog2007.ihost.data.remote.api.*
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -58,12 +59,35 @@ object RetrofitClient {
         .addInterceptor(FirebaseAuthInterceptor())
         .build()
 
-    val apiService: ApiService by lazy {
+    private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(ApiService::class.java)
+    }
+
+    val userApi: UserApi by lazy {
+        retrofit.create(UserApi::class.java)
+    }
+
+    val eventApi: EventApi by lazy {
+        retrofit.create(EventApi::class.java)
+    }
+
+    val eventUserApi: EventUserApi by lazy {
+        retrofit.create(EventUserApi::class.java)
+    }
+
+    val imageApi: ImageApi by lazy {
+        retrofit.create(ImageApi::class.java)
+    }
+
+    val friendshipApi: FriendshipApi by lazy {
+        retrofit.create(FriendshipApi::class.java)
+    }
+
+    val stripeApi: StripeApi by lazy {
+        retrofit.create(StripeApi::class.java)
     }
 }

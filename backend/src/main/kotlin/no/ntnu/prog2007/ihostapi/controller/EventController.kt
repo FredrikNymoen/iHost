@@ -22,8 +22,8 @@ class EventController(
     /**
      * Get all events for current user
      */
-    @GetMapping
-    fun getAllEvents(): ResponseEntity<List<Map<String, Any?>>> {
+    @GetMapping()
+    fun getUserEvents(): ResponseEntity<List<Map<String, Any?>>> {
         val uid = getCurrentUserId()
         val events = eventService.getAllEventsForUser(uid)
         logger.info("Retrieved ${events.size} events for user: $uid")

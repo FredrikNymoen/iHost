@@ -5,16 +5,20 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.userProfileChangeRequest
 import kotlinx.coroutines.tasks.await
-import no.ntnu.prog2007.ihost.data.model.CreateUserRequest
-import no.ntnu.prog2007.ihost.data.model.User
+import no.ntnu.prog2007.ihost.data.model.dto.CreateUserRequest
 import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
-import retrofit2.HttpException
+import no.ntnu.prog2007.ihost.data.remote.api.UserApi
 
+/**
+ * Repository for Firebase Authentication operations
+ * Handles user registration, sign in/out, and Firebase user management
+ *
+ * For user profile operations (get, update, etc.), use UserRepository instead
+ */
 class AuthRepository(
-    private val firebaseAuth: FirebaseAuth
+    private val firebaseAuth: FirebaseAuth,
+    private val userApi: UserApi = RetrofitClient.userApi
 ) {
-
-    private val apiService = RetrofitClient.apiService
 
     /**
      * Register user in Firebase Auth and create profile on backend
@@ -58,7 +62,7 @@ class AuthRepository(
             "Sending to backend: uid=${firebaseUser.uid}, email=$email, displayName=$username"
         )
 
-        val response = apiService.registerUser(createUserRequest)
+        val response = userApi.registerUser(createUserRequest)
 
         Log.d("AuthRepository", "Backend registration successful: ${response.message}")
 
@@ -81,29 +85,6 @@ class AuthRepository(
     }
 
     /**
-     * Fetch user profile from backend by UID
-     */
-    suspend fun getUserProfile(uid: String): Result<User> = try {
-        try {
-            val user = apiService.getUserByUid(uid)
-            Result.success(user)
-        } catch (e: HttpException) {
-            if (e.code() == 404) {
-                // 404 not found
-                Log.e("AuthRepository", "User profile not found for UID $uid")
-                Result.failure(Exception("User profile not found (404)"))
-            } else {
-                // Other http errors
-                Log.e("AuthRepository", "HTTP error fetching profile: ${e.code()}, ${e.message()}")
-                Result.failure(e)
-            }
-        }
-    } catch (e: Exception) {
-        Log.e("AuthRepository", "Error fetching user profile: ${e.message}")
-        Result.failure(e)
-    }
-
-    /**
      * Sign out current user
      */
     fun signOut() {
@@ -111,7 +92,7 @@ class AuthRepository(
     }
 
     /**
-     * Get current user
+     * Get current Firebase user
      */
     fun getCurrentUser(): FirebaseUser? = firebaseAuth.currentUser
 
@@ -122,37 +103,5 @@ class AuthRepository(
         firebaseAuth.currentUser?.getIdToken(true)?.await()?.token
     } catch (e: Exception) {
         null
-    }
-
-    suspend fun isUsernameAvailable(username: String): Result<Boolean> = try {
-        val response = apiService.isUsernameAvailable(username)
-        Result.success(response["available"] == true)
-    } catch (e: Exception) {
-        Log.e("AuthRepository", "Username availability check error: ${e.message}", e)
-        Result.failure(e)
-    }
-
-    /**
-     * Update user profile on backend
-     */
-    suspend fun updateUserProfile(
-        uid: String,
-        firstName: String? = null,
-        lastName: String? = null,
-        photoUrl: String? = null,
-        phoneNumber: String? = null
-    ): Result<User> = try {
-        val updateRequest = no.ntnu.prog2007.ihost.data.model.UpdateUserRequest(
-            firstName = firstName,
-            lastName = lastName,
-            photoUrl = photoUrl,
-            phoneNumber = phoneNumber
-        )
-        val updatedUser = apiService.updateUserProfile(uid, updateRequest)
-        Log.d("AuthRepository", "User profile updated successfully for UID: $uid")
-        Result.success(updatedUser)
-    } catch (e: Exception) {
-        Log.e("AuthRepository", "Error updating user profile: ${e.message}", e)
-        Result.failure(e)
     }
 }

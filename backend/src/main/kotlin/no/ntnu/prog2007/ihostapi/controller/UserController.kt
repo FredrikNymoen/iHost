@@ -21,18 +21,6 @@ class UserController(
 ) {
     private val logger = Logger.getLogger(UserController::class.java.name)
 
-    /**
-     * Verify that the user is authenticated and return user data
-     */
-    @GetMapping("/verify")
-    fun verifyToken(): ResponseEntity<User> {
-        val uid = getCurrentUserId()
-        val user = userService.getUserById(uid)
-            ?: throw IllegalArgumentException("User not found")
-
-        logger.info("Token verified for user: $uid")
-        return ResponseEntity.ok(user)
-    }
 
     /**
      * Get all users (for inviting users to events)

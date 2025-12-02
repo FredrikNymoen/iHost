@@ -1,4 +1,4 @@
-package no.ntnu.prog2007.ihost.data.model
+package no.ntnu.prog2007.ihost.data.model.domain
 
 /**
  * Data class representing a friendship between two users

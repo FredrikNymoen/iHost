@@ -36,7 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import no.ntnu.prog2007.ihost.data.model.Event
+import no.ntnu.prog2007.ihost.data.model.domain.Event
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import androidx.compose.material.icons.filled.Share

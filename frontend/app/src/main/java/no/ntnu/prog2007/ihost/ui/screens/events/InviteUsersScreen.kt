@@ -23,7 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
-import no.ntnu.prog2007.ihost.data.model.User
+import no.ntnu.prog2007.ihost.data.model.domain.User
 import no.ntnu.prog2007.ihost.data.model.getOtherUserId
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel

@@ -8,8 +8,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import no.ntnu.prog2007.ihost.data.model.Friendship
-import no.ntnu.prog2007.ihost.data.model.User
+import no.ntnu.prog2007.ihost.data.model.domain.Friendship
+import no.ntnu.prog2007.ihost.data.model.domain.User
 import no.ntnu.prog2007.ihost.data.repository.FriendshipRepository
 import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
 
