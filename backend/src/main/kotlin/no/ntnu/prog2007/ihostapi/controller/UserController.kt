@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.*
 import java.util.logging.Logger
 
 @RestController
-@RequestMapping("/api/auth")
-class AuthController(
+@RequestMapping("/api/users")
+class UserController(
     private val userService: UserService
 ) {
-    private val logger = Logger.getLogger(AuthController::class.java.name)
+    private val logger = Logger.getLogger(UserController::class.java.name)
 
     /**
      * Verify that the user is authenticated and return user data
@@ -37,7 +37,7 @@ class AuthController(
     /**
      * Get all users (for inviting users to events)
      */
-    @GetMapping("/users")
+    @GetMapping("/")
     fun getAllUsers(): ResponseEntity<List<User>> {
         val uid = getCurrentUserId() // Verify authentication
         val users = userService.getAllUsers()
@@ -49,7 +49,7 @@ class AuthController(
     /**
      * Get user by UID (public endpoint)
      */
-    @GetMapping("/user/{uid}")
+    @GetMapping("/{uid}")
     fun getUserByUid(@PathVariable uid: String): ResponseEntity<User> {
         val user = userService.getUserById(uid)
             ?: throw IllegalArgumentException("User not found")
@@ -82,7 +82,7 @@ class AuthController(
     /**
      * Update user profile (only the user can update their own profile)
      */
-    @PutMapping("/user/{uid}")
+    @PutMapping("/{uid}")
     fun updateUserProfile(
         @PathVariable uid: String,
         @Valid @RequestBody request: UpdateUserRequest

@@ -8,18 +8,18 @@ import retrofit2.http.*
 
 interface ApiService {
     // Auth endpoints
-    @POST("api/auth/register")
+    @POST("api/users/register")
     suspend fun registerUser(
         @Body request: CreateUserRequest
     ): AuthResponse
 
-    //@GET("api/auth/verify")
+    //@GET("api/users/verify")
     //suspend fun verifyAuth(): User
 
-    @GET("api/auth/users")
+    @GET("api/users")
     suspend fun getAllUsers(): List<User>
 
-    @GET("api/auth/user/{uid}")
+    @GET("api/users/{uid}")
     suspend fun getUserByUid(
         @Path("uid") uid: String
     ): User
@@ -104,11 +104,11 @@ interface ApiService {
     ): List<EventImage>
 
     // Username availability check
-    @GET("api/auth/username-available/{username}")
+    @GET("api/users/username-available/{username}")
     suspend fun isUsernameAvailable(@Path("username") username: String): Map<String, Boolean>
 
     // Update user profile
-    @PUT("api/auth/user/{uid}")
+    @PUT("api/users/{uid}")
     suspend fun updateUserProfile(
         @Path("uid") uid: String,
         @Body request: UpdateUserRequest
