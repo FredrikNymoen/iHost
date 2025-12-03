@@ -163,15 +163,16 @@ fun IHostApp() {
         Destination.Profile
     )
 
+    // Screens that should show header
+    val headerScreens = listOf(
+        Destination.Events,
+        Destination.AddEvent,
+        Destination.Profile
+    )
+
     // Check if we should show bottom navigation and header
     val shouldShowBottomNav = currentRoute in bottomNavScreens.map { it.route }
-    val shouldShowHeader = currentRoute != Destination.Login.route &&
-                           currentRoute != Destination.SignUp.route &&
-                           currentRoute?.startsWith("event_detail") != true &&
-                           currentRoute?.startsWith("edit_event") != true &&
-                           currentRoute?.startsWith("invite_users") != true &&
-                           currentRoute != Destination.AddFriend.route &&
-                           currentRoute != Destination.FriendsList.route
+    val shouldShowHeader = currentRoute in headerScreens.map { it.route }
 
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(

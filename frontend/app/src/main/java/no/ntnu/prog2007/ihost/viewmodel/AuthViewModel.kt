@@ -32,9 +32,11 @@ data class AuthUiState(
  * State holder for registration form fields for the personal info part of the registration form
  */
 data class RegistrationState(
+    val email: String = "",
+    val password: String = "",
     val firstName: String = "",
     val lastName: String = "",
-    val email: String = "",
+    val username: String = ""
 )
 
 class AuthViewModel : ViewModel() {
@@ -60,6 +62,8 @@ class AuthViewModel : ViewModel() {
             "firstName" -> _registrationState.update { it.copy(firstName = value) }
             "lastName" -> _registrationState.update { it.copy(lastName = value) }
             "email" -> _registrationState.update { it.copy(email = value) }
+            "password" -> _registrationState.update { it.copy(password = value) }
+            "username" -> _registrationState.update { it.copy(username = value) }
         }
     }
 

@@ -17,7 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import no.ntnu.prog2007.ihost.ui.components.JoinEventDialog
+import no.ntnu.prog2007.ihost.ui.screens.events.main.components.JoinEventDialog
 import no.ntnu.prog2007.ihost.ui.screens.events.main.components.EventItem
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel

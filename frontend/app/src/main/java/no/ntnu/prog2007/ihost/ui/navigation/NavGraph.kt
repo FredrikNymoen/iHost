@@ -35,7 +35,7 @@ fun NavGraphBuilder.loginScreen(
             viewModel = authViewModel,
             onNavigateToSignUp = {
                 authViewModel.resetRegistrationState()
-                navController.navigate(Destination.PersonalInfo.route)
+                navController.navigate(Destination.SignUp.route)
             }
         )
     }
@@ -48,8 +48,8 @@ fun NavGraphBuilder.personalInfoScreen(
     composable(Destination.PersonalInfo.route) {
         PersonalInfoScreen(
             viewModel = authViewModel,
-            onNext = {
-                navController.navigate(Destination.SignUp.route)
+            onSignUp = {
+                // Navigation handled by MainActivity based on auth state
             },
             onNavigateToLogin = {
                 navController.popBackStack()
@@ -68,7 +68,7 @@ fun NavGraphBuilder.signUpScreen(
             onNavigateToLogin = {
                 navController.popBackStack()
             },
-            onNavigateBack = {
+            onNavigateToPersonalInfo = {
                 navController.navigate(Destination.PersonalInfo.route)
             }
         )
