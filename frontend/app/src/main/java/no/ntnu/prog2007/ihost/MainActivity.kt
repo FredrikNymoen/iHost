@@ -4,12 +4,16 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -17,17 +21,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.FirebaseApp
 import no.ntnu.prog2007.ihost.service.StripePaymentService
-import no.ntnu.prog2007.ihost.ui.components.AppHeader
-import no.ntnu.prog2007.ihost.ui.components.BottomNavigationBar
+import no.ntnu.prog2007.ihost.ui.components.layout.AppHeader
+import no.ntnu.prog2007.ihost.ui.components.layout.BottomNavigationBar
 import no.ntnu.prog2007.ihost.ui.navigation.AppNavHost
 import no.ntnu.prog2007.ihost.ui.navigation.Destination
 import no.ntnu.prog2007.ihost.ui.theme.IHostTheme
@@ -38,6 +44,9 @@ import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Install splash screen
+        installSplashScreen()
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
@@ -49,10 +58,43 @@ class MainActivity : ComponentActivity() {
         StripePaymentService.initializePaymentSheet(this)
 
         setContent {
+            var showSplash by remember { mutableStateOf(true) }
+
             IHostTheme {
-                IHostApp()
+                if (showSplash) {
+                    // Custom splash screen with "iHost" text
+                    SplashScreen {
+                        showSplash = false
+                    }
+                } else {
+                    IHostApp()
+                }
             }
         }
+    }
+}
+
+@Composable
+fun SplashScreen(onSplashFinished: () -> Unit) {
+    // Show splash for a short duration
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(800) // 0.8 second
+        onSplashFinished()
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFEFE5DC)), // WarmCream color
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "iHost",
+            fontSize = 120.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF6B5446), // RichBrown color
+            letterSpacing = (-0.1).sp
+        )
     }
 }
 

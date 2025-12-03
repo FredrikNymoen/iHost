@@ -1,10 +1,11 @@
-package no.ntnu.prog2007.ihost.ui.components
+package no.ntnu.prog2007.ihost.ui.components.dialogs
 
-import android.app.Activity
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Address
 import android.location.Geocoder
 import android.os.Build
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,11 +24,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
+import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.maps.android.compose.*
@@ -42,7 +45,7 @@ import java.util.Locale
  * Performs reverse geocoding to get formatted address from coordinates
  * Format: "Gatenavn Gatenummer, Postnummer Poststed"
  */
-suspend fun getAddressFromLocation(context: android.content.Context, latLng: LatLng): String? {
+suspend fun getAddressFromLocation(context: Context, latLng: LatLng): String? {
     return withContext(Dispatchers.IO) {
         try {
             val geocoder = Geocoder(context, Locale.getDefault())
@@ -57,7 +60,7 @@ suspend fun getAddressFromLocation(context: android.content.Context, latLng: Lat
                     }
                 }
                 // Wait a bit for the callback
-                kotlinx.coroutines.delay(1000)
+                delay(1000)
                 addressResult
             } else {
                 // For older Android versions
@@ -80,7 +83,7 @@ suspend fun getAddressFromLocation(context: android.content.Context, latLng: Lat
  * Formats address with preference for full address line
  * This gives better results for locations like NTNU, businesses, etc.
  */
-private fun formatAddress(address: android.location.Address): String {
+private fun formatAddress(address: Address): String {
     // Get the full first address line (most complete and accurate)
     val fullAddressLine = address.getAddressLine(0)
 
@@ -154,7 +157,7 @@ fun LocationPickerDialog(
         try {
             val appInfo = context.packageManager.getApplicationInfo(
                 context.packageName,
-                android.content.pm.PackageManager.GET_META_DATA
+                PackageManager.GET_META_DATA
             )
             val apiKey = appInfo.metaData.getString("com.google.android.geo.API_KEY") ?: ""
             if (apiKey.isNotEmpty() && apiKey != "YOUR_GOOGLE_MAPS_API_KEY_HERE") {
@@ -288,8 +291,8 @@ fun LocationPickerDialog(
                                             placesClient?.let { client ->
                                                 // Fetch place details
                                                 val placeFields = listOf(
-                                                    com.google.android.libraries.places.api.model.Place.Field.LAT_LNG,
-                                                    com.google.android.libraries.places.api.model.Place.Field.NAME
+                                                    Place.Field.LAT_LNG,
+                                                    Place.Field.NAME
                                                 )
                                                 val request = FetchPlaceRequest
                                                     .builder(prediction.placeId, placeFields)
@@ -316,7 +319,7 @@ fun LocationPickerDialog(
 
                                                                 // Animate camera to new position
                                                                 cameraPositionState.animate(
-                                                                    update = com.google.android.gms.maps.CameraUpdateFactory
+                                                                    update = CameraUpdateFactory
                                                                         .newLatLngZoom(latLng, 15f),
                                                                     durationMs = 1000
                                                                 )

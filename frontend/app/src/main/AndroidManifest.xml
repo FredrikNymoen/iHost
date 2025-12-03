@@ -27,23 +27,17 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="${GOOGLE_MAPS_API_KEY}" />
 
-        <!-- SplashActivity as the ONLY launcher -->
+        <!-- MainActivity as launcher with splash screen -->
         <activity
-            android:name=".SplashActivity"
+            android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/SplashTheme">
+            android:label="@string/app_name"
+            android:theme="@style/Theme.IHost">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <!-- MainActivity - NO launcher intent filter -->
-        <activity
-            android:name=".MainActivity"
-            android:exported="false"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.IHost" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

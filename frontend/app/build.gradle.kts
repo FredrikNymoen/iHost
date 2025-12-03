@@ -111,6 +111,9 @@ dependencies {
     // Icons
     implementation("androidx.compose.material:material-icons-extended")
 
+    // Splash Screen API
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
     // Stripe
     implementation("com.stripe:stripe-android:20.49.0")
 

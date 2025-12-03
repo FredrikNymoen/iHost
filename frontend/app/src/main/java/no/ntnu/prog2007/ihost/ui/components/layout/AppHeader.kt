@@ -1,4 +1,4 @@
-package no.ntnu.prog2007.ihost.ui.components
+package no.ntnu.prog2007.ihost.ui.components.layout
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

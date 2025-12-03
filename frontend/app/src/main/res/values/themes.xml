@@ -1,24 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Main app theme - base theme without API 31+ attributes -->
     <style name="Theme.IHost" parent="android:Theme.Material.Light.NoActionBar" />
 
-    <!-- Splash Screen Theme - This replaces the Android default splash -->
-    <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Set background to your splash blue color -->
-        <item name="android:windowBackground">@color/splash_soft_soft_background</item>
-        <!-- Make fullscreen -->
-        <item name="android:windowFullscreen">true</item>
-        <!-- Remove action bar -->
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowActionBar">false</item>
-        <!-- Remove title -->
-        <item name="android:windowContentOverlay">@null</item>
-        <!-- CRITICAL: This prevents the default splash from showing -->
-        <item name="android:windowIsTranslucent">false</item>
-        <item name="android:windowDisablePreview">true</item>
-        <!-- Match status bar to background -->
-        <item name="android:statusBarColor">@color/splash_soft_soft_background</item>
-        <item name="android:navigationBarColor">@color/splash_soft_soft_background</item>
-    </style>
 </resources>

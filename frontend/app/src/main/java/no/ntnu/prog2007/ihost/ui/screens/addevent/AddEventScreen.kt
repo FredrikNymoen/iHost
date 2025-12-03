@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
 import com.google.android.gms.maps.model.LatLng
-import no.ntnu.prog2007.ihost.ui.components.LocationPickerDialog
+import no.ntnu.prog2007.ihost.ui.components.dialogs.LocationPickerDialog
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import java.time.Instant
 import java.time.LocalDate
