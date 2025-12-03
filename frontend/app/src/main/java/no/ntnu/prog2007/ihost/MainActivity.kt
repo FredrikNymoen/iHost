@@ -60,9 +60,9 @@ class MainActivity : ComponentActivity() {
 fun IHostApp() {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = viewModel()
-    val eventViewModel: EventViewModel = viewModel { EventViewModel(authViewModel) }
+    val eventViewModel: EventViewModel = viewModel()
     val stripeViewModel: StripeViewModel = viewModel()
-    val friendViewModel: FriendViewModel = viewModel { FriendViewModel(authViewModel) }
+    val friendViewModel: FriendViewModel = viewModel()
 
     val authUiState by authViewModel.uiState.collectAsState()
     val navBackStackEntry by navController.currentBackStackEntryAsState()

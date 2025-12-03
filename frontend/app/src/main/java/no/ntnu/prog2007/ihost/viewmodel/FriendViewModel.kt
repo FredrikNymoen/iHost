@@ -8,8 +8,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.google.firebase.auth.FirebaseAuth
 import no.ntnu.prog2007.ihost.data.model.domain.Friendship
 import no.ntnu.prog2007.ihost.data.model.domain.User
+import no.ntnu.prog2007.ihost.data.repository.AuthRepository
 import no.ntnu.prog2007.ihost.data.repository.FriendshipRepository
 import no.ntnu.prog2007.ihost.data.repository.UserRepository
 
@@ -23,9 +25,8 @@ data class FriendUiState(
     val errorMessage: String? = null
 )
 
-class FriendViewModel(
-    private val authViewModel: AuthViewModel
-) : ViewModel() {
+class FriendViewModel : ViewModel() {
+    private val authRepository = AuthRepository(FirebaseAuth.getInstance())
     private val friendshipRepository = FriendshipRepository()
     private val userRepository = UserRepository()
 
@@ -87,7 +88,7 @@ class FriendViewModel(
      */
     private fun loadUserDetails(friendships: List<Friendship>) {
         viewModelScope.launch {
-            val currentUserId = authViewModel.uiState.value.currentUser?.uid ?: return@launch
+            val currentUserId = authRepository.getCurrentUser()?.uid ?: return@launch
             val userIds = friendships.flatMap {
                 listOf(it.user1Id, it.user2Id)
             }.distinct().filter { it != currentUserId }
@@ -120,7 +121,7 @@ class FriendViewModel(
 
             userRepository.getAllUsers().fold(
                 onSuccess = { users ->
-                    val currentUserId = authViewModel.uiState.value.currentUser?.uid
+                    val currentUserId = authRepository.getCurrentUser()?.uid
 
                     // Filter out current user
                     val filteredUsers = users.filter { it.uid != currentUserId }
