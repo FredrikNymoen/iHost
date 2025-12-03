@@ -28,8 +28,8 @@ import com.google.firebase.FirebaseApp
 import no.ntnu.prog2007.ihost.service.StripePaymentService
 import no.ntnu.prog2007.ihost.ui.components.AppHeader
 import no.ntnu.prog2007.ihost.ui.components.BottomNavigationBar
-import no.ntnu.prog2007.ihost.ui.navigation.NavigationGraph
-import no.ntnu.prog2007.ihost.ui.navigation.Screen
+import no.ntnu.prog2007.ihost.ui.navigation.AppNavHost
+import no.ntnu.prog2007.ihost.ui.navigation.Destination
 import no.ntnu.prog2007.ihost.ui.theme.IHostTheme
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
@@ -73,9 +73,9 @@ fun IHostApp() {
 
     // Determine start destination based on login state
     val startDestination = if (authUiState.isLoggedIn) {
-        Screen.Events.route
+        Destination.Events.route
     } else {
-        Screen.Login.route
+        Destination.Login.route
     }
 
     // Load events on app start if already logged in
@@ -90,14 +90,14 @@ fun IHostApp() {
         if (authUiState.isLoggedIn && !authUiState.isLoading) {
             // User just logged in/signed up and loading is done
             // Navigate if we're on Login/SignUp screen
-            if (currentRoute in listOf(Screen.Login.route, Screen.SignUp.route, Screen.PersonalInfo.route)) {
+            if (currentRoute in listOf(Destination.Login.route, Destination.SignUp.route, Destination.PersonalInfo.route)) {
                 if (!hasNavigatedOnLogin) {
                     hasNavigatedOnLogin = true
                     // Load fresh events for the new user
                     eventViewModel.loadEvents()
                     // Navigate to Events
-                    navController.navigate(Screen.Events.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
+                    navController.navigate(Destination.Events.route) {
+                        popUpTo(Destination.Login.route) { inclusive = true }
                     }
                 }
             }
@@ -105,9 +105,9 @@ fun IHostApp() {
             // Reset flag when user is logged out
             hasNavigatedOnLogin = false
             // If user logged out and not on auth screens, navigate back to Login
-            if (currentRoute != null && currentRoute !in listOf(Screen.Login.route, Screen.SignUp.route, Screen.PersonalInfo.route)) {
-                eventViewModel.resetEvents()
-                navController.navigate(Screen.Login.route) {
+            if (currentRoute != null && currentRoute !in listOf(Destination.Login.route, Destination.SignUp.route, Destination.PersonalInfo.route)) {
+                eventViewModel.clearEvents()
+                navController.navigate(Destination.Login.route) {
                     popUpTo(0) { inclusive = true }
                 }
             }
@@ -116,20 +116,20 @@ fun IHostApp() {
 
     // Screens for bottom navigation (only shown when logged in)
     val bottomNavScreens = listOf(
-        Screen.Events,
-        Screen.AddEvent,
-        Screen.Profile
+        Destination.Events,
+        Destination.AddEvent,
+        Destination.Profile
     )
 
     // Check if we should show bottom navigation and header
     val shouldShowBottomNav = currentRoute in bottomNavScreens.map { it.route }
-    val shouldShowHeader = currentRoute != Screen.Login.route &&
-                           currentRoute != Screen.SignUp.route &&
+    val shouldShowHeader = currentRoute != Destination.Login.route &&
+                           currentRoute != Destination.SignUp.route &&
                            currentRoute?.startsWith("event_detail") != true &&
                            currentRoute?.startsWith("edit_event") != true &&
                            currentRoute?.startsWith("invite_users") != true &&
-                           currentRoute != Screen.AddFriend.route &&
-                           currentRoute != Screen.FriendsList.route
+                           currentRoute != Destination.AddFriend.route &&
+                           currentRoute != Destination.FriendsList.route
 
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
@@ -160,7 +160,7 @@ fun IHostApp() {
             },
             containerColor = Color.Transparent
         ) { padding ->
-            NavigationGraph(
+            AppNavHost(
                 navController = navController,
                 authViewModel = authViewModel,
                 eventViewModel = eventViewModel,
