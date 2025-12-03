@@ -3,27 +3,24 @@ package no.ntnu.prog2007.ihost.data.model.dto
 import com.google.gson.annotations.SerializedName
 
 /**
- * Response from image upload endpoint
+ * EventImage API response
  */
-data class ImageUploadResponse(
+data class EventImageResponse(
+    @SerializedName("path") val path: String,
+    @SerializedName("eventId") val eventId: String,
+    @SerializedName("createdAt") val createdAt: String
+)
+
+/**
+ * Response from event image upload endpoint
+ */
+data class EventImageUploadResponse(
     @SerializedName("message")
     val message: String,
     @SerializedName("imageUrl")
     val imageUrl: String,
     @SerializedName("eventId")
     val eventId: String
-)
-
-/**
- * Event image data
- */
-data class EventImage(
-    @SerializedName("path")
-    val path: String,
-    @SerializedName("eventId")
-    val eventId: String,
-    @SerializedName("createdAt")
-    val createdAt: String
 )
 
 /**

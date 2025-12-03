@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import no.ntnu.prog2007.ihost.data.model.domain.Friendship
 import no.ntnu.prog2007.ihost.data.model.domain.User
 import no.ntnu.prog2007.ihost.data.repository.FriendshipRepository
-import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
+import no.ntnu.prog2007.ihost.data.repository.UserRepository
 
 data class FriendUiState(
     val friends: List<Friendship> = emptyList(),
@@ -27,7 +27,7 @@ class FriendViewModel(
     private val authViewModel: AuthViewModel
 ) : ViewModel() {
     private val friendshipRepository = FriendshipRepository()
-    private val apiService = RetrofitClient.apiService
+    private val userRepository = UserRepository()
 
     private val _uiState = MutableStateFlow(FriendUiState())
     val uiState: StateFlow<FriendUiState> = _uiState.asStateFlow()
@@ -96,12 +96,14 @@ class FriendViewModel(
 
             userIds.forEach { userId ->
                 if (!updatedMap.containsKey(userId)) {
-                    try {
-                        val user = apiService.getUserByUid(userId)
-                        updatedMap[userId] = user
-                    } catch (e: Exception) {
-                        Log.e("FriendViewModel", "Error loading user $userId", e)
-                    }
+                    userRepository.getUserByUid(userId).fold(
+                        onSuccess = { user ->
+                            updatedMap[userId] = user
+                        },
+                        onFailure = { error ->
+                            Log.e("FriendViewModel", "Error loading user $userId: ${error.message}", error)
+                        }
+                    )
                 }
             }
 
@@ -115,28 +117,31 @@ class FriendViewModel(
     fun loadAllUsers() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            try {
-                val users = apiService.getAllUsers()
-                val currentUserId = authViewModel.uiState.value.currentUser?.uid
 
-                // Filter out current user
-                val filteredUsers = users.filter { it.uid != currentUserId }
+            userRepository.getAllUsers().fold(
+                onSuccess = { users ->
+                    val currentUserId = authViewModel.uiState.value.currentUser?.uid
 
-                _uiState.update {
-                    it.copy(
-                        allUsers = filteredUsers,
-                        isLoading = false
-                    )
+                    // Filter out current user
+                    val filteredUsers = users.filter { it.uid != currentUserId }
+
+                    _uiState.update {
+                        it.copy(
+                            allUsers = filteredUsers,
+                            isLoading = false
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    Log.e("FriendViewModel", "Error loading all users: ${error.message}", error)
+                    _uiState.update {
+                        it.copy(
+                            errorMessage = "Failed to load users: ${error.localizedMessage}",
+                            isLoading = false
+                        )
+                    }
                 }
-            } catch (e: Exception) {
-                Log.e("FriendViewModel", "Error loading all users", e)
-                _uiState.update {
-                    it.copy(
-                        errorMessage = "Failed to load users: ${e.localizedMessage}",
-                        isLoading = false
-                    )
-                }
-            }
+            )
         }
     }
 
@@ -242,10 +247,5 @@ class FriendViewModel(
         }
     }
 
-    /**
-     * Clear error message
-     */
-    fun clearError() {
-        _uiState.update { it.copy(errorMessage = null) }
-    }
+
 }

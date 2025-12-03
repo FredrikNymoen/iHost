@@ -319,7 +319,7 @@ fun EventDetailScreen(
 @Composable
 fun EventDetailHeader(
     event: Event,
-    eventImages: List<no.ntnu.prog2007.ihost.data.remote.EventImage>?
+    eventImages: List<no.ntnu.prog2007.ihost.data.model.domain.EventImage>?
 ) {
     Card(
         modifier = Modifier

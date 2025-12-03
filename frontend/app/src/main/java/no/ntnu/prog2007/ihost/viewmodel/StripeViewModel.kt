@@ -6,8 +6,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import no.ntnu.prog2007.ihost.data.model.PaymentIntentRequest
-import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
+import no.ntnu.prog2007.ihost.data.repository.StripeRepository
 import no.ntnu.prog2007.ihost.service.StripePaymentService
 import android.util.Log
 
@@ -23,6 +22,8 @@ class StripeViewModel : ViewModel() {
         private const val TAG = "StripeViewModel"
     }
 
+    private val stripeRepository = StripeRepository()
+
     private val _uiState = MutableStateFlow(StripeUiState())
     val uiState: StateFlow<StripeUiState> = _uiState
 
@@ -32,16 +33,18 @@ class StripeViewModel : ViewModel() {
 
     private fun loadPublishableKey() {
         viewModelScope.launch {
-            try {
-                val key = RetrofitClient.apiService.getKeys().publishableKey
-                _uiState.value = _uiState.value.copy(publishableKey = key)
-                Log.d(TAG, "Publishable key loaded successfully")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error loading publishable key", e)
-                _uiState.value = _uiState.value.copy(
-                    paymentError = "Failed to load payment configuration: ${e.message}"
-                )
-            }
+            stripeRepository.getPublishableKey().fold(
+                onSuccess = { key ->
+                    _uiState.value = _uiState.value.copy(publishableKey = key)
+                    Log.d(TAG, "Publishable key loaded successfully")
+                },
+                onFailure = { error ->
+                    Log.e(TAG, "Error loading publishable key: ${error.message}", error)
+                    _uiState.value = _uiState.value.copy(
+                        paymentError = "Failed to load payment configuration: ${error.message}"
+                    )
+                }
+            )
         }
     }
 
@@ -60,7 +63,7 @@ class StripeViewModel : ViewModel() {
             try {
                 Log.d(TAG, "Initiating payment for event: $eventId")
 
-                val service = StripePaymentService(RetrofitClient.apiService, activity)
+                val service = StripePaymentService(stripeRepository, activity)
 
                 service.initiatePayment(
                     eventId = eventId,

@@ -104,8 +104,6 @@ fun EditEventScreen(
     var eventTime by remember { mutableStateOf(event?.eventTime ?: "") }
     var location by remember { mutableStateOf(event?.location ?: "") }
     var showDatePicker by remember { mutableStateOf(false) }
-    var isFree by remember { mutableStateOf(event?.free ?: true) }
-    var price by remember { mutableStateOf(if (event?.price != null && event.price > 0) event.price.toString() else "") }
     var showLocationPicker by remember { mutableStateOf(false) }
 
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -120,8 +118,6 @@ fun EditEventScreen(
             eventDate = it.eventDate
             eventTime = it.eventTime ?: ""
             location = it.location ?: ""
-            isFree = it.free
-            price = if (it.price > 0) it.price.toString() else ""
         }
     }
 
@@ -545,6 +541,8 @@ fun EditEventScreen(
                 }
             )
 
+            // This code is documented until Payment system will be implemented right way.
+            /*
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -560,8 +558,8 @@ fun EditEventScreen(
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
-            // This code is documented until Payment system will be implemented right way.
-            /*
+
+
             if (!isFree) {
                 OutlinedTextField(
                     value = price,
@@ -581,15 +579,6 @@ fun EditEventScreen(
                         keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal
                     )
                 )
-            }*/
-
-            if (uiState.errorMessage != null) {
-                Text(
-                    text = uiState.errorMessage!!,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
             }
 
             Row(
@@ -606,15 +595,12 @@ fun EditEventScreen(
                             0.0
                         }
                         viewModel.updateEvent(
-                            context = context,
                             eventId = eventId,
                             title = title,
                             description = description.ifEmpty { null },
                             eventDate = eventDate,
                             eventTime = eventTime.ifEmpty { null },
                             location = location.ifEmpty { null },
-                            free = isFree,
-                            price = priceValue,
                             imageUri = selectedImageUri
                         )
                         onEventUpdated()
@@ -656,6 +642,17 @@ fun EditEventScreen(
                         )
                     }
                 }
+            }
+            */
+
+
+            if (uiState.errorMessage != null) {
+                Text(
+                    text = uiState.errorMessage!!,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
             }
 
             Spacer(modifier = Modifier.weight(1f))

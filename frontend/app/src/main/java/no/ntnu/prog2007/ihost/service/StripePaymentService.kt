@@ -87,10 +87,10 @@ class StripePaymentService(
 
             // 2) Lag PaymentIntent (backend)
             val paymentIntentResult = stripeRepository.createPaymentIntent(eventId)
-            val paymentIntentResponse = paymentIntentResult.getOrElse {
+            val paymentIntent = paymentIntentResult.getOrElse {
                 throw IllegalStateException("Failed to create payment intent: ${it.message}")
             }
-            val clientSecret = paymentIntentResponse.paymentIntent
+            val clientSecret = paymentIntent.clientSecret
             if (clientSecret.isNullOrEmpty()) {
                 throw IllegalStateException("Missing client secret from backend")
             }
@@ -102,8 +102,8 @@ class StripePaymentService(
 
             // 4) Konfigurer kunde
             val customerConfig = PaymentSheet.CustomerConfiguration(
-                id = paymentIntentResponse.customer,
-                ephemeralKeySecret = paymentIntentResponse.ephemeralKey
+                id = paymentIntent.customerId,
+                ephemeralKeySecret = paymentIntent.ephemeralKey
             )
             val configuration = PaymentSheet.Configuration(
                 merchantDisplayName = "iHost",

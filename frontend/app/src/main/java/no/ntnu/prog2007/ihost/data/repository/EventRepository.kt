@@ -1,8 +1,11 @@
 package no.ntnu.prog2007.ihost.data.repository
 
 import android.util.Log
-import no.ntnu.prog2007.ihost.data.model.dto.EventWithMetadata
+import no.ntnu.prog2007.ihost.data.model.domain.Event
+import no.ntnu.prog2007.ihost.data.model.domain.EventWithMetadata
 import no.ntnu.prog2007.ihost.data.model.dto.CreateEventRequest
+import no.ntnu.prog2007.ihost.data.model.dto.EventResponse
+import no.ntnu.prog2007.ihost.data.model.dto.EventWithMetadataResponse
 import no.ntnu.prog2007.ihost.data.model.dto.UpdateEventRequest
 import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
 import no.ntnu.prog2007.ihost.data.remote.api.EventApi
@@ -16,7 +19,8 @@ class EventRepository(
      */
     suspend fun getUserEvents(): Result<List<EventWithMetadata>> {
         return try {
-            val events = eventApi.getAllEvents()
+            val eventsDto = eventApi.getAllEvents()
+            val events = eventsDto.map { mapToEventWithMetadata(it) }
             Log.d("EventRepository", "Loaded ${events.size} events")
             Result.success(events)
         } catch (e: Exception) {
@@ -30,7 +34,8 @@ class EventRepository(
      */
     suspend fun getEventById(eventId: String): Result<EventWithMetadata> {
         return try {
-            val event = eventApi.getEventById(eventId)
+            val eventDto = eventApi.getEventById(eventId)
+            val event = mapToEventWithMetadata(eventDto)
             Log.d("EventRepository", "Loaded event: ${event.event.title}")
             Result.success(event)
         } catch (e: Exception) {
@@ -44,7 +49,8 @@ class EventRepository(
      */
     suspend fun getEventByCode(shareCode: String): Result<EventWithMetadata> {
         return try {
-            val event = eventApi.getEventByCode(shareCode)
+            val eventDto = eventApi.getEventByCode(shareCode)
+            val event = mapToEventWithMetadata(eventDto)
             Log.d("EventRepository", "Loaded event by code: ${event.event.title}")
             Result.success(event)
         } catch (e: Exception) {
@@ -75,7 +81,8 @@ class EventRepository(
                 free = free,
                 price = price
             )
-            val event = eventApi.createEvent(request)
+            val eventDto = eventApi.createEvent(request)
+            val event = mapToEventWithMetadata(eventDto)
             Log.d("EventRepository", "Created event: ${event.event.title}")
             Result.success(event)
         } catch (e: Exception) {
@@ -103,7 +110,8 @@ class EventRepository(
                 eventTime = eventTime,
                 location = location
             )
-            val event = eventApi.updateEvent(eventId, request)
+            val eventDto = eventApi.updateEvent(eventId, request)
+            val event = mapToEventWithMetadata(eventDto)
             Log.d("EventRepository", "Updated event: $eventId")
             Result.success(event)
         } catch (e: Exception) {
@@ -124,5 +132,26 @@ class EventRepository(
             Log.e("EventRepository", "Error deleting event", e)
             Result.failure(e)
         }
+    }
+
+    private fun mapToEventWithMetadata(dto: EventWithMetadataResponse): EventWithMetadata {
+        return EventWithMetadata(
+            id = dto.id,
+            event = Event(
+                title = dto.event.title,
+                description = dto.event.description,
+                eventDate = dto.event.eventDate,
+                eventTime = dto.event.eventTime,
+                location = dto.event.location,
+                creatorUid = dto.event.creatorUid,
+                free = dto.event.free,
+                price = dto.event.price,
+                createdAt = dto.event.createdAt,
+                updatedAt = dto.event.updatedAt,
+                shareCode = dto.event.shareCode
+            ),
+            userStatus = dto.userStatus,
+            userRole = dto.userRole
+        )
     }
 }

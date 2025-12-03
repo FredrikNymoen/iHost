@@ -15,13 +15,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.ntnu.prog2007.ihost.data.model.domain.User
-import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
 import no.ntnu.prog2007.ihost.data.repository.AuthRepository
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import java.io.File
-import java.io.FileOutputStream
+import no.ntnu.prog2007.ihost.data.repository.UserRepository
+import no.ntnu.prog2007.ihost.data.repository.ImageRepository
 
 data class AuthUiState(
     val currentUser: FirebaseUser? = null,
@@ -44,6 +40,8 @@ data class RegistrationState(
 class AuthViewModel : ViewModel() {
     private val auth: FirebaseAuth = Firebase.auth
     private val authRepository = AuthRepository(auth)
+    private val userRepository = UserRepository()
+    private val imageRepository = ImageRepository()
     private val _registrationState = MutableStateFlow(RegistrationState()) // State for registration form
     val registrationState : StateFlow<RegistrationState> = _registrationState.asStateFlow() // read only expose of registration state
 
@@ -88,13 +86,12 @@ class AuthViewModel : ViewModel() {
             // Update loading state
             _uiState.update { it.copy(isProfileLoading = true) }
 
-            try { // Call repository to get user profile
-                val userResult = authRepository.getUserProfile(uid)
-                userResult.onSuccess { profile -> // Success, update profile data
+            userRepository.getUserByUid(uid).fold(
+                onSuccess = { profile ->
                     _uiState.update { it.copy(userProfile = profile, isProfileLoading = false) }
-                }
-                userResult.onFailure { error ->
-                    // Check if its a 404 not found error to handle deleted or missing profiles trying to be loaded from stored auth tokens
+                },
+                onFailure = { error ->
+                    // Check if its a 404 not found error to handle deleted or missing profiles
                     if (error.message?.contains("404") == true ||
                         error.message?.contains("not found") == true) {
 
@@ -113,10 +110,7 @@ class AuthViewModel : ViewModel() {
                         Log.e("AuthViewModel", "Error fetching user profile: ${error.message}")
                     }
                 }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(isProfileLoading = false) }
-                Log.e("AuthViewModel", "Error loading user profile: ${e.message}", e)
-            }
+            )
         }
     }
 
@@ -151,55 +145,60 @@ class AuthViewModel : ViewModel() {
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            // Check if username is available
-            val usernameResult = authRepository.isUsernameAvailable(username = username)
-            if (usernameResult.isFailure) { // Error during check
-                _uiState.update {
-                    it.copy(
-                        errorMessage = "Feil ved sjekking av brukernavn: ${usernameResult.exceptionOrNull()?.localizedMessage}",
-                        isLoading = false
-                    )
-                }
-                return@launch
-            }
-            val isAvailable = usernameResult.getOrNull() ?: false
-            if (!isAvailable) { // Username taken
-                _uiState.update {
-                    it.copy(
-                        errorMessage = "Brukernavnet er allerede tatt.",
-                        isLoading = false
-                    )
-                }
-                return@launch
-            }
 
-            // If we reach here, username is available - proceed with registration
-            val result = authRepository.registerUser(
-                username = username,
-                email = regState.email,
-                password = password,
-                firstName = regState.firstName,
-                lastName = regState.lastName
+            // Check if username is available using UserRepository
+            userRepository.isUsernameAvailable(username).fold(
+                onSuccess = { isAvailable ->
+                    if (!isAvailable) {
+                        _uiState.update {
+                            it.copy(
+                                errorMessage = "Brukernavnet er allerede tatt.",
+                                isLoading = false
+                            )
+                        }
+                        return@launch
+                    }
+
+                    // Username is available - proceed with registration
+                    viewModelScope.launch {
+                        authRepository.registerUser(
+                            username = username,
+                            email = regState.email,
+                            password = password,
+                            firstName = regState.firstName,
+                            lastName = regState.lastName
+                        ).fold(
+                            onSuccess = { user ->
+                                _uiState.update {
+                                    it.copy(
+                                        currentUser = user,
+                                        isLoggedIn = true,
+                                        isLoading = false
+                                    )
+                                }
+                                Log.d("AuthViewModel", "User signed up and registered: ${regState.email}")
+                            },
+                            onFailure = { e ->
+                                Log.e("AuthViewModel", "Sign up error: ${e.message}", e)
+                                _uiState.update {
+                                    it.copy(
+                                        errorMessage = "Feil ved registrering: ${e.localizedMessage}",
+                                        isLoading = false
+                                    )
+                                }
+                            }
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(
+                            errorMessage = "Feil ved sjekking av brukernavn: ${error.localizedMessage}",
+                            isLoading = false
+                        )
+                    }
+                }
             )
-            result.onSuccess { user ->
-                _uiState.update {
-                    it.copy(
-                        currentUser = user,
-                        isLoggedIn = true,
-                        isLoading = false
-                    )
-                }
-                Log.d("AuthViewModel", "User signed up and registered: $regState.email")
-            }
-            result.onFailure { e ->
-                Log.e("AuthViewModel", "Sign up error: ${e.message}", e)
-                _uiState.update {
-                    it.copy(
-                        errorMessage = "Feil ved registrering: ${e.localizedMessage}",
-                        isLoading = false
-                    )
-                }
-            }
         }
     }
 
@@ -210,7 +209,7 @@ class AuthViewModel : ViewModel() {
 
     /**
      * Username availability check for SignUpScreen
-     * Calls authRepositorys username availability check and returns result via callback
+     * Calls UserRepository's username availability check and returns result via callback
      * @param username The username to check
      * @param onResult Callback with result: true if available, false if taken or error
      */
@@ -223,18 +222,15 @@ class AuthViewModel : ViewModel() {
             onResult(false)
             return
         }
-        viewModelScope.launch { // Call repository check
-            try {
-                val result = authRepository.isUsernameAvailable(username)
-                result.onSuccess { available ->
+        viewModelScope.launch {
+            userRepository.isUsernameAvailable(username).fold(
+                onSuccess = { available ->
                     onResult(available)
-                }
-                result.onFailure {
+                },
+                onFailure = {
                     onResult(false)
                 }
-            } catch (e: Exception) {
-                onResult(false) // We dont really care about why it failed, we just return that it failed.
-            }
+            )
         }
     }
 
@@ -250,35 +246,40 @@ class AuthViewModel : ViewModel() {
      */
     suspend fun uploadProfilePhoto(context: Context, imageUri: Uri): String? {
         _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
         return try {
             Log.d("AuthViewModel", "Starting profile photo upload for URI: $imageUri")
 
-            // Get input stream from URI
             val inputStream = context.contentResolver.openInputStream(imageUri)
                 ?: throw IllegalArgumentException("Cannot open image URI")
 
-            // Create a temporary file
-            val file = File(context.cacheDir, "profile_upload_${System.currentTimeMillis()}.jpg")
-            FileOutputStream(file).use { outputStream ->
+            val file = java.io.File(context.cacheDir, "profile_upload_${System.currentTimeMillis()}.jpg")
+            java.io.FileOutputStream(file).use { outputStream ->
                 inputStream.copyTo(outputStream)
             }
             inputStream.close()
 
-            // Create multipart request body
-            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-            val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
-
-            // Upload to backend
-            val response = RetrofitClient.apiService.uploadProfilePhoto(body)
-
-            // Clean up temporary file
-            file.delete()
-
-            Log.d("AuthViewModel", "Profile photo uploaded successfully: ${response.photoUrl}")
-            _uiState.update { it.copy(isLoading = false) }
-            response.photoUrl
+            imageRepository.uploadProfilePhoto(file).fold(
+                onSuccess = { photoUrl ->
+                    file.delete()
+                    Log.d("AuthViewModel", "Profile photo uploaded successfully: $photoUrl")
+                    _uiState.update { it.copy(isLoading = false) }
+                    photoUrl
+                },
+                onFailure = { error ->
+                    file.delete()
+                    Log.e("AuthViewModel", "Error uploading profile photo: ${error.message}", error)
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Failed to upload photo: ${error.localizedMessage}"
+                        )
+                    }
+                    null
+                }
+            )
         } catch (e: Exception) {
-            Log.e("AuthViewModel", "Error uploading profile photo: ${e.message}", e)
+            Log.e("AuthViewModel", "Error preparing profile photo: ${e.message}", e)
             _uiState.update {
                 it.copy(
                     isLoading = false,
@@ -306,16 +307,14 @@ class AuthViewModel : ViewModel() {
             val uid = _uiState.value.currentUser?.uid ?: return@launch
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            try {
-                val result = authRepository.updateUserProfile(
-                    uid = uid,
-                    firstName = firstName,
-                    lastName = lastName,
-                    photoUrl = photoUrl,
-                    phoneNumber = phoneNumber
-                )
-
-                result.onSuccess { updatedUser ->
+            userRepository.updateUserProfile(
+                uid = uid,
+                firstName = firstName,
+                lastName = lastName,
+                photoUrl = photoUrl,
+                phoneNumber = phoneNumber
+            ).fold(
+                onSuccess = { updatedUser ->
                     _uiState.update {
                         it.copy(
                             userProfile = updatedUser,
@@ -323,9 +322,8 @@ class AuthViewModel : ViewModel() {
                         )
                     }
                     Log.d("AuthViewModel", "User profile updated successfully")
-                }
-
-                result.onFailure { error ->
+                },
+                onFailure = { error ->
                     _uiState.update {
                         it.copy(
                             isLoading = false,
@@ -334,15 +332,7 @@ class AuthViewModel : ViewModel() {
                     }
                     Log.e("AuthViewModel", "Error updating profile: ${error.message}")
                 }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        errorMessage = "Error updating profile: ${e.localizedMessage}"
-                    )
-                }
-                Log.e("AuthViewModel", "Exception updating profile: ${e.message}", e)
-            }
+            )
         }
     }
 }

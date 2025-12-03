@@ -1,7 +1,7 @@
 package no.ntnu.prog2007.ihost.data.remote.api
 
-import no.ntnu.prog2007.ihost.data.model.domain.EventUser
-import no.ntnu.prog2007.ihost.data.model.dto.EventWithMetadata
+import no.ntnu.prog2007.ihost.data.model.dto.EventUserResponse
+import no.ntnu.prog2007.ihost.data.model.dto.EventWithMetadataResponse
 import no.ntnu.prog2007.ihost.data.model.dto.InviteUsersRequest
 import no.ntnu.prog2007.ihost.data.model.dto.InviteUsersResponse
 import no.ntnu.prog2007.ihost.data.remote.config.ApiEndpoints.EVENT_USERS
@@ -27,10 +27,10 @@ interface EventUserApi {
     suspend fun getEventAttendees(
         @Path("eventId") eventId: String,
         @Query("status") status: String? = null
-    ): List<EventUser>
+    ): List<EventUserResponse>
 
     @GET("$EVENT_USERS/my-events")
     suspend fun getMyEvents(
         @Query("status") status: String? = null
-    ): List<EventWithMetadata>
+    ): List<EventWithMetadataResponse>
 }

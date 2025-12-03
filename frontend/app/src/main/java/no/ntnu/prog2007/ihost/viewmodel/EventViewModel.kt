@@ -10,15 +10,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import no.ntnu.prog2007.ihost.data.model.*
-import no.ntnu.prog2007.ihost.data.remote.EventImage
-import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.File
-import java.io.FileOutputStream
+import no.ntnu.prog2007.ihost.data.model.domain.EventUser
+import no.ntnu.prog2007.ihost.data.model.domain.User
+import no.ntnu.prog2007.ihost.data.model.domain.EventImage
+import no.ntnu.prog2007.ihost.data.model.domain.EventWithMetadata
+import no.ntnu.prog2007.ihost.data.repository.EventRepository
+import no.ntnu.prog2007.ihost.data.repository.EventUserRepository
+import no.ntnu.prog2007.ihost.data.repository.ImageRepository
+import no.ntnu.prog2007.ihost.data.repository.UserRepository
 
 data class EventUiState(
     val events: List<EventWithMetadata> = emptyList(),
@@ -29,9 +28,12 @@ data class EventUiState(
     val eventAttendees: Map<String, List<EventUser>> = emptyMap() // Map of eventId to list of attendees
 )
 
-class EventViewModel(
-    private val authViewModel: AuthViewModel
-) : ViewModel() {
+class EventViewModel: ViewModel() {
+
+    private val eventRepository = EventRepository()
+    private val eventUserRepository = EventUserRepository()
+    private val imageRepository = ImageRepository()
+    private val userRepository = UserRepository()
 
     private val _uiState = MutableStateFlow(EventUiState())
     val uiState: StateFlow<EventUiState> = _uiState.asStateFlow()
@@ -48,29 +50,33 @@ class EventViewModel(
     fun loadEvents() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            try {
-                val events = RetrofitClient.apiService.getAllEvents()
-                _uiState.update {
-                    it.copy(
-                        events = events, isLoading = false
-                    )
-                }
-                Log.d("EventViewModel", "Loaded ${events.size} events")
 
-                // Load images and attendees for all events
-                events.forEach { eventWithMetadata ->
-                    loadEventImages(eventWithMetadata.id)
-                    loadEventAttendees(eventWithMetadata.id)
+            eventRepository.getUserEvents().fold(
+                onSuccess = { events ->
+                    _uiState.update {
+                        it.copy(
+                            events = events,
+                            isLoading = false
+                        )
+                    }
+                    Log.d("EventViewModel", "Loaded ${events.size} events")
+
+                    // Load images and attendees for all events
+                    events.forEach { eventWithMetadata ->
+                        loadEventImages(eventWithMetadata.id)
+                        loadEventAttendees(eventWithMetadata.id)
+                    }
+                },
+                onFailure = { error ->
+                    Log.e("EventViewModel", "Error loading events: ${error.message}", error)
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Feil ved lasting av events: ${error.localizedMessage}"
+                        )
+                    }
                 }
-            } catch (e: Exception) {
-                Log.e("EventViewModel", "Error loading events: ${e.message}", e)
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        errorMessage = "Feil ved lasting av events: ${e.localizedMessage}"
-                    )
-                }
-            }
+            )
         }
     }
 
@@ -80,17 +86,19 @@ class EventViewModel(
      */
     fun loadEventImages(eventId: String) {
         viewModelScope.launch {
-            try {
-                val images = RetrofitClient.apiService.getEventImages(eventId)
-                _uiState.update { state ->
-                    state.copy(
-                        eventImages = state.eventImages + (eventId to images)
-                    )
+            imageRepository.getEventImages(eventId).fold(
+                onSuccess = { images ->
+                    _uiState.update { state ->
+                        state.copy(
+                            eventImages = state.eventImages + (eventId to images)
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    Log.e("EventViewModel", "Error loading images for event $eventId: ${error.message}", error)
+                    // Don't update error state as this is a background operation
                 }
-            } catch (e: Exception) {
-                Log.e("EventViewModel", "Error loading images for event $eventId: ${e.message}", e)
-                // Don't update error state as this is a background operation
-            }
+            )
         }
     }
 
@@ -110,17 +118,18 @@ class EventViewModel(
      */
     fun loadEventAttendees(eventId: String) {
         viewModelScope.launch {
-            try {
-                // Get all event_users for this event (no status filter)
-                val attendees = RetrofitClient.apiService.getEventAttendees(eventId, status = null)
-                _uiState.update { state ->
-                    state.copy(
-                        eventAttendees = state.eventAttendees + (eventId to attendees)
-                    )
+            eventUserRepository.getEventAttendees(eventId, status = null).fold(
+                onSuccess = { attendees ->
+                    _uiState.update { state ->
+                        state.copy(
+                            eventAttendees = state.eventAttendees + (eventId to attendees)
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    Log.e("EventViewModel", "Error loading attendees for event $eventId: ${error.message}", error)
                 }
-            } catch (e: Exception) {
-                Log.e("EventViewModel", "Error loading attendees for event $eventId: ${e.message}", e)
-            }
+            )
         }
     }
 
@@ -136,44 +145,39 @@ class EventViewModel(
     }
 
     /**
-     * Upload an image to Cloudinary
+     * Upload an image for an event
      * @param context Android context for accessing content resolver
      * @param imageUri URI of the image to upload
-     * @param eventId Event ID to associate with the image (required)
-     * @return The Cloudinary URL of the uploaded image, or null if upload fails
+     * @param eventId Event ID to associate with the image
+     * @return The uploaded image URL, or null if upload fails
      */
-    suspend fun uploadImage(context: Context, imageUri: Uri, eventId: String): String? {
+    private suspend fun uploadEventImage(context: Context, imageUri: Uri, eventId: String): String? {
         return try {
-            Log.d("EventViewModel", "Starting image upload for URI: $imageUri, eventId: $eventId")
+            Log.d("EventViewModel", "Starting event image upload for URI: $imageUri, eventId: $eventId")
 
-            // Get input stream from URI
             val inputStream = context.contentResolver.openInputStream(imageUri)
                 ?: throw IllegalArgumentException("Cannot open image URI")
 
-            // Create a temporary file
-            val file = File(context.cacheDir, "upload_${System.currentTimeMillis()}.jpg")
-            FileOutputStream(file).use { outputStream ->
+            val file = java.io.File(context.cacheDir, "upload_${System.currentTimeMillis()}.jpg")
+            java.io.FileOutputStream(file).use { outputStream ->
                 inputStream.copyTo(outputStream)
             }
             inputStream.close()
 
-            // Create multipart request body
-            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-            val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
-
-            // Create eventId request body (required)
-            val eventIdBody = eventId.toRequestBody("text/plain".toMediaTypeOrNull())
-
-            // Upload to backend
-            val response = RetrofitClient.apiService.uploadImage(body, eventIdBody)
-
-            // Clean up temporary file
-            file.delete()
-
-            Log.d("EventViewModel", "Image uploaded successfully: ${response.imageUrl}")
-            response.imageUrl
+            imageRepository.uploadEventImage(file, eventId).fold(
+                onSuccess = { imageUrl ->
+                    file.delete()
+                    Log.d("EventViewModel", "Event image uploaded successfully: $imageUrl")
+                    imageUrl
+                },
+                onFailure = { error ->
+                    file.delete()
+                    Log.e("EventViewModel", "Error uploading event image: ${error.message}", error)
+                    null
+                }
+            )
         } catch (e: Exception) {
-            Log.e("EventViewModel", "Error uploading image: ${e.message}", e)
+            Log.e("EventViewModel", "Error preparing event image upload: ${e.message}", e)
             null
         }
     }
@@ -191,47 +195,48 @@ class EventViewModel(
     ) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            try {
-                // Create event first without image
-                val request = CreateEventRequest(
-                    title = title,
-                    description = description,
-                    eventDate = eventDate,
-                    eventTime = eventTime,
-                    location = location,
-                    free = free,
-                    price = price
-                )
-                val newEventWithMetadata = RetrofitClient.apiService.createEvent(request)
-                Log.d("EventViewModel", "Event created: ${newEventWithMetadata.event.title} with ID: ${newEventWithMetadata.id}")
 
-                // Upload image after event is created, if provided
-                if (imageUri != null) {
-                    Log.d("EventViewModel", "Uploading image for event: ${newEventWithMetadata.id}")
-                    val imageUrl = uploadImage(context, imageUri, newEventWithMetadata.id)
-                    if (imageUrl != null) {
-                        Log.d("EventViewModel", "Image uploaded successfully: $imageUrl")
-                        // Reload images for this event after upload
-                        loadEventImages(newEventWithMetadata.id)
-                    } else {
-                        Log.w("EventViewModel", "Image upload failed, but event was created")
+            eventRepository.createEvent(
+                title = title,
+                description = description,
+                eventDate = eventDate,
+                eventTime = eventTime,
+                location = location,
+                free = free,
+                price = price
+            ).fold(
+                onSuccess = { newEventWithMetadata ->
+                    Log.d("EventViewModel", "Event created: ${newEventWithMetadata.event.title} with ID: ${newEventWithMetadata.id}")
+
+                    // Upload image after event is created, if provided
+                    if (imageUri != null) {
+                        Log.d("EventViewModel", "Uploading image for event: ${newEventWithMetadata.id}")
+                        val imageUrl = uploadEventImage(context, imageUri, newEventWithMetadata.id)
+                        if (imageUrl != null) {
+                            Log.d("EventViewModel", "Image uploaded successfully: $imageUrl")
+                            loadEventImages(newEventWithMetadata.id)
+                        } else {
+                            Log.w("EventViewModel", "Image upload failed, but event was created")
+                        }
+                    }
+
+                    _uiState.update { state ->
+                        state.copy(
+                            events = state.events + newEventWithMetadata,
+                            isLoading = false
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    Log.e("EventViewModel", "Error creating event: ${error.message}", error)
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Feil ved opprettelse av event: ${error.localizedMessage}"
+                        )
                     }
                 }
-
-                _uiState.update { state ->
-                    state.copy(
-                        events = state.events + newEventWithMetadata, isLoading = false
-                    )
-                }
-            } catch (e: Exception) {
-                Log.e("EventViewModel", "Error creating event: ${e.message}", e)
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        errorMessage = "Feil ved opprettelse av event: ${e.localizedMessage}"
-                    )
-                }
-            }
+            )
         }
     }
     fun editEvent(eventId:String, onSuccess: (EventWithMetadata) -> Unit){
@@ -241,24 +246,27 @@ class EventViewModel(
     fun deleteEvent(eventId: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            try {
-                RetrofitClient.apiService.deleteEvent(eventId)
-                _uiState.update { state ->
-                    state.copy(
-                        events = state.events.filter { event -> event.id != eventId },
-                        isLoading = false
-                    )
+
+            eventRepository.deleteEvent(eventId).fold(
+                onSuccess = {
+                    _uiState.update { state ->
+                        state.copy(
+                            events = state.events.filter { event -> event.id != eventId },
+                            isLoading = false
+                        )
+                    }
+                    Log.d("EventViewModel", "Event deleted: $eventId")
+                },
+                onFailure = { error ->
+                    Log.e("EventViewModel", "Error deleting event: ${error.message}", error)
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Feil ved sletting av event: ${error.localizedMessage}"
+                        )
+                    }
                 }
-                Log.d("EventViewModel", "Event deleted: $eventId")
-            } catch (e: Exception) {
-                Log.e("EventViewModel", "Error deleting event: ${e.message}", e)
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        errorMessage = "Feil ved sletting av event: ${e.localizedMessage}"
-                    )
-                }
-            }
+            )
         }
     }
 
@@ -272,27 +280,28 @@ class EventViewModel(
      * @param onSuccess Callback invoked with the fetched EventWithMetadata on success.
      */
     fun getEventByCode(shareCode: String, onSuccess: (EventWithMetadata) -> Unit) {
-        viewModelScope.launch { // Launch coroutine for network call
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) } // Set loading state
-            try { // Try to fetch event
-                // Fetch event by share code - backend will auto-create PENDING event_user if needed
-                val eventWithMetadata = RetrofitClient.apiService.getEventByCode(shareCode)
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-                // Reload all events to get the updated list from server (including new event_user)
-                loadEvents()
+            eventRepository.getEventByCode(shareCode).fold(
+                onSuccess = { eventWithMetadata ->
+                    // Reload all events to get the updated list from server (including new event_user)
+                    loadEvents()
 
-                // Success callback and log it
-                onSuccess(eventWithMetadata)
-                Log.d("EventViewModel", "Fetched event '${eventWithMetadata.event.title}' by code: $shareCode")
-            } catch (e: Exception) { // Handle errors
-                Log.e("EventViewModel", "Error fetching event by code: ${e.message}", e)
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        errorMessage = "Feil ved henting av event: ${e.localizedMessage}"
-                    )
+                    // Success callback and log it
+                    onSuccess(eventWithMetadata)
+                    Log.d("EventViewModel", "Fetched event '${eventWithMetadata.event.title}' by code: $shareCode")
+                },
+                onFailure = { error ->
+                    Log.e("EventViewModel", "Error fetching event by code: ${error.message}", error)
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Feil ved henting av event: ${error.localizedMessage}"
+                        )
+                    }
                 }
-            }
+            )
         }
     }
 
@@ -310,14 +319,16 @@ class EventViewModel(
      */
     fun acceptInvitation(eventUserId: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
-            try {
-                RetrofitClient.apiService.acceptInvitation(eventUserId)
-                loadEvents() // Reload events to get updated status
-                onSuccess()
-            } catch (e: Exception) {
-                Log.e("EventViewModel", "Error accepting invitation: ${e.message}", e)
-                onError(e.localizedMessage ?: "Unknown error")
-            }
+            eventUserRepository.acceptInvitation(eventUserId).fold(
+                onSuccess = {
+                    loadEvents() // Reload events to get updated status
+                    onSuccess()
+                },
+                onFailure = { error ->
+                    Log.e("EventViewModel", "Error accepting invitation: ${error.message}", error)
+                    onError(error.localizedMessage ?: "Unknown error")
+                }
+            )
         }
     }
 
@@ -329,14 +340,16 @@ class EventViewModel(
      */
     fun declineInvitation(eventUserId: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
-            try {
-                RetrofitClient.apiService.declineInvitation(eventUserId)
-                loadEvents() // Reload events to get updated status
-                onSuccess()
-            } catch (e: Exception) {
-                Log.e("EventViewModel", "Error declining invitation: ${e.message}", e)
-                onError(e.localizedMessage ?: "Unknown error")
-            }
+            eventUserRepository.declineInvitation(eventUserId).fold(
+                onSuccess = {
+                    loadEvents() // Reload events to get updated status
+                    onSuccess()
+                },
+                onFailure = { error ->
+                    Log.e("EventViewModel", "Error declining invitation: ${error.message}", error)
+                    onError(error.localizedMessage ?: "Unknown error")
+                }
+            )
         }
     }
 
@@ -346,16 +359,17 @@ class EventViewModel(
      * @return The user's Username, or "User" if fetch fails
      */
     suspend fun getUserUserName(uid: String): String {
-        return try {
-            val user = RetrofitClient.apiService.getUserByUid(uid)
-            print(user.username)
-            user.username
-        } catch (e: Exception) {
-            Log.e("EventViewModel", "Error fetching user name for $uid: ${e.message}", e)
-            "User"
-        }
+        return userRepository.getUserByUid(uid).fold(
+            onSuccess = { user ->
+                print(user.username)
+                user.username
+            },
+            onFailure = { error ->
+                Log.e("EventViewModel", "Error fetching user name for $uid: ${error.message}", error)
+                "User"
+            }
+        )
     }
-
 
     /**
      * Get user Last name by UID
@@ -363,13 +377,13 @@ class EventViewModel(
      * @return The user's Last name, or "User" if fetch fails
      */
     suspend fun getUserLastName(uid: String): String? {
-        return try {
-            val user = RetrofitClient.apiService.getUserByUid(uid)
-            user.lastName
-        } catch (e: Exception) {
-            Log.e("EventViewModel", "Error fetching user name for $uid: ${e.message}", e)
-            "User"
-        }
+        return userRepository.getUserByUid(uid).fold(
+            onSuccess = { user -> user.lastName },
+            onFailure = { error ->
+                Log.e("EventViewModel", "Error fetching user name for $uid: ${error.message}", error)
+                "User"
+            }
+        )
     }
 
     /**
@@ -378,13 +392,13 @@ class EventViewModel(
      * @return The user's First name, or "User" if fetch fails
      */
     suspend fun getUserFirstName(uid: String): String {
-        return try {
-            val user = RetrofitClient.apiService.getUserByUid(uid)
-            user.firstName
-        } catch (e: Exception) {
-            Log.e("EventViewModel", "Error fetching user name for $uid: ${e.message}", e)
-            "User"
-        }
+        return userRepository.getUserByUid(uid).fold(
+            onSuccess = { user -> user.firstName },
+            onFailure = { error ->
+                Log.e("EventViewModel", "Error fetching user name for $uid: ${error.message}", error)
+                "User"
+            }
+        )
     }
 
     /**
@@ -393,12 +407,13 @@ class EventViewModel(
      * @return The User object, or null if fetch fails
      */
     suspend fun getUserByUid(uid: String): User? {
-        return try {
-            RetrofitClient.apiService.getUserByUid(uid)
-        } catch (e: Exception) {
-            Log.e("EventViewModel", "Error fetching user for $uid: ${e.message}", e)
-            null
-        }
+        return userRepository.getUserByUid(uid).fold(
+            onSuccess = { user -> user },
+            onFailure = { error ->
+                Log.e("EventViewModel", "Error fetching user for $uid: ${error.message}", error)
+                null
+            }
+        )
     }
 
     /**
@@ -406,12 +421,13 @@ class EventViewModel(
      * @return List of all users
      */
     suspend fun getAllUsers(): List<User> {
-        return try {
-            RetrofitClient.apiService.getAllUsers()
-        } catch (e: Exception) {
-            Log.e("EventViewModel", "Error fetching all users: ${e.message}", e)
-            emptyList()
-        }
+        return userRepository.getAllUsers().fold(
+            onSuccess = { users -> users },
+            onFailure = { error ->
+                Log.e("EventViewModel", "Error fetching all users: ${error.message}", error)
+                emptyList()
+            }
+        )
     }
 
     /**
@@ -423,15 +439,16 @@ class EventViewModel(
      */
     fun inviteUsers(eventId: String, userIds: List<String>, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
-            try {
-                val request = InviteUsersRequest(eventId = eventId, userIds = userIds)
-                RetrofitClient.apiService.inviteUsers(request)
-                loadEventAttendees(eventId) // Reload attendees after inviting
-                onSuccess()
-            } catch (e: Exception) {
-                Log.e("EventViewModel", "Error inviting users: ${e.message}", e)
-                onError(e.localizedMessage ?: "Unknown error")
-            }
+            eventUserRepository.inviteUsers(eventId, userIds).fold(
+                onSuccess = {
+                    loadEventAttendees(eventId) // Reload attendees after inviting
+                    onSuccess()
+                },
+                onFailure = { error ->
+                    Log.e("EventViewModel", "Error inviting users: ${error.message}", error)
+                    onError(error.localizedMessage ?: "Unknown error")
+                }
+            )
         }
     }
 
@@ -449,55 +466,53 @@ class EventViewModel(
      * Updating information about event
      */
     fun updateEvent(
-        context: android.content.Context,
         eventId: String,
         title: String,
         description: String?,
         eventDate: String,
         eventTime: String?,
         location: String?,
-        free: Boolean,
-        price: Double,
-        imageUri: android.net.Uri?
+        imageUri: Uri?
     ) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            try {
-                // Create the update request
-                val updateRequest = UpdateEventRequest(
-                    title = title,
-                    description = description,
-                    eventDate = eventDate,
-                    eventTime = eventTime,
-                    location = location
-                )
-
-                // Call the API to update the event
-                val updatedEvent = RetrofitClient.apiService.updateEvent(eventId, updateRequest)
-
-                // Update the events list in state
-                val updatedEvents = _uiState.value.events.map { eventWithMetadata ->
-                    if (eventWithMetadata.id == eventId) {
-                        updatedEvent
-                    } else {
-                        eventWithMetadata
+            eventRepository.updateEvent(
+                eventId = eventId,
+                title = title,
+                description = description,
+                eventDate = eventDate,
+                eventTime = eventTime,
+                location = location
+            ).fold(
+                onSuccess = { updatedEvent ->
+                    // Update the events list in state
+                    val updatedEvents = _uiState.value.events.map { eventWithMetadata ->
+                        if (eventWithMetadata.id == eventId) {
+                            updatedEvent
+                        } else {
+                            eventWithMetadata
+                        }
                     }
+
+                    _uiState.update {
+                        it.copy(
+                            events = updatedEvents,
+                            isLoading = false
+                        )
+                    }
+                    Log.d("EventViewModel", "Event updated successfully: $eventId")
+                },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Failed to update event: ${error.message}"
+                        )
+                    }
+                    Log.e("EventViewModel", "Error updating event", error)
                 }
-
-                _uiState.value = _uiState.value.copy(
-                    events = updatedEvents,
-                    isLoading = false
-                )
-
-
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    errorMessage = "Failed to update event: ${e.message}"
-                )
-                android.util.Log.e("EventViewModel", "Error updating event", e)
-            }
+            )
         }
     }
 }

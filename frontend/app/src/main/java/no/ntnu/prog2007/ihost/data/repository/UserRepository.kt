@@ -3,6 +3,7 @@ package no.ntnu.prog2007.ihost.data.repository
 import android.util.Log
 import no.ntnu.prog2007.ihost.data.model.domain.User
 import no.ntnu.prog2007.ihost.data.model.dto.UpdateUserRequest
+import no.ntnu.prog2007.ihost.data.model.dto.UserResponse
 import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
 import no.ntnu.prog2007.ihost.data.remote.api.UserApi
 
@@ -15,7 +16,8 @@ class UserRepository(
      */
     suspend fun getAllUsers(): Result<List<User>> {
         return try {
-            val users = userApi.getAllUsers()
+            val usersDto = userApi.getAllUsers()
+            val users = usersDto.map { mapToUser(it) }
             Log.d("UserRepository", "Loaded ${users.size} users")
             Result.success(users)
         } catch (e: Exception) {
@@ -29,7 +31,8 @@ class UserRepository(
      */
     suspend fun getUserByUid(uid: String): Result<User> {
         return try {
-            val user = userApi.getUserByUid(uid)
+            val userDto = userApi.getUserByUid(uid)
+            val user = mapToUser(userDto)
             Log.d("UserRepository", "Loaded user: ${user.username}")
             Result.success(user)
         } catch (e: Exception) {
@@ -70,12 +73,28 @@ class UserRepository(
                 photoUrl = photoUrl,
                 phoneNumber = phoneNumber
             )
-            val updatedUser = userApi.updateUserProfile(uid, updateRequest)
+            val userDto = userApi.updateUserProfile(uid, updateRequest)
+            val updatedUser = mapToUser(userDto)
             Log.d("UserRepository", "User profile updated for UID: $uid")
             Result.success(updatedUser)
         } catch (e: Exception) {
             Log.e("UserRepository", "Error updating user profile", e)
             Result.failure(e)
         }
+    }
+
+    private fun mapToUser(dto: UserResponse): User {
+        return User(
+            uid = dto.uid,
+            email = dto.email,
+            username = dto.username,
+            phoneNumber = dto.phoneNumber,
+            photoUrl = dto.photoUrl,
+            createdAt = dto.createdAt,
+            updatedAt = dto.updatedAt,
+            firstName = dto.firstName,
+            lastName = dto.lastName,
+            isEmailVerified = dto.isEmailVerified
+        )
     }
 }

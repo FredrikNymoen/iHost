@@ -1,7 +1,7 @@
 package no.ntnu.prog2007.ihost.data.remote.api
 
-import no.ntnu.prog2007.ihost.data.model.dto.EventImage
-import no.ntnu.prog2007.ihost.data.model.dto.ImageUploadResponse
+import no.ntnu.prog2007.ihost.data.model.dto.EventImageResponse
+import no.ntnu.prog2007.ihost.data.model.dto.EventImageUploadResponse
 import no.ntnu.prog2007.ihost.data.model.dto.ProfilePhotoUploadResponse
 import no.ntnu.prog2007.ihost.data.remote.config.ApiEndpoints.IMAGES
 import okhttp3.MultipartBody
@@ -14,12 +14,12 @@ interface ImageApi {
     suspend fun uploadImage(
         @Part file: MultipartBody.Part,
         @Part("eventId") eventId: RequestBody
-    ): ImageUploadResponse
+    ): EventImageUploadResponse
 
     @GET("$IMAGES/event/{eventId}")
     suspend fun getEventImages(
         @Path("eventId") eventId: String
-    ): List<EventImage>
+    ): List<EventImageResponse>
 
     @Multipart
     @POST("$IMAGES/upload-profile")

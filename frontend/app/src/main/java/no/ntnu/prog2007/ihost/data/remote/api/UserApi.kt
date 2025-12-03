@@ -1,9 +1,9 @@
 package no.ntnu.prog2007.ihost.data.remote.api
 
-import no.ntnu.prog2007.ihost.data.model.domain.User
 import no.ntnu.prog2007.ihost.data.model.dto.AuthResponse
 import no.ntnu.prog2007.ihost.data.model.dto.CreateUserRequest
 import no.ntnu.prog2007.ihost.data.model.dto.UpdateUserRequest
+import no.ntnu.prog2007.ihost.data.model.dto.UserResponse
 import no.ntnu.prog2007.ihost.data.remote.config.ApiEndpoints.USERS
 import retrofit2.http.*
 
@@ -14,12 +14,12 @@ interface UserApi {
     ): AuthResponse
 
     @GET(USERS)
-    suspend fun getAllUsers(): List<User>
+    suspend fun getAllUsers(): List<UserResponse>
 
     @GET("$USERS/{uid}")
     suspend fun getUserByUid(
         @Path("uid") uid: String
-    ): User
+    ): UserResponse
 
     @GET("$USERS/username-available/{username}")
     suspend fun isUsernameAvailable(
@@ -30,5 +30,5 @@ interface UserApi {
     suspend fun updateUserProfile(
         @Path("uid") uid: String,
         @Body request: UpdateUserRequest
-    ): User
+    ): UserResponse
 }

@@ -33,7 +33,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import no.ntnu.prog2007.ihost.data.model.dto.EventWithMetadata
+import no.ntnu.prog2007.ihost.data.model.domain.EventWithMetadata
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 
@@ -59,7 +59,7 @@ fun EventItem(
     val isDeclined = eventWithMetadata.userStatus == "DECLINED"
 
     // Get host information
-    var hostUser by remember { mutableStateOf<no.ntnu.prog2007.ihost.data.model.User?>(null) }
+    var hostUser by remember { mutableStateOf<no.ntnu.prog2007.ihost.data.model.domain.User?>(null) }
 
     LaunchedEffect(event.creatorUid) {
         hostUser = viewModel.getUserByUid(event.creatorUid)

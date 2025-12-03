@@ -1,8 +1,12 @@
 package no.ntnu.prog2007.ihost.data.repository
 
 import android.util.Log
+import no.ntnu.prog2007.ihost.data.model.domain.Event
 import no.ntnu.prog2007.ihost.data.model.domain.EventUser
-import no.ntnu.prog2007.ihost.data.model.dto.EventWithMetadata
+import no.ntnu.prog2007.ihost.data.model.domain.EventWithMetadata
+import no.ntnu.prog2007.ihost.data.model.dto.EventResponse
+import no.ntnu.prog2007.ihost.data.model.dto.EventUserResponse
+import no.ntnu.prog2007.ihost.data.model.dto.EventWithMetadataResponse
 import no.ntnu.prog2007.ihost.data.model.dto.InviteUsersRequest
 import no.ntnu.prog2007.ihost.data.model.dto.InviteUsersResponse
 import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
@@ -15,12 +19,12 @@ class EventUserRepository(
     /**
      * Invite users to an event
      */
-    suspend fun inviteUsers(eventId: String, userIds: List<String>): Result<InviteUsersResponse> {
+    suspend fun inviteUsers(eventId: String, userIds: List<String>): Result<Unit> {
         return try {
             val request = InviteUsersRequest(eventId = eventId, userIds = userIds)
             val response = eventUserApi.inviteUsers(request)
             Log.d("EventUserRepository", "Invited ${response.invitedCount} users to event $eventId")
-            Result.success(response)
+            Result.success(Unit)
         } catch (e: Exception) {
             Log.e("EventUserRepository", "Error inviting users to event", e)
             Result.failure(e)
@@ -61,7 +65,8 @@ class EventUserRepository(
      */
     suspend fun getEventAttendees(eventId: String, status: String? = null): Result<List<EventUser>> {
         return try {
-            val attendees = eventUserApi.getEventAttendees(eventId, status)
+            val attendeesDto = eventUserApi.getEventAttendees(eventId, status)
+            val attendees = attendeesDto.map { mapToEventUser(it) }
             Log.d("EventUserRepository", "Loaded ${attendees.size} attendees for event $eventId")
             Result.success(attendees)
         } catch (e: Exception) {
@@ -76,12 +81,46 @@ class EventUserRepository(
      */
     suspend fun getMyEvents(status: String? = null): Result<List<EventWithMetadata>> {
         return try {
-            val events = eventUserApi.getMyEvents(status)
+            val eventsDto = eventUserApi.getMyEvents(status)
+            val events = eventsDto.map { mapToEventWithMetadata(it) }
             Log.d("EventUserRepository", "Loaded ${events.size} events for current user")
             Result.success(events)
         } catch (e: Exception) {
             Log.e("EventUserRepository", "Error loading user events", e)
             Result.failure(e)
         }
+    }
+
+    private fun mapToEventUser(dto: EventUserResponse): EventUser {
+        return EventUser(
+            id = dto.id,
+            eventId = dto.eventId,
+            userId = dto.userId,
+            status = dto.status,
+            role = dto.role,
+            invitedAt = dto.invitedAt,
+            respondedAt = dto.respondedAt
+        )
+    }
+
+    private fun mapToEventWithMetadata(dto: EventWithMetadataResponse): EventWithMetadata {
+        return EventWithMetadata(
+            id = dto.id,
+            event = Event(
+                title = dto.event.title,
+                description = dto.event.description,
+                eventDate = dto.event.eventDate,
+                eventTime = dto.event.eventTime,
+                location = dto.event.location,
+                creatorUid = dto.event.creatorUid,
+                free = dto.event.free,
+                price = dto.event.price,
+                createdAt = dto.event.createdAt,
+                updatedAt = dto.event.updatedAt,
+                shareCode = dto.event.shareCode
+            ),
+            userStatus = dto.userStatus,
+            userRole = dto.userRole
+        )
     }
 }

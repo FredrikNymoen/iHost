@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.launch
-import no.ntnu.prog2007.ihost.data.model.getOtherUserId
 import no.ntnu.prog2007.ihost.ui.components.UserCardWithTwoActions
 import no.ntnu.prog2007.ihost.ui.components.UserCardWithIconAction
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
