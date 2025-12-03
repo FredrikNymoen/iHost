@@ -1,10 +1,9 @@
-package no.ntnu.prog2007.ihost.ui.screens.friends
+package no.ntnu.prog2007.ihost.ui.screens.profile.friends
 
-import androidx.compose.foundation.background
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PersonRemove
@@ -12,14 +11,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
-import no.ntnu.prog2007.ihost.data.model.domain.User
 import no.ntnu.prog2007.ihost.data.model.domain.getOtherUserId
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
@@ -127,17 +120,17 @@ fun FriendsListScreen(
                                         friendViewModel.removeFriend(
                                             friendshipId = friendship.id,
                                             onSuccess = {
-                                                android.widget.Toast.makeText(
+                                                Toast.makeText(
                                                     context,
                                                     "Removed ${friendUser.firstName} from friends",
-                                                    android.widget.Toast.LENGTH_SHORT
+                                                    Toast.LENGTH_SHORT
                                                 ).show()
                                             },
                                             onError = { error ->
-                                                android.widget.Toast.makeText(
+                                                Toast.makeText(
                                                     context,
                                                     "Error: $error",
-                                                    android.widget.Toast.LENGTH_SHORT
+                                                    Toast.LENGTH_SHORT
                                                 ).show()
                                             }
                                         )

@@ -1,4 +1,4 @@
-package no.ntnu.prog2007.ihost.ui.screens.friends
+package no.ntnu.prog2007.ihost.ui.screens.profile.friends
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -230,7 +231,7 @@ fun UserItemWithAddButton(
                         modifier = Modifier
                             .size(48.dp)
                             .background(MaterialTheme.colorScheme.primary, CircleShape),
-                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        contentScale = ContentScale.Crop
                     )
                 } else {
                     Box(

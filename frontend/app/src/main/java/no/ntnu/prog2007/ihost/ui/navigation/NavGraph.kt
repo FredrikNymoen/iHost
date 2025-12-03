@@ -9,12 +9,12 @@ import no.ntnu.prog2007.ihost.ui.screens.addevent.AddEventScreen
 import no.ntnu.prog2007.ihost.ui.screens.auth.LoginScreen
 import no.ntnu.prog2007.ihost.ui.screens.auth.PersonalInfoScreen
 import no.ntnu.prog2007.ihost.ui.screens.auth.SignUpScreen
-import no.ntnu.prog2007.ihost.ui.screens.editevent.EditEventScreen
+import no.ntnu.prog2007.ihost.ui.screens.events.EditEventScreen
 import no.ntnu.prog2007.ihost.ui.screens.events.EventDetailScreen
 import no.ntnu.prog2007.ihost.ui.screens.events.EventsScreen
 import no.ntnu.prog2007.ihost.ui.screens.events.InviteUsersScreen
-import no.ntnu.prog2007.ihost.ui.screens.friends.AddFriendScreen
-import no.ntnu.prog2007.ihost.ui.screens.friends.FriendsListScreen
+import no.ntnu.prog2007.ihost.ui.screens.profile.friends.AddFriendScreen
+import no.ntnu.prog2007.ihost.ui.screens.profile.friends.FriendsListScreen
 import no.ntnu.prog2007.ihost.ui.screens.profile.ProfileScreen
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
