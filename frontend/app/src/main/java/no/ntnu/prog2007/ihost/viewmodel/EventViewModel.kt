@@ -40,6 +40,14 @@ class EventViewModel: ViewModel() {
 
     private var eventsLoaded = false
 
+    /**
+     * Clear all event data (call on logout)
+     */
+    fun clearEvents() {
+        _uiState.value = EventUiState()
+        eventsLoaded = false
+    }
+
     fun ensureEventsLoaded() {
         if (!eventsLoaded) {
             loadEvents()

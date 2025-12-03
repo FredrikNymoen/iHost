@@ -161,6 +161,10 @@ fun NavigationGraph(
                 eventViewModel = eventViewModel,
                 friendViewModel = friendViewModel,
                 onLogOut = {
+                    // Clear all ViewModels state on logout
+                    eventViewModel.clearEvents()
+                    friendViewModel.clearFriendships()
+
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
                     }

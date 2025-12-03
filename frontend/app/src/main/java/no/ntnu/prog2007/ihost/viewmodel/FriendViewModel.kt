@@ -34,6 +34,13 @@ class FriendViewModel : ViewModel() {
     val uiState: StateFlow<FriendUiState> = _uiState.asStateFlow()
 
     /**
+     * Clear all friendship data (call on logout)
+     */
+    fun clearFriendships() {
+        _uiState.value = FriendUiState()
+    }
+
+    /**
      * Load friends, pending requests, and sent requests for current user
      */
     fun loadFriendships() {

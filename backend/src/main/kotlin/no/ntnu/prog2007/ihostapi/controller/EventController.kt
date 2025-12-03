@@ -22,7 +22,7 @@ class EventController(
     /**
      * Get all events for current user
      */
-    @GetMapping()
+    @GetMapping
     fun getUserEvents(): ResponseEntity<List<Map<String, Any?>>> {
         val uid = getCurrentUserId()
         val events = eventService.getAllEventsForUser(uid)

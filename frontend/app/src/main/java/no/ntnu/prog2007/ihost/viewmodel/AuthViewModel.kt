@@ -204,7 +204,14 @@ class AuthViewModel : ViewModel() {
 
     fun signOut() {
         authRepository.signOut()
-        _uiState.update { it.copy(currentUser = null, isLoggedIn = false) }
+        _uiState.update {
+            it.copy(
+                currentUser = null,
+                userProfile = null,
+                isLoggedIn = false,
+                errorMessage = null
+            )
+        }
     }
 
     /**

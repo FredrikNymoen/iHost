@@ -25,7 +25,7 @@ class UserController(
     /**
      * Get all users (for inviting users to events)
      */
-    @GetMapping("/")
+    @GetMapping
     fun getAllUsers(): ResponseEntity<List<User>> {
         val uid = getCurrentUserId() // Verify authentication
         val users = userService.getAllUsers()
