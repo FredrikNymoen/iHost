@@ -23,6 +23,7 @@ import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
 import no.ntnu.prog2007.ihost.viewmodel.StripeViewModel
+import no.ntnu.prog2007.ihost.viewmodel.UserViewModel
 
 /**
  * Extension functions for adding navigation destinations to NavGraphBuilder
@@ -148,18 +149,21 @@ fun NavGraphBuilder.addEventScreen(
 fun NavGraphBuilder.profileScreen(
     navController: NavHostController,
     authViewModel: AuthViewModel,
+    userViewModel: UserViewModel,
     eventViewModel: EventViewModel,
     friendViewModel: FriendViewModel
 ) {
     composable(Destination.Profile.route) {
         ProfileScreen(
             authViewModel = authViewModel,
+            userViewModel = userViewModel,
             eventViewModel = eventViewModel,
             friendViewModel = friendViewModel,
             onLogOut = {
                 // Clear all ViewModels state on logout
                 eventViewModel.clearEvents()
                 friendViewModel.clearFriendships()
+                userViewModel.clearSelectedUser()
 
                 navController.navigate(Destination.Login.route) {
                     popUpTo(0) { inclusive = true }

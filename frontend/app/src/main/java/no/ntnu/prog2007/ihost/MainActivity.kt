@@ -41,6 +41,7 @@ import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.StripeViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
+import no.ntnu.prog2007.ihost.viewmodel.UserViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,6 +106,7 @@ fun IHostApp() {
     val eventViewModel: EventViewModel = viewModel()
     val stripeViewModel: StripeViewModel = viewModel()
     val friendViewModel: FriendViewModel = viewModel()
+    val userViewModel: UserViewModel = viewModel()
 
     val authUiState by authViewModel.uiState.collectAsState()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -118,10 +120,10 @@ fun IHostApp() {
 
     // Validate authentication and load data on app start if already logged in
     LaunchedEffect(Unit) {
-        if (authUiState.isLoggedIn) {
+        if (authUiState.isLoggedIn && authUiState.currentUser != null) {
             // Load user profile first to validate authentication with backend
             // This will automatically sign out if token is invalid
-            authViewModel.loadUserProfile()
+            userViewModel.loadUserProfile(authUiState.currentUser!!.uid)
             // Load events
             eventViewModel.ensureEventsLoaded()
         }
@@ -209,6 +211,7 @@ fun IHostApp() {
                 eventViewModel = eventViewModel,
                 stripeViewModel = stripeViewModel,
                 friendViewModel = friendViewModel,
+                userViewModel = userViewModel,
                 modifier = Modifier.padding(padding),
                 startDestination = startDestination
             )

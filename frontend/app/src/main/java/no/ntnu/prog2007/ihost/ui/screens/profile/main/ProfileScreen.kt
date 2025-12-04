@@ -32,11 +32,13 @@ import no.ntnu.prog2007.ihost.ui.screens.profile.main.components.ProfileStatisti
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
+import no.ntnu.prog2007.ihost.viewmodel.UserViewModel
 import java.io.File
 
 @Composable
 fun ProfileScreen(
     authViewModel: AuthViewModel,
+    userViewModel: UserViewModel,
     eventViewModel: EventViewModel,
     friendViewModel: FriendViewModel,
     onLogOut: () -> Unit,
@@ -45,12 +47,13 @@ fun ProfileScreen(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val uiState by authViewModel.uiState.collectAsState()
+    val authUiState by authViewModel.uiState.collectAsState()
+    val userUiState by userViewModel.uiState.collectAsState()
     val eventUiState by eventViewModel.uiState.collectAsState()
     val friendUiState by friendViewModel.uiState.collectAsState()
-    val user = uiState.currentUser
-    val userProfile = uiState.userProfile
-    val isProfileLoading = uiState.isProfileLoading
+    val user = authUiState.currentUser
+    val userProfile = userUiState.selectedUser
+    val isProfileLoading = userUiState.isProfileLoading
 
     // Dialog states
     var showEditNameDialog by remember { mutableStateOf(false) }
@@ -70,7 +73,7 @@ fun ProfileScreen(
     LaunchedEffect(user) {
         if (user != null) {
             if (userProfile == null && !isProfileLoading) {
-                authViewModel.loadUserProfile()
+                userViewModel.loadUserProfile(user.uid)
             }
             eventViewModel.ensureEventsLoaded()
             if (friendUiState.friends.isEmpty() && !friendUiState.isLoading) {
@@ -103,8 +106,8 @@ fun ProfileScreen(
         // Show loading indicator if profile is loading
         if (isProfileLoading || (user != null && userProfile == null)) {
             // Empty space - loading overlay shown in Box below
-        } else if (uiState.errorMessage?.contains("account has been deleted") == true ||
-            uiState.errorMessage?.contains("sign in again") == true) {
+        } else if (userUiState.errorMessage?.contains("account has been deleted") == true ||
+            userUiState.errorMessage?.contains("sign in again") == true) {
             // Account deleted or requires re-authentication
             ErrorState(
                 message = "Please sign in again.",
@@ -115,7 +118,7 @@ fun ProfileScreen(
             // 1. Avatar Section
             ProfileAvatar(
                 photoUrl = userProfile.photoUrl,
-                isLoading = uiState.isLoading,
+                isLoading = userUiState.isLoading,
                 onChangeAvatar = { showChangeAvatarDialog = true }
             )
 
@@ -127,7 +130,7 @@ fun ProfileScreen(
                 lastName = userProfile.lastName,
                 username = userProfile.username,
                 email = user.email,
-                isLoading = uiState.isLoading,
+                isLoading = userUiState.isLoading,
                 onEditName = { showEditNameDialog = true }
             )
 
@@ -164,13 +167,14 @@ fun ProfileScreen(
     }
 
     // Dialogs
-    if (showEditNameDialog && userProfile != null) {
+    if (showEditNameDialog && userProfile != null && user != null) {
         EditNameDialog(
             currentFirstName = userProfile.firstName,
             currentLastName = userProfile.lastName ?: "",
             onDismiss = { showEditNameDialog = false },
             onSave = { firstName, lastName ->
-                authViewModel.updateUserProfile(
+                userViewModel.updateUserProfile(
+                    uid = user.uid,
                     firstName = firstName,
                     lastName = lastName
                 )
@@ -193,11 +197,11 @@ fun ProfileScreen(
             selectedImageUri?.let { uri ->
                 coroutineScope.launch {
                     try {
-                        val photoUrl = authViewModel.uploadProfilePhoto(context, uri)
-                        if (photoUrl != null) {
+                        val photoUrl = userViewModel.uploadProfilePhoto(context, uri)
+                        if (photoUrl != null && user != null) {
                             // Wait a bit for backend to finish updating, then reload
                             delay(500)
-                            authViewModel.loadUserProfile()
+                            userViewModel.loadUserProfile(user.uid)
                             Log.d("ProfileScreen", "Profile photo uploaded: $photoUrl")
                         } else {
                             Log.e("ProfileScreen", "Failed to upload profile photo")
@@ -240,11 +244,11 @@ fun ProfileScreen(
             // Upload the photo when selected from gallery
             coroutineScope.launch {
                 try {
-                    val photoUrl = authViewModel.uploadProfilePhoto(context, uri)
-                    if (photoUrl != null) {
+                    val photoUrl = userViewModel.uploadProfilePhoto(context, uri)
+                    if (photoUrl != null && user != null) {
                         // Wait a bit for backend to finish updating, then reload
                         delay(500)
-                        authViewModel.loadUserProfile()
+                        userViewModel.loadUserProfile(user.uid)
                         Log.d("ProfileScreen", "Profile photo uploaded: $photoUrl")
                     } else {
                         Log.e("ProfileScreen", "Failed to upload profile photo")
@@ -277,7 +281,7 @@ fun ProfileScreen(
         // Show loading overlays centered on screen
         if (isProfileLoading || (user != null && userProfile == null)) {
             LoadingOverlay(message = "Loading profile...")
-        } else if (uiState.isLoading) {
+        } else if (userUiState.isLoading) {
             LoadingOverlay()
         }
     }

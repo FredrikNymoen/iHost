@@ -291,7 +291,7 @@ fun AddEventScreen(
                     description = description.ifEmpty { null },
                     eventDate = eventDate,
                     eventTime = eventTime.ifEmpty { null },
-                    location = location,
+                    location = location.ifEmpty { null },
                     free = isFree,
                     price = priceValue,
                     imageUri = selectedImageUri
@@ -300,7 +300,6 @@ fun AddEventScreen(
             },
             enabled = title.isNotEmpty()
                     && eventDate.isNotEmpty()
-                    && location.isNotEmpty()
                     && dateTimeError == null
                     && !uiState.isLoading,
             isLoading = uiState.isLoading
