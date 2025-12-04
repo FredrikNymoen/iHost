@@ -1,4 +1,4 @@
-package no.ntnu.prog2007.ihost.ui.components.dialogs
+package no.ntnu.prog2007.ihost.ui.screens.addevent.components
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -144,7 +144,7 @@ fun LocationPickerDialog(
     var searchQuery by remember { mutableStateOf(initialLocation) }
     var predictions by remember { mutableStateOf<List<AutocompletePrediction>>(emptyList()) }
     var showPredictions by remember { mutableStateOf(false) }
-    var selectedLatLng by remember { mutableStateOf(LatLng(63.4305, 10.3951)) } // Default: Trondheim
+    var selectedLatLng by remember { mutableStateOf(LatLng(60.7957, 10.6910))} // Default: Gjøvik
     var markerPosition by remember { mutableStateOf(selectedLatLng) }
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(selectedLatLng, 12f)

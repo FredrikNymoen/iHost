@@ -27,7 +27,7 @@ class ImageRepository(
             val filePart = MultipartBody.Part.createFormData("file", imageFile.name, requestFile)
             val eventIdBody = eventId.toRequestBody("text/plain".toMediaTypeOrNull())
 
-            val response = imageApi.uploadImage(filePart, eventIdBody)
+            val response = imageApi.uploadEventImage(filePart, eventIdBody)
             Log.d("ImageRepository", "Image uploaded successfully: ${response.imageUrl}")
             Result.success(response.imageUrl)
         } catch (e: Exception) {

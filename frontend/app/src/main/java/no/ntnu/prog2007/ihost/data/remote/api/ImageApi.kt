@@ -11,7 +11,7 @@ import retrofit2.http.*
 interface ImageApi {
     @Multipart
     @POST("$IMAGES/upload")
-    suspend fun uploadImage(
+    suspend fun uploadEventImage(
         @Part file: MultipartBody.Part,
         @Part("eventId") eventId: RequestBody
     ): EventImageUploadResponse

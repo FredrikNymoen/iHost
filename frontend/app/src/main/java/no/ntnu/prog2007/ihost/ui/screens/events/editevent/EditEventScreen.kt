@@ -67,7 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import coil3.compose.AsyncImage
-import no.ntnu.prog2007.ihost.ui.components.dialogs.LocationPickerDialog
+import no.ntnu.prog2007.ihost.ui.screens.addevent.components.LocationPickerDialog
 import no.ntnu.prog2007.ihost.ui.components.TopBar
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import java.io.File
