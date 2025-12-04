@@ -108,4 +108,19 @@ class AuthRepository(
     } catch (e: Exception) {
         null
     }
+
+    /**
+     * Send password reset email using Firebase
+     * Firebase handles sending the email with a secure reset link
+     */
+    suspend fun sendPasswordResetEmail(email: String): Result<Unit> = try {
+        Log.d("AuthRepository", "Attempting to send password reset email to: $email")
+        firebaseAuth.sendPasswordResetEmail(email).await()
+        Log.d("AuthRepository", "Password reset email successfully sent to: $email")
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Log.e("AuthRepository", "Error sending password reset email to $email: ${e.message}", e)
+        Log.e("AuthRepository", "Exception type: ${e.javaClass.simpleName}")
+        Result.failure(e)
+    }
 }

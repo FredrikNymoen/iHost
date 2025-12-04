@@ -143,7 +143,7 @@ fun IHostApp() {
             // Reset flag when user is logged out
             hasNavigatedOnLogin = false
             // If user logged out and not on auth screens, navigate back to Welcome
-            if (currentRoute != null && currentRoute !in listOf(Destination.Welcome.route, Destination.Login.route, Destination.SignUp.route, Destination.PersonalInfo.route)) {
+            if (currentRoute != null && currentRoute !in listOf(Destination.Welcome.route, Destination.Login.route, Destination.SignUp.route, Destination.PersonalInfo.route, Destination.ForgotPassword.route)) {
                 eventViewModel.clearEvents()
                 navController.navigate(Destination.Welcome.route) {
                     popUpTo(0) { inclusive = true }

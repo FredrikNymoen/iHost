@@ -285,6 +285,49 @@ class AuthViewModel : ViewModel() {
     }
 
     /**
+     * Send password reset email
+     * @param email The email to send the reset link to
+     * @param onResult Callback with result: true if successful, false if failed
+     */
+    fun sendPasswordResetEmail(email: String, onResult: (Boolean) -> Unit) {
+        if (email.isBlank()) {
+            _uiState.update { it.copy(errorMessage = "Please enter your email") }
+            onResult(false)
+            return
+        }
+
+        viewModelScope.launch {
+            Log.d("AuthViewModel", "sendPasswordResetEmail called with email: $email")
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            authRepository.sendPasswordResetEmail(email).fold(
+                onSuccess = {
+                    _uiState.update { it.copy(isLoading = false) }
+                    Log.d("AuthViewModel", "Password reset email sent successfully to: $email")
+                    onResult(true)
+                },
+                onFailure = { error ->
+                    val errorMsg = when {
+                        error.message?.contains("network", ignoreCase = true) == true ->
+                            "Network error. Please check your internet connection."
+                        error.message?.contains("user", ignoreCase = true) == true ->
+                            "No account found with this email address."
+                        else -> "Failed to send reset email: ${error.localizedMessage}"
+                    }
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = errorMsg
+                        )
+                    }
+                    Log.e("AuthViewModel", "Error sending password reset email: ${error.message}", error)
+                    onResult(false)
+                }
+            )
+        }
+    }
+
+    /**
      * Upload a profile photo to Cloudinary
      * @param context Android context for accessing content resolver
      * @param imageUri URI of the image to upload

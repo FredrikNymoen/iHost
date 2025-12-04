@@ -9,6 +9,7 @@ import androidx.navigation.navArgument
 import no.ntnu.prog2007.ihost.ui.screens.addevent.AddEventScreen
 import no.ntnu.prog2007.ihost.ui.screens.auth.welcome.WelcomeScreen
 import no.ntnu.prog2007.ihost.ui.screens.auth.login.LoginScreen
+import no.ntnu.prog2007.ihost.ui.screens.auth.forgotpassword.ForgotPasswordScreen
 import no.ntnu.prog2007.ihost.ui.screens.auth.personalinfo.PersonalInfoScreen
 import no.ntnu.prog2007.ihost.ui.screens.auth.signup.SignUpScreen
 import no.ntnu.prog2007.ihost.ui.screens.events.editevent.EditEventScreen
@@ -51,6 +52,23 @@ fun NavGraphBuilder.loginScreen(
 ) {
     composable(Destination.Login.route) {
         LoginScreen(
+            viewModel = authViewModel,
+            onNavigateBack = {
+                navController.popBackStack()
+            },
+            onNavigateToForgotPassword = {
+                navController.navigate(Destination.ForgotPassword.route)
+            }
+        )
+    }
+}
+
+fun NavGraphBuilder.forgotPasswordScreen(
+    navController: NavHostController,
+    authViewModel: AuthViewModel
+) {
+    composable(Destination.ForgotPassword.route) {
+        ForgotPasswordScreen(
             viewModel = authViewModel,
             onNavigateBack = {
                 navController.popBackStack()

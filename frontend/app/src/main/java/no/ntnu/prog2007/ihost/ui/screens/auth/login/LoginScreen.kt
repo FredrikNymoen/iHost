@@ -24,7 +24,8 @@ import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 @Composable
 fun LoginScreen(
     viewModel: AuthViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToForgotPassword: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var email by remember { mutableStateOf("") }
@@ -107,7 +108,19 @@ fun LoginScreen(
                 enabled = !uiState.isLoading
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            // Forgot Password link
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                TextButton(
+                    onClick = onNavigateToForgotPassword
+                ) {
+                    Text("Forgot Password?", fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = { viewModel.signIn(email, password) },

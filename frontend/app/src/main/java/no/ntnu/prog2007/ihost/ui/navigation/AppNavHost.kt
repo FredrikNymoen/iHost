@@ -30,6 +30,7 @@ fun AppNavHost(
         // Auth screens
         welcomeScreen(navController, authViewModel)
         loginScreen(navController, authViewModel)
+        forgotPasswordScreen(navController, authViewModel)
         personalInfoScreen(navController, authViewModel)
         signUpScreen(navController, authViewModel)
 

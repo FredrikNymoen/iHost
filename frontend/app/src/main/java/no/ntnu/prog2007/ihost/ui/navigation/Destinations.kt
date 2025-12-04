@@ -23,6 +23,7 @@ sealed class Destination(
     data object Login : Destination("login", "Log in")
     data object SignUp : Destination("signup", "Register")
     data object PersonalInfo : Destination("personal_info", "Personal info")
+    data object ForgotPassword : Destination("forgot_password", "Forgot Password")
 
     // Main app destinations
     data object Events : Destination(
