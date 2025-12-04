@@ -18,11 +18,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import com.google.android.gms.maps.model.LatLng
-import no.ntnu.prog2007.ihost.ui.components.event.EventDetailsForm
-import no.ntnu.prog2007.ihost.ui.components.event.EventImageSection
-import no.ntnu.prog2007.ihost.ui.components.event.ImageSourceDialog
-import no.ntnu.prog2007.ihost.ui.components.event.LocationPickerDialog
-import no.ntnu.prog2007.ihost.ui.components.event.TimePickerDialog
+import no.ntnu.prog2007.ihost.ui.components.events.EventDetailsForm
+import no.ntnu.prog2007.ihost.ui.components.events.EventImageSection
+import no.ntnu.prog2007.ihost.ui.components.events.ImageSourceDialog
+import no.ntnu.prog2007.ihost.ui.components.events.LocationPickerDialog
+import no.ntnu.prog2007.ihost.ui.components.events.TimePickerDialog
 import no.ntnu.prog2007.ihost.ui.screens.addevent.components.CreateEventButton
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import java.time.Instant

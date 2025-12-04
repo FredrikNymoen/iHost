@@ -1,4 +1,4 @@
-package no.ntnu.prog2007.ihost.ui.components.event
+package no.ntnu.prog2007.ihost.ui.components.events
 
 import android.content.Context
 import android.content.pm.PackageManager

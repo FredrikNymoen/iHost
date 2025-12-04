@@ -1,4 +1,4 @@
-package no.ntnu.prog2007.ihost.ui.components.event
+package no.ntnu.prog2007.ihost.ui.components.events
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*

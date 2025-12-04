@@ -22,7 +22,14 @@ import no.ntnu.prog2007.ihost.ui.components.TopBar
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.StripeViewModel
-import no.ntnu.prog2007.ihost.ui.screens.events.eventdetail.components.*
+import no.ntnu.prog2007.ihost.ui.screens.events.eventdetail.components.EventDetailHeader
+import no.ntnu.prog2007.ihost.ui.screens.events.eventdetail.components.EventInfoSection
+import no.ntnu.prog2007.ihost.ui.screens.events.eventdetail.components.AttendeesSection
+import no.ntnu.prog2007.ihost.ui.screens.events.eventdetail.components.AttendeeInfo
+import no.ntnu.prog2007.ihost.ui.screens.events.eventdetail.components.CreatorActionButtons
+import no.ntnu.prog2007.ihost.ui.screens.events.eventdetail.components.PendingInvitationActions
+import no.ntnu.prog2007.ihost.ui.screens.events.eventdetail.components.StatusCard
+import no.ntnu.prog2007.ihost.ui.screens.events.eventdetail.components.StatusType
 import androidx.core.net.toUri
 
 

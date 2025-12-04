@@ -17,7 +17,12 @@ import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.ui.components.TopBar
-import no.ntnu.prog2007.ihost.ui.screens.events.inviteusers.components.*
+import no.ntnu.prog2007.ihost.ui.screens.events.inviteusers.components.SearchBar
+import no.ntnu.prog2007.ihost.ui.screens.events.inviteusers.components.FloatingInviteButton
+import no.ntnu.prog2007.ihost.ui.screens.events.inviteusers.components.ErrorState
+import no.ntnu.prog2007.ihost.ui.screens.events.inviteusers.components.EmptyState
+import no.ntnu.prog2007.ihost.ui.screens.events.inviteusers.components.LoadingState
+import no.ntnu.prog2007.ihost.ui.screens.events.inviteusers.components.UserSelectionList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

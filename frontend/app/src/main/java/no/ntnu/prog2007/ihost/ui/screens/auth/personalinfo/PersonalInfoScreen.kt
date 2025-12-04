@@ -1,22 +1,18 @@
 package no.ntnu.prog2007.ihost.ui.screens.auth.personalinfo
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import no.ntnu.prog2007.ihost.ui.components.auth.AuthHeader
+import no.ntnu.prog2007.ihost.ui.screens.auth.personalinfo.components.NameTextField
+import no.ntnu.prog2007.ihost.ui.screens.auth.personalinfo.components.UsernameTextField
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,6 +24,7 @@ fun PersonalInfoScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val registrationState by viewModel.registrationState.collectAsState()
+
     // Navigate when registration is successful
     LaunchedEffect(uiState.registrationSuccess) {
         if (uiState.registrationSuccess) {
@@ -35,7 +32,6 @@ fun PersonalInfoScreen(
             onSignUp()
         }
     }
-
 
     // Username validation state
     var isCheckingUsername by remember { mutableStateOf(false) }
@@ -83,135 +79,42 @@ fun PersonalInfoScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = "Personal Information",
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Tell us a bit about yourself",
-            fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onBackground
+        AuthHeader(
+            title = "Personal Information",
+            subtitle = "Tell us a bit about yourself"
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // First name field
-        OutlinedTextField(
+        NameTextField(
             value = registrationState.firstName,
             onValueChange = { viewModel.updateRegistrationField("firstName", it) },
-            label = { Text("First Name", color = MaterialTheme.colorScheme.onSurface) },
-            leadingIcon = {
-                Icon(
-                    Icons.Default.Person,
-                    contentDescription = "First Name",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
-                cursorColor = MaterialTheme.colorScheme.primary
-            )
+            label = "First Name"
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Last name field
-        OutlinedTextField(
+        NameTextField(
             value = registrationState.lastName,
             onValueChange = { viewModel.updateRegistrationField("lastName", it) },
-            label = { Text("Last Name", color = MaterialTheme.colorScheme.onSurface) },
-            leadingIcon = {
-                Icon(
-                    Icons.Default.Person,
-                    contentDescription = "Last Name",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
-                cursorColor = MaterialTheme.colorScheme.primary
-            )
+            label = "Last Name"
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Username field
-        OutlinedTextField(
+        UsernameTextField(
             value = registrationState.username,
             onValueChange = {
                 viewModel.updateRegistrationField("username", it)
                 validateUsername(it)
             },
-            label = { Text("Username", color = MaterialTheme.colorScheme.onSurface) },
-            leadingIcon = {
-                Icon(
-                    Icons.Default.Person,
-                    contentDescription = "Username",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            },
-            trailingIcon = {
-                when {
-                    isCheckingUsername -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            strokeWidth = 2.dp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                    isUsernameAvailable == true -> {
-                        Icon(
-                            Icons.Default.Check,
-                            contentDescription = "Username available",
-                            tint = Color.Green
-                        )
-                    }
-                    isUsernameAvailable == false -> {
-                        Icon(
-                            Icons.Default.Close,
-                            contentDescription = "Username not available",
-                            tint = Color.Red
-                        )
-                    }
-                }
-            },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
-                cursorColor = MaterialTheme.colorScheme.primary
-            )
+            isCheckingUsername = isCheckingUsername,
+            isUsernameAvailable = isUsernameAvailable,
+            usernameError = usernameError
         )
-
-        if (usernameError != null) {
-            Text(
-                text = usernameError!!,
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 12.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, top = 4.dp)
-            )
-        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Sign Up button
         Button(
             onClick = {
                 viewModel.signUp(registrationState.username, registrationState.password)
@@ -237,7 +140,6 @@ fun PersonalInfoScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Back button
         OutlinedButton(
             onClick = onNavigateBack,
             modifier = Modifier

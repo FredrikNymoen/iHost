@@ -1,7 +1,7 @@
 package no.ntnu.prog2007.ihost.ui.screens.events.editevent.components
 
 import androidx.compose.runtime.Composable
-import no.ntnu.prog2007.ihost.ui.components.event.EventDetailsForm
+import no.ntnu.prog2007.ihost.ui.components.events.EventDetailsForm
 
 @Composable
 fun EditEventDetailsForm(

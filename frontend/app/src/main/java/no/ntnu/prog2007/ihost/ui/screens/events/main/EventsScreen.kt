@@ -9,7 +9,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import no.ntnu.prog2007.ihost.ui.screens.events.main.components.*
+import no.ntnu.prog2007.ihost.ui.screens.events.main.components.JoinEventDialog
+import no.ntnu.prog2007.ihost.ui.screens.events.main.components.FloatingActionButtons
+import no.ntnu.prog2007.ihost.ui.screens.events.main.components.TabSelector
+import no.ntnu.prog2007.ihost.ui.screens.events.main.components.DateFilterBar
+import no.ntnu.prog2007.ihost.ui.screens.events.main.components.EventsList
+import no.ntnu.prog2007.ihost.ui.screens.events.main.components.ErrorMessage
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 
