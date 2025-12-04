@@ -58,12 +58,7 @@ class ImageServiceImpl(
     override fun uploadProfilePhoto(file: MultipartFile, userId: String): String {
         logger.info("Uploading profile photo for user: $userId")
 
-        // Upload to Cloudinary in user_images folder
-        val photoUrl = cloudinaryService.uploadImage(file, folder = "user_images")
-
-        logger.info("Profile photo uploaded to Cloudinary: $photoUrl")
-
-        // Update user document with new photoUrl
+        // Get user document to check for existing photoUrl
         val userDocRef = firestore.collection(USERS_COLLECTION).document(userId)
         val userDoc = userDocRef.get().get()
 
@@ -72,7 +67,26 @@ class ImageServiceImpl(
             throw ResourceNotFoundException("User not found")
         }
 
-        // Update photoUrl field
+        // Delete old photo from Cloudinary if it exists
+        val oldPhotoUrl = userDoc.getString("photoUrl")
+        if (!oldPhotoUrl.isNullOrBlank()) {
+            try {
+                // Extract public ID from URL (format: .../folder/publicId.extension)
+                val publicId = oldPhotoUrl.substringAfterLast("/").substringBeforeLast(".")
+                val folder = "user_images"
+                cloudinaryService.deleteImage("$folder/$publicId")
+                logger.info("Deleted old profile photo from Cloudinary: $oldPhotoUrl")
+            } catch (e: Exception) {
+                logger.warning("Failed to delete old profile photo, continuing with upload: ${e.message}")
+            }
+        }
+
+        // Upload new photo to Cloudinary in user_images folder
+        val photoUrl = cloudinaryService.uploadImage(file, folder = "user_images")
+
+        logger.info("Profile photo uploaded to Cloudinary: $photoUrl")
+
+        // Update user document with new photoUrl
         userDocRef.update("photoUrl", photoUrl).get()
 
         logger.info("User document updated with new photoUrl for user: $userId")

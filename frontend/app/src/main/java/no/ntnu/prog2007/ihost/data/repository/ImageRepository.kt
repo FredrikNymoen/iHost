@@ -86,7 +86,7 @@ class ImageRepository(
      */
     suspend fun deleteEventImage(eventImageDocumentId: String): Result<Unit> {
         return try {
-            imageApi.deleteImage(eventImageDocumentId)
+            imageApi.deleteEventImage(eventImageDocumentId)
             Log.d("ImageRepository", "Event image deleted successfully: $eventImageDocumentId")
             Result.success(Unit)
         } catch (e: Exception) {

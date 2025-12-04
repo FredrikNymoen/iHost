@@ -28,7 +28,7 @@ interface ImageApi {
     ): ProfilePhotoUploadResponse
 
     @DELETE("$IMAGES/{documentId}")
-    suspend fun deleteImage(
+    suspend fun deleteEventImage(
         @Path("documentId") documentId: String
     )
 }
