@@ -102,7 +102,7 @@ fun ProfileScreen(
     ) {
         // Show loading indicator if profile is loading
         if (isProfileLoading || (user != null && userProfile == null)) {
-            LoadingOverlay(message = "Loading profile...")
+            // Empty space - loading overlay shown in Box below
         } else if (uiState.errorMessage?.contains("account has been deleted") == true ||
             uiState.errorMessage?.contains("sign in again") == true) {
             // Account deleted or requires re-authentication
@@ -274,8 +274,10 @@ fun ProfileScreen(
         )
     }
 
-        // Show loading overlay when uploading/updating
-        if (uiState.isLoading) {
+        // Show loading overlays centered on screen
+        if (isProfileLoading || (user != null && userProfile == null)) {
+            LoadingOverlay(message = "Loading profile...")
+        } else if (uiState.isLoading) {
             LoadingOverlay()
         }
     }

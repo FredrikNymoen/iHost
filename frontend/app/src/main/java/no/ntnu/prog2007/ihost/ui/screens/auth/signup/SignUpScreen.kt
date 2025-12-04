@@ -33,11 +33,13 @@ fun SignUpScreen(
     var confirmPasswordVisible by remember { mutableStateOf(false) }
     var confirmPassword by remember { mutableStateOf("") }
     var emailError by remember { mutableStateOf<String?>(null) }
+    var hasAutoFilled by remember { mutableStateOf(false) }
 
-    // Auto-fill confirm password if password is already set (e.g., when coming back from PersonalInfoScreen)
-    LaunchedEffect(registrationState.password) {
-        if (registrationState.password.isNotBlank() && confirmPassword.isEmpty()) {
+    // Auto-fill confirm password ONCE if password is already set (e.g., when coming back from PersonalInfoScreen)
+    LaunchedEffect(Unit) {
+        if (!hasAutoFilled && registrationState.password.isNotBlank() && confirmPassword.isEmpty()) {
             confirmPassword = registrationState.password
+            hasAutoFilled = true
         }
     }
 
