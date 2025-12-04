@@ -64,6 +64,16 @@ fun EditEventScreen(
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var showImageSourceDialog by remember { mutableStateOf(false) }
     var imageKey by remember { mutableStateOf(0) }
+    var hasRemovedImage by remember { mutableStateOf(false) }
+
+    // Get existing event image
+    val existingEventImage = uiState.eventImages[eventId]?.firstOrNull()
+    val existingImageUrl = if (!hasRemovedImage) existingEventImage?.path else null
+
+    // Load event images when screen opens
+    LaunchedEffect(eventId) {
+        viewModel.loadEventImages(eventId)
+    }
 
     // Update form when event loads
     LaunchedEffect(event) {
@@ -85,6 +95,7 @@ fun EditEventScreen(
             Log.d("Camera", "Photo capture cancelled or failed")
         } else {
             Log.d("Camera", "Photo captured: $selectedImageUri")
+            hasRemovedImage = false
             imageKey++
         }
     }
@@ -115,6 +126,7 @@ fun EditEventScreen(
     ) { uri ->
         if (uri != null) {
             selectedImageUri = uri
+            hasRemovedImage = false
             Log.d("PhotoPicker", "Selected URI: $uri")
         }
     }
@@ -238,10 +250,18 @@ fun EditEventScreen(
         ) {
             EventImageSection(
                 selectedImageUri = selectedImageUri,
+                existingImageUrl = existingImageUrl,
                 imageKey = imageKey,
                 placeholderText = "Tap to change event image",
-                onAddImageClick = { showImageSourceDialog = true },
-                onRemoveImage = { selectedImageUri = null }
+                onAddImageClick = {
+                    showImageSourceDialog = true
+                    hasRemovedImage = false
+                },
+                onRemoveImage = {
+                    selectedImageUri = null
+                    hasRemovedImage = true
+                    imageKey++
+                }
             )
 
             EditEventDetailsForm(
@@ -263,13 +283,15 @@ fun EditEventScreen(
                 isLoading = uiState.isLoading,
                 onClick = {
                     viewModel.updateEvent(
+                        context = context,
                         eventId = eventId,
                         title = title,
                         description = description.ifEmpty { null },
                         eventDate = eventDate,
                         eventTime = eventTime.ifEmpty { null },
                         location = location.ifEmpty { null },
-                        imageUri = selectedImageUri
+                        imageUri = selectedImageUri,
+                        hasRemovedImage = hasRemovedImage
                     )
                     onEventUpdated()
                 }

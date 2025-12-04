@@ -53,6 +53,7 @@ class ImageRepository(
 
     private fun mapToEventImage(dto: EventImageResponse): EventImage {
         return EventImage(
+            id = dto.id,
             path = dto.path,
             eventId = dto.eventId,
             createdAt = dto.createdAt
@@ -74,6 +75,22 @@ class ImageRepository(
             Result.success(response.photoUrl)
         } catch (e: Exception) {
             Log.e("ImageRepository", "Error uploading profile photo", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Delete an event image by document ID
+     * @param eventImageDocumentId The Firestore document ID of the event image to delete
+     * @return Result indicating success or failure
+     */
+    suspend fun deleteEventImage(eventImageDocumentId: String): Result<Unit> {
+        return try {
+            imageApi.deleteImage(eventImageDocumentId)
+            Log.d("ImageRepository", "Event image deleted successfully: $eventImageDocumentId")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("ImageRepository", "Error deleting event image", e)
             Result.failure(e)
         }
     }

@@ -111,15 +111,6 @@ class EventViewModel: ViewModel() {
     }
 
     /**
-     * Get the first image URL for an event, or null if no images exist
-     * @param eventId The ID of the event
-     * @return The URL of the first image, or null
-     */
-    fun getFirstImageUrl(eventId: String): String? {
-        return _uiState.value.eventImages[eventId]?.firstOrNull()?.path
-    }
-
-    /**
      * Load attendees for a specific event
      * @param eventId The ID of the event to load attendees for
      * Note: This loads ALL event_users (including PENDING) for the event
@@ -246,9 +237,6 @@ class EventViewModel: ViewModel() {
                 }
             )
         }
-    }
-    fun editEvent(eventId:String, onSuccess: (EventWithMetadata) -> Unit){
-
     }
 
     fun deleteEvent(eventId: String) {
@@ -474,13 +462,15 @@ class EventViewModel: ViewModel() {
      * Updating information about event
      */
     fun updateEvent(
+        context: Context,
         eventId: String,
         title: String,
         description: String?,
         eventDate: String,
         eventTime: String?,
         location: String?,
-        imageUri: Uri?
+        imageUri: Uri?,
+        hasRemovedImage: Boolean
     ) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
@@ -494,6 +484,47 @@ class EventViewModel: ViewModel() {
                 location = location
             ).fold(
                 onSuccess = { updatedEvent ->
+                    Log.d("EventViewModel", "Event updated successfully: $eventId")
+
+                    // Get existing image to delete if we're updating/removing
+                    val existingImage = _uiState.value.eventImages[eventId]?.firstOrNull()
+
+                    // Handle image update
+                    if (imageUri != null) {
+                        // Delete old image first if it exists
+                        if (existingImage != null) {
+                            Log.d("EventViewModel", "Deleting old image before uploading new one: ${existingImage.id}")
+                            imageRepository.deleteEventImage(existingImage.id)
+                        }
+
+                        // Upload new image
+                        Log.d("EventViewModel", "Uploading new image for event: $eventId")
+                        val imageUrl = uploadEventImage(context, imageUri, eventId)
+                        if (imageUrl != null) {
+                            Log.d("EventViewModel", "Image uploaded successfully: $imageUrl")
+                            loadEventImages(eventId)
+                        } else {
+                            Log.w("EventViewModel", "Image upload failed, but event was updated")
+                        }
+                    } else if (hasRemovedImage && existingImage != null) {
+                        // Remove existing image
+                        Log.d("EventViewModel", "Removing image for event: $eventId")
+                        imageRepository.deleteEventImage(existingImage.id).fold(
+                            onSuccess = {
+                                Log.d("EventViewModel", "Image deleted successfully")
+                                // Clear the image from state
+                                _uiState.update { state ->
+                                    val updatedImages = state.eventImages.toMutableMap()
+                                    updatedImages[eventId] = emptyList()
+                                    state.copy(eventImages = updatedImages)
+                                }
+                            },
+                            onFailure = { error ->
+                                Log.e("EventViewModel", "Failed to delete image: ${error.message}", error)
+                            }
+                        )
+                    }
+
                     // Update the events list in state
                     val updatedEvents = _uiState.value.events.map { eventWithMetadata ->
                         if (eventWithMetadata.id == eventId) {
@@ -509,7 +540,6 @@ class EventViewModel: ViewModel() {
                             isLoading = false
                         )
                     }
-                    Log.d("EventViewModel", "Event updated successfully: $eventId")
                 },
                 onFailure = { error ->
                     _uiState.update {

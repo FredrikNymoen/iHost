@@ -6,6 +6,7 @@ import com.google.gson.annotations.SerializedName
  * EventImage API response
  */
 data class EventImageResponse(
+    @SerializedName("id") val id: String,
     @SerializedName("path") val path: String,
     @SerializedName("eventId") val eventId: String,
     @SerializedName("createdAt") val createdAt: String

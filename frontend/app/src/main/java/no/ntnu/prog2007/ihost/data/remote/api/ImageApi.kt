@@ -26,4 +26,9 @@ interface ImageApi {
     suspend fun uploadProfilePhoto(
         @Part file: MultipartBody.Part
     ): ProfilePhotoUploadResponse
+
+    @DELETE("$IMAGES/{documentId}")
+    suspend fun deleteImage(
+        @Path("documentId") documentId: String
+    )
 }

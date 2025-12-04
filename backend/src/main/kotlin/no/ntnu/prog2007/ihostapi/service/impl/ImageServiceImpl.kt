@@ -86,7 +86,11 @@ class ImageServiceImpl(
             .get()
             .get()
 
-        val images = query.documents.map { doc -> doc.data }
+        val images = query.documents.map { doc ->
+            val data = doc.data?.toMutableMap() ?: mutableMapOf()
+            data["id"] = doc.id  // Add document ID to the response
+            data
+        }
 
         logger.info("Retrieved ${images.size} images for event: $eventId")
         return images

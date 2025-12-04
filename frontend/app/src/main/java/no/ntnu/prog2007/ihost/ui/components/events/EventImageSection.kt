@@ -24,6 +24,7 @@ import coil3.compose.AsyncImage
 @Composable
 fun EventImageSection(
     selectedImageUri: Uri?,
+    existingImageUrl: String? = null,
     imageKey: Int = 0,
     placeholderText: String = "Tap to add image",
     onAddImageClick: () -> Unit,
@@ -44,11 +45,13 @@ fun EventImageSection(
             ),
         contentAlignment = Alignment.Center
     ) {
-        if (selectedImageUri != null) {
+        val imageToShow = selectedImageUri ?: existingImageUrl
+
+        if (imageToShow != null) {
             key(imageKey) {
                 AsyncImage(
-                    model = selectedImageUri,
-                    contentDescription = "Selected event image",
+                    model = imageToShow,
+                    contentDescription = "Event image",
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
@@ -63,6 +66,14 @@ fun EventImageSection(
                     contentScale = ContentScale.Crop
                 )
             }
+
+            // Show remove button and add image button overlay
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(onClick = onAddImageClick)
+            )
+
             IconButton(
                 onClick = onRemoveImage,
                 modifier = Modifier
