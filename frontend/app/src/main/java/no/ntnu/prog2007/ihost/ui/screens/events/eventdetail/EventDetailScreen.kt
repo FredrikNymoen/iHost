@@ -23,6 +23,7 @@ import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.StripeViewModel
 import no.ntnu.prog2007.ihost.ui.screens.events.eventdetail.components.*
+import androidx.core.net.toUri
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,10 +43,6 @@ fun EventDetailScreen(
     val event = eventWithMetadata?.event
     val currentUserId = authUiState.currentUser?.uid
     val context = LocalContext.current
-
-
-    // Get the ComponentActivity from context
-    val activity = context as? ComponentActivity
 
     // State to hold attendee names mapping
     var attendeeUserNames by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
@@ -154,9 +151,7 @@ fun EventDetailScreen(
                         // Open Google Maps with the location
                         val intent = Intent(
                             Intent.ACTION_VIEW,
-                            Uri.parse(
-                                "geo:0,0?q=${Uri.encode(event.location)}"
-                            )
+                            "geo:0,0?q=${Uri.encode(event.location)}".toUri()
                         )
                         intent.setPackage("com.google.android.apps.maps")
 
@@ -166,11 +161,9 @@ fun EventDetailScreen(
                             // If Google Maps not installed, use browser
                             val webIntent = Intent(
                                 Intent.ACTION_VIEW,
-                                Uri.parse(
-                                    "https://www.google.com/maps/search/?api=1&query=${
-                                        Uri.encode(event.location)
-                                    }"
-                                )
+                                "https://www.google.com/maps/search/?api=1&query=${
+                                    Uri.encode(event.location)
+                                }".toUri()
                             )
                             context.startActivity(webIntent)
                         }
@@ -197,7 +190,7 @@ fun EventDetailScreen(
 
                 // Action Buttons
                 val isCreator = event.creatorUid == currentUserId
-                val userStatus = eventWithMetadata?.userStatus
+                val userStatus = eventWithMetadata.userStatus
                 val isAccepted = userStatus == "ACCEPTED" || userStatus == "CREATOR"
                 val isPending = userStatus == "PENDING"
                 val isDeclined = userStatus == "DECLINED"
