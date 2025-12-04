@@ -33,6 +33,10 @@ android {
         val mapsApiKey = localProperties.getProperty("GOOGLE_MAPS_API_KEY") ?: ""
         buildConfigField("String", "GOOGLE_MAPS_API_KEY", "\"$mapsApiKey\"")
         manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = mapsApiKey
+
+        // Add BASE_URL from local.properties
+        val baseUrl = localProperties.getProperty("BASE_URL") ?: "http://10.0.2.2:8080/"
+        buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
     }
 
     buildTypes {

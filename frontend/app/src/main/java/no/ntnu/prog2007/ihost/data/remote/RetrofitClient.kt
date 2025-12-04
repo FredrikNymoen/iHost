@@ -4,6 +4,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
+import no.ntnu.prog2007.ihost.BuildConfig
 import no.ntnu.prog2007.ihost.data.remote.api.*
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -13,7 +14,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 
 object RetrofitClient {
-    private const val BASE_URL = "http://10.0.2.2:8080/"
+    private const val BASE_URL = BuildConfig.BASE_URL
 
     // Interceptor that adds Firebase ID token to every request
     private class FirebaseAuthInterceptor : Interceptor {
