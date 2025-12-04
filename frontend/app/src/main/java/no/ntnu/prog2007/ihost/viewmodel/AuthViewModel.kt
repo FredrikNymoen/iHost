@@ -105,17 +105,21 @@ class AuthViewModel : ViewModel() {
                     _uiState.update { it.copy(userProfile = profile, isProfileLoading = false) }
                 },
                 onFailure = { error ->
-                    // Check if its a 404 not found error to handle deleted or missing profiles
-                    if (error.message?.contains("404") == true ||
+                    // Check if authentication failed (403/401) or profile not found (404)
+                    if (error.message?.contains("403") == true ||
+                        error.message?.contains("401") == true ||
+                        error.message?.contains("Forbidden") == true ||
+                        error.message?.contains("Unauthorized") == true ||
+                        error.message?.contains("404") == true ||
                         error.message?.contains("not found") == true) {
 
-                        // Profile doesnt exist, force log out and inform
-                        Log.w("AuthViewModel","User profile not found for authenticated user $uid, signing out.")
+                        // Authentication failed or profile doesnt exist, force log out
+                        Log.w("AuthViewModel","Authentication failed or profile not found for user $uid, signing out.")
                         signOut()
                         _uiState.update {
                             it.copy(
                                 isProfileLoading = false,
-                                errorMessage = "Your account has been deleted or does not exist. Please sign in again."
+                                errorMessage = "Your session has expired or your account no longer exists. Please sign in again."
                             )
                         }
                     } else {

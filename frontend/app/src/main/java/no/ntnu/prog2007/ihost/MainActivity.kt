@@ -116,9 +116,13 @@ fun IHostApp() {
     // Determine start destination based on login state
     val startDestination = if (authUiState.isLoggedIn) Destination.Events.route else Destination.Welcome.route
 
-    // Load events on app start if already logged in
+    // Validate authentication and load data on app start if already logged in
     LaunchedEffect(Unit) {
         if (authUiState.isLoggedIn) {
+            // Load user profile first to validate authentication with backend
+            // This will automatically sign out if token is invalid
+            authViewModel.loadUserProfile()
+            // Load events
             eventViewModel.ensureEventsLoaded()
         }
     }
