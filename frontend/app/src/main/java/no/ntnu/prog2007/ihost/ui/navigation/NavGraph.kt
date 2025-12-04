@@ -1,11 +1,13 @@
 package no.ntnu.prog2007.ihost.ui.navigation
 
+import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import no.ntnu.prog2007.ihost.ui.screens.addevent.AddEventScreen
+import no.ntnu.prog2007.ihost.ui.screens.auth.welcome.WelcomeScreen
 import no.ntnu.prog2007.ihost.ui.screens.auth.login.LoginScreen
 import no.ntnu.prog2007.ihost.ui.screens.auth.personalinfo.PersonalInfoScreen
 import no.ntnu.prog2007.ihost.ui.screens.auth.signup.SignUpScreen
@@ -26,6 +28,23 @@ import no.ntnu.prog2007.ihost.viewmodel.StripeViewModel
  */
 
 // Auth screens
+fun NavGraphBuilder.welcomeScreen(
+    navController: NavHostController,
+    authViewModel: AuthViewModel
+) {
+    composable(Destination.Welcome.route) {
+        WelcomeScreen(
+            onNavigateToLogin = {
+                navController.navigate(Destination.Login.route)
+            },
+            onNavigateToSignUp = {
+                authViewModel.resetRegistrationState()
+                navController.navigate(Destination.SignUp.route)
+            }
+        )
+    }
+}
+
 fun NavGraphBuilder.loginScreen(
     navController: NavHostController,
     authViewModel: AuthViewModel
@@ -33,9 +52,8 @@ fun NavGraphBuilder.loginScreen(
     composable(Destination.Login.route) {
         LoginScreen(
             viewModel = authViewModel,
-            onNavigateToSignUp = {
-                authViewModel.resetRegistrationState()
-                navController.navigate(Destination.SignUp.route)
+            onNavigateBack = {
+                navController.popBackStack()
             }
         )
     }
@@ -49,9 +67,10 @@ fun NavGraphBuilder.personalInfoScreen(
         PersonalInfoScreen(
             viewModel = authViewModel,
             onSignUp = {
-                // Navigation handled by MainActivity based on auth state
+                // After successful signup, navigate to Events
+                // The MainActivity will handle the navigation based on auth state
             },
-            onNavigateToLogin = {
+            onNavigateBack = {
                 navController.popBackStack()
             }
         )
@@ -65,7 +84,7 @@ fun NavGraphBuilder.signUpScreen(
     composable(Destination.SignUp.route) {
         SignUpScreen(
             viewModel = authViewModel,
-            onNavigateToLogin = {
+            onNavigateBack = {
                 navController.popBackStack()
             },
             onNavigateToPersonalInfo = {
@@ -251,3 +270,4 @@ fun NavGraphBuilder.friendsListScreen(
         )
     }
 }
+

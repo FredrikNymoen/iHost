@@ -3,6 +3,7 @@ package no.ntnu.prog2007.ihost.ui.screens.auth.signup
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,7 +23,7 @@ import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 @Composable
 fun SignUpScreen(
     viewModel: AuthViewModel,
-    onNavigateToLogin: () -> Unit,
+    onNavigateBack: () -> Unit,
     onNavigateToPersonalInfo: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -31,6 +32,14 @@ fun SignUpScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
     var confirmPassword by remember { mutableStateOf("") }
+    var emailError by remember { mutableStateOf<String?>(null) }
+
+    // Auto-fill confirm password if password is already set (e.g., when coming back from PersonalInfoScreen)
+    LaunchedEffect(registrationState.password) {
+        if (registrationState.password.isNotBlank() && confirmPassword.isEmpty()) {
+            confirmPassword = registrationState.password
+        }
+    }
 
     val emailFocusRequester = remember { FocusRequester() }
     val passwordFocusRequester = remember { FocusRequester() }
@@ -79,7 +88,10 @@ fun SignUpScreen(
 
         OutlinedTextField(
             value = registrationState.email,
-            onValueChange = { viewModel.updateRegistrationField("email", it) },
+            onValueChange = {
+                viewModel.updateRegistrationField("email", it)
+                emailError = null // Clear error when user types
+            },
             label = { Text("Email", color = MaterialTheme.colorScheme.onSurface) },
             leadingIcon = {
                 Icon(
@@ -90,6 +102,7 @@ fun SignUpScreen(
             },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            isError = emailError != null,
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRequester(emailFocusRequester),
@@ -101,6 +114,17 @@ fun SignUpScreen(
                 cursorColor = MaterialTheme.colorScheme.primary
             )
         )
+
+        if (emailError != null) {
+            Text(
+                text = emailError!!,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, top = 4.dp)
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -195,7 +219,18 @@ fun SignUpScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = onNavigateToPersonalInfo,
+            onClick = {
+                // Check if email is available before proceeding
+                viewModel.checkEmailAvailability(registrationState.email) { available ->
+                    if (available) {
+                        // Email is available, proceed to personal info
+                        onNavigateToPersonalInfo()
+                    } else {
+                        // Email is taken, show error
+                        emailError = "This email is already registered"
+                    }
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
@@ -209,18 +244,14 @@ fun SignUpScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+        // Return button
+        OutlinedButton(
+            onClick = onNavigateBack,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
         ) {
-            Text(
-                text = "Already have an account?",
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            TextButton(onClick = onNavigateToLogin) {
-                Text("Log In", color = MaterialTheme.colorScheme.primary)
-            }
+            Text("Return", fontSize = 16.sp)
         }
     }
 }

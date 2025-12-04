@@ -2,6 +2,7 @@ package no.ntnu.prog2007.ihost.ui.screens.auth.personalinfo
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Person
@@ -23,10 +24,18 @@ import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 fun PersonalInfoScreen(
     viewModel: AuthViewModel,
     onSignUp: () -> Unit,
-    onNavigateToLogin: () -> Unit
+    onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val registrationState by viewModel.registrationState.collectAsState()
+    // Navigate when registration is successful
+    LaunchedEffect(uiState.registrationSuccess) {
+        if (uiState.registrationSuccess) {
+            viewModel.clearRegistrationSuccess()
+            onSignUp()
+        }
+    }
+
 
     // Username validation state
     var isCheckingUsername by remember { mutableStateOf(false) }
@@ -228,19 +237,14 @@ fun PersonalInfoScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Login link
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+        // Back button
+        OutlinedButton(
+            onClick = onNavigateBack,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
         ) {
-            Text(
-                text = "Already have an account?",
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            TextButton(onClick = onNavigateToLogin) {
-                Text("Log In", color = MaterialTheme.colorScheme.primary)
-            }
+            Text("Back", fontSize = 16.sp)
         }
     }
 }

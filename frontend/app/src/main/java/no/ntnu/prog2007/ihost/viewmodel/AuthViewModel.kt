@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import no.ntnu.prog2007.ihost.data.model.domain.User
 import no.ntnu.prog2007.ihost.data.repository.AuthRepository
 import no.ntnu.prog2007.ihost.data.repository.UserRepository
@@ -25,7 +26,8 @@ data class AuthUiState(
     val isProfileLoading: Boolean = false, // Loading state for profile data
     val isLoggedIn: Boolean = false,
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val registrationSuccess: Boolean = false // Flag to indicate successful registration
 )
 
 /**
@@ -72,6 +74,14 @@ class AuthViewModel : ViewModel() {
      */
     fun resetRegistrationState() {
         _registrationState.value = RegistrationState()
+        _uiState.update { it.copy(registrationSuccess = false) }
+    }
+
+    /**
+     * Clear registration success flag
+     */
+    fun clearRegistrationSuccess() {
+        _uiState.update { it.copy(registrationSuccess = false) }
     }
 
     private fun checkCurrentUser() {
@@ -175,19 +185,21 @@ class AuthViewModel : ViewModel() {
                             onSuccess = { user ->
                                 _uiState.update {
                                     it.copy(
-                                        currentUser = user,
+                                        currentUser = auth.currentUser,
                                         isLoggedIn = true,
-                                        isLoading = false
+                                        isLoading = false,
+                                        registrationSuccess = true
                                     )
                                 }
-                                Log.d("AuthViewModel", "User signed up and registered: ${regState.email}")
+                                Log.d("AuthViewModel", "User signed up successfully: ${regState.email}")
                             },
                             onFailure = { e ->
                                 Log.e("AuthViewModel", "Sign up error: ${e.message}", e)
                                 _uiState.update {
                                     it.copy(
                                         errorMessage = "Feil ved registrering: ${e.localizedMessage}",
-                                        isLoading = false
+                                        isLoading = false,
+                                        registrationSuccess = false
                                     )
                                 }
                             }
@@ -235,6 +247,29 @@ class AuthViewModel : ViewModel() {
         }
         viewModelScope.launch {
             userRepository.isUsernameAvailable(username).fold(
+                onSuccess = { available ->
+                    onResult(available)
+                },
+                onFailure = {
+                    onResult(false)
+                }
+            )
+        }
+    }
+
+    /**
+     * Email availability check for SignUpScreen
+     * Calls UserRepository's email availability check and returns result via callback
+     * @param email The email to check
+     * @param onResult Callback with result: true if available, false if taken or error
+     */
+    fun checkEmailAvailability(email: String, onResult: (Boolean) -> Unit) {
+        if (email.isBlank()) { // Empty email fail early
+            onResult(false)
+            return
+        }
+        viewModelScope.launch {
+            userRepository.isEmailAvailable(email).fold(
                 onSuccess = { available ->
                     onResult(available)
                 },

@@ -114,11 +114,7 @@ fun IHostApp() {
     var hasNavigatedOnLogin by remember { mutableStateOf(false) }
 
     // Determine start destination based on login state
-    val startDestination = if (authUiState.isLoggedIn) {
-        Destination.Events.route
-    } else {
-        Destination.Login.route
-    }
+    val startDestination = if (authUiState.isLoggedIn) Destination.Events.route else Destination.Welcome.route
 
     // Load events on app start if already logged in
     LaunchedEffect(Unit) {
@@ -131,25 +127,25 @@ fun IHostApp() {
     LaunchedEffect(authUiState.isLoggedIn, authUiState.isLoading, currentRoute) {
         if (authUiState.isLoggedIn && !authUiState.isLoading) {
             // User just logged in/signed up and loading is done
-            // Navigate if we're on Login/SignUp screen
-            if (currentRoute in listOf(Destination.Login.route, Destination.SignUp.route, Destination.PersonalInfo.route)) {
+            // Navigate if we're on auth screens
+            if (currentRoute in listOf(Destination.Welcome.route, Destination.Login.route, Destination.SignUp.route, Destination.PersonalInfo.route)) {
                 if (!hasNavigatedOnLogin) {
                     hasNavigatedOnLogin = true
                     // Load fresh events for the new user
                     eventViewModel.loadEvents()
                     // Navigate to Events
                     navController.navigate(Destination.Events.route) {
-                        popUpTo(Destination.Login.route) { inclusive = true }
+                        popUpTo(Destination.Welcome.route) { inclusive = true }
                     }
                 }
             }
         } else if (!authUiState.isLoggedIn) {
             // Reset flag when user is logged out
             hasNavigatedOnLogin = false
-            // If user logged out and not on auth screens, navigate back to Login
-            if (currentRoute != null && currentRoute !in listOf(Destination.Login.route, Destination.SignUp.route, Destination.PersonalInfo.route)) {
+            // If user logged out and not on auth screens, navigate back to Welcome
+            if (currentRoute != null && currentRoute !in listOf(Destination.Welcome.route, Destination.Login.route, Destination.SignUp.route, Destination.PersonalInfo.route)) {
                 eventViewModel.clearEvents()
-                navController.navigate(Destination.Login.route) {
+                navController.navigate(Destination.Welcome.route) {
                     popUpTo(0) { inclusive = true }
                 }
             }

@@ -14,4 +14,5 @@ interface UserService {
     fun getAllUsers(): List<User>
     fun isUsernameAvailable(username: String): Boolean
     fun getUserByUsername(username: String): User?
+    fun isEmailAvailable(email: String): Boolean
 }

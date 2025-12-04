@@ -3,6 +3,7 @@ package no.ntnu.prog2007.ihost.ui.screens.auth.login
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
@@ -23,7 +24,7 @@ import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 @Composable
 fun LoginScreen(
     viewModel: AuthViewModel,
-    onNavigateToSignUp: () -> Unit
+    onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var email by remember { mutableStateOf("") }
@@ -37,9 +38,8 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Logo/Title
         Text(
-            text = "iHost",
+            text = "Welcome back",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
@@ -48,116 +48,94 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Log in to see your events",
+            text = "Log in to continue",
             fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onBackground
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Error message
-        if (uiState.errorMessage != null) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                color = MaterialTheme.colorScheme.errorContainer,
-                shape = MaterialTheme.shapes.small
-            ) {
-                Text(
-                    text = uiState.errorMessage!!,
-                    color = MaterialTheme.colorScheme.onErrorContainer,
-                    modifier = Modifier.padding(12.dp),
-                    fontSize = 14.sp
-                )
-            }
-        }
-
-        // Email field
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email", color = MaterialTheme.colorScheme.onSurface) },
-            leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email", tint = MaterialTheme.colorScheme.onSurface) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !uiState.isLoading,
-            textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
-                cursorColor = MaterialTheme.colorScheme.primary
-            )
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Password field
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password", color = MaterialTheme.colorScheme.onSurface) },
-            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password", tint = MaterialTheme.colorScheme.onSurface) },
-            trailingIcon = {
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(
-                        if (passwordVisible) Icons.Default.VisibilityOff
-                        else Icons.Default.Visibility,
-                        contentDescription = if (passwordVisible) "Hide password" else "Show password",
-                        tint = MaterialTheme.colorScheme.onSurface
+            if (uiState.errorMessage != null) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    shape = MaterialTheme.shapes.small
+                ) {
+                    Text(
+                        text = uiState.errorMessage!!,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(12.dp),
+                        fontSize = 14.sp
                     )
                 }
-            },
-            visualTransformation = if (passwordVisible) VisualTransformation.None
-            else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !uiState.isLoading,
-            textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
-                cursorColor = MaterialTheme.colorScheme.primary
-            )
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Login button
-        Button(
-            onClick = { viewModel.signIn(email, password) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            enabled = !uiState.isLoading && email.isNotBlank() && password.isNotBlank()
-        ) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                Text("Log In", fontSize = 16.sp)
             }
-        }
+
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !uiState.isLoading
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password") },
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            if (passwordVisible) Icons.Default.VisibilityOff
+                            else Icons.Default.Visibility,
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                        )
+                    }
+                },
+                visualTransformation = if (passwordVisible) VisualTransformation.None
+                else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !uiState.isLoading
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = { viewModel.signIn(email, password) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                enabled = !uiState.isLoading && email.isNotBlank() && password.isNotBlank()
+            ) {
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Text("Log In", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                }
+            }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Sign up link
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+        // Return button
+        OutlinedButton(
+            onClick = onNavigateBack,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
         ) {
-            Text(
-                text = "Don't have an account?",
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            TextButton(onClick = onNavigateToSignUp) {
-                Text("Sign Up", color = MaterialTheme.colorScheme.primary)
-            }
+            Text("Return", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
         }
     }
 }

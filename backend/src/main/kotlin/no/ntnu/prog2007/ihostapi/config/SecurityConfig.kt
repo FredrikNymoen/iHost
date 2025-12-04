@@ -38,6 +38,7 @@ class SecurityConfig(private val firebaseTokenFilter: FirebaseTokenFilter) {
                     .requestMatchers("/health").permitAll()
                     .requestMatchers("/api/users/register").permitAll()
                     .requestMatchers("/api/users/username-available/**").permitAll()
+                    .requestMatchers("/api/users/email-available/**").permitAll()
                     // All other endpoints require authentication
                     .anyRequest().authenticated()
             }

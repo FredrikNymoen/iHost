@@ -98,6 +98,16 @@ class UserController(
     }
 
     /**
+     * Check if an email is available
+     */
+    @GetMapping("/email-available/{email}")
+    fun isEmailAvailable(@PathVariable email: String): ResponseEntity<Map<String, Boolean>> {
+        logger.info { "Checking email availability for: $email" }
+        val available = userService.isEmailAvailable(email)
+        return ResponseEntity.ok(mapOf("available" to available))
+    }
+
+    /**
      * Helper function to get current authenticated user ID
      */
     private fun getCurrentUserId(): String {

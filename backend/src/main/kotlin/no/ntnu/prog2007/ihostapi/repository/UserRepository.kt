@@ -73,4 +73,18 @@ class UserRepository(
             null
         }
     }
+
+    fun findByEmail(email: String): User? {
+        val query = firestore.collection(COLLECTION_NAME)
+            .whereEqualTo("email", email)
+            .limit(1)
+            .get()
+            .get()
+
+        return if (query.documents.isNotEmpty()) {
+            query.documents[0].toObject(User::class.java)
+        } else {
+            null
+        }
+    }
 }

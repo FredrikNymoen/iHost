@@ -57,6 +57,21 @@ class UserRepository(
     }
 
     /**
+     * Check if email is available
+     */
+    suspend fun isEmailAvailable(email: String): Result<Boolean> {
+        return try {
+            val response = userApi.isEmailAvailable(email)
+            val available = response["available"] == true
+            Log.d("UserRepository", "Email '$email' available: $available")
+            Result.success(available)
+        } catch (e: Exception) {
+            Log.e("UserRepository", "Error checking email availability", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
      * Update user profile
      */
     suspend fun updateUserProfile(

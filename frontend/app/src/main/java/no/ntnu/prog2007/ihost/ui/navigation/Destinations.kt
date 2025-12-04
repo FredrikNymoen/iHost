@@ -19,6 +19,7 @@ sealed class Destination(
     val unselectedIcon: ImageVector? = null
 ) {
     // Auth destinations
+    data object Welcome : Destination("welcome", "Welcome")
     data object Login : Destination("login", "Log in")
     data object SignUp : Destination("signup", "Register")
     data object PersonalInfo : Destination("personal_info", "Personal info")

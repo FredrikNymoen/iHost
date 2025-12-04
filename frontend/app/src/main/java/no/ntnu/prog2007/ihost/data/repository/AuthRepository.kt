@@ -66,6 +66,7 @@ class AuthRepository(
 
         Log.d("AuthRepository", "Backend registration successful: ${response.message}")
 
+        // User is now registered and logged in
         Result.success(firebaseUser)
     } catch (e: Exception) {
         Log.e("AuthRepository", "Registration error: ${e.message}", e)
@@ -75,13 +76,16 @@ class AuthRepository(
     /**
      * Sign in user with email and password
      */
-    suspend fun signIn(email: String, password: String): Result<FirebaseUser> = try {
-        val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
-        val user = authResult.user
-            ?: return Result.failure(Exception("Sign in failed"))
-        Result.success(user)
-    } catch (e: Exception) {
-        Result.failure(e)
+    suspend fun signIn(email: String, password: String): Result<FirebaseUser> {
+        return try {
+            val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
+            val user = authResult.user
+                ?: return Result.failure(Exception("Sign in failed"))
+
+            Result.success(user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     /**

@@ -105,4 +105,8 @@ class UserServiceImpl(
     override fun getUserByUsername(username: String): User? {
         return userRepository.findByUsername(username)
     }
+
+    override fun isEmailAvailable(email: String): Boolean {
+        return userRepository.findByEmail(email) == null
+    }
 }

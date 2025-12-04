@@ -26,6 +26,11 @@ interface UserApi {
         @Path("username") username: String
     ): Map<String, Boolean>
 
+    @GET("$USERS/email-available/{email}")
+    suspend fun isEmailAvailable(
+        @Path("email", encoded = false) email: String
+    ): Map<String, Boolean>
+
     @PUT("$USERS/{uid}")
     suspend fun updateUserProfile(
         @Path("uid") uid: String,

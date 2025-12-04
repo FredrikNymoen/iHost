@@ -20,7 +20,7 @@ fun AppNavHost(
     stripeViewModel: StripeViewModel,
     friendViewModel: FriendViewModel,
     modifier: Modifier = Modifier,
-    startDestination: String = Destination.Login.route
+    startDestination: String = Destination.Welcome.route
 ) {
     NavHost(
         navController = navController,
@@ -28,6 +28,7 @@ fun AppNavHost(
         modifier = modifier
     ) {
         // Auth screens
+        welcomeScreen(navController, authViewModel)
         loginScreen(navController, authViewModel)
         personalInfoScreen(navController, authViewModel)
         signUpScreen(navController, authViewModel)
