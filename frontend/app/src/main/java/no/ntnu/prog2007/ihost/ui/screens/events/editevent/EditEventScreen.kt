@@ -29,12 +29,14 @@ import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -577,6 +579,8 @@ fun EditEventScreen(
                     )
                 )
             }
+            */
+
 
             Row(
                 modifier = Modifier
@@ -586,11 +590,6 @@ fun EditEventScreen(
             ) {
                 Button(
                     onClick = {
-                        val priceValue = if (!isFree && price.isNotEmpty()) {
-                            price.toDoubleOrNull() ?: 0.0
-                        } else {
-                            0.0
-                        }
                         viewModel.updateEvent(
                             eventId = eventId,
                             title = title,
@@ -640,7 +639,7 @@ fun EditEventScreen(
                     }
                 }
             }
-            */
+
 
 
             if (uiState.errorMessage != null) {
