@@ -255,7 +255,6 @@ fun EditEventScreen(
                 placeholderText = "Tap to change event image",
                 onAddImageClick = {
                     showImageSourceDialog = true
-                    hasRemovedImage = false
                 },
                 onRemoveImage = {
                     selectedImageUri = null
