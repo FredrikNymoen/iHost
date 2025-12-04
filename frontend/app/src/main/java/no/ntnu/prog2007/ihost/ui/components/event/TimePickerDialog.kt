@@ -1,4 +1,4 @@
-package no.ntnu.prog2007.ihost.ui.screens.addevent.components
+package no.ntnu.prog2007.ihost.ui.components.event
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api

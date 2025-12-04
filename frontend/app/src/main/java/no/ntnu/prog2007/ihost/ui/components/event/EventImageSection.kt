@@ -1,4 +1,4 @@
-package no.ntnu.prog2007.ihost.ui.screens.addevent.components
+package no.ntnu.prog2007.ihost.ui.components.event
 
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -24,7 +24,8 @@ import coil3.compose.AsyncImage
 @Composable
 fun EventImageSection(
     selectedImageUri: Uri?,
-    imageKey: Int,
+    imageKey: Int = 0,
+    placeholderText: String = "Tap to add image",
     onAddImageClick: () -> Unit,
     onRemoveImage: () -> Unit
 ) {
@@ -91,7 +92,7 @@ fun EventImageSection(
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    "Tap to add image",
+                    placeholderText,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface

@@ -1,4 +1,4 @@
-package no.ntnu.prog2007.ihost.ui.screens.addevent.components
+package no.ntnu.prog2007.ihost.ui.components.event
 
 import android.content.Context
 import android.content.pm.PackageManager

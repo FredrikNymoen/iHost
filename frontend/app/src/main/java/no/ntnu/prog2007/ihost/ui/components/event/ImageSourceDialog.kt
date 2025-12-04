@@ -1,4 +1,4 @@
-package no.ntnu.prog2007.ihost.ui.screens.addevent.components
+package no.ntnu.prog2007.ihost.ui.components.event
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
