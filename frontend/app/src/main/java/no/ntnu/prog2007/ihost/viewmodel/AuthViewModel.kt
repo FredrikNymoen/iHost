@@ -194,6 +194,22 @@ class AuthViewModel : ViewModel() {
                 errorMessage = null
             )
         }
+        // Also clear registration state
+        _registrationState.value = RegistrationState()
+    }
+
+    /**
+     * Clear all auth data except current user state (call on logout)
+     */
+    fun clearAuthData() {
+        _registrationState.value = RegistrationState()
+        _uiState.update {
+            it.copy(
+                errorMessage = null,
+                registrationSuccess = false,
+                isLoading = false
+            )
+        }
     }
 
     /**

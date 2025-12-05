@@ -228,6 +228,13 @@ class UserViewModel : ViewModel() {
     }
 
     /**
+     * Clear all user data (call on logout)
+     */
+    fun clearUserData() {
+        _uiState.value = UserUiState()
+    }
+
+    /**
      * Clear error message
      */
     fun clearError() {

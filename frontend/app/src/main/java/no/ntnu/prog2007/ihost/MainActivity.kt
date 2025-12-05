@@ -150,7 +150,13 @@ fun IHostApp() {
             hasNavigatedOnLogin = false
             // If user logged out and not on auth screens, navigate back to Welcome
             if (currentRoute != null && currentRoute !in listOf(Destination.Welcome.route, Destination.Login.route, Destination.SignUp.route, Destination.PersonalInfo.route, Destination.ForgotPassword.route)) {
+                // Clear all ViewModels
+                authViewModel.clearAuthData()
                 eventViewModel.clearEvents()
+                friendViewModel.clearFriendships()
+                userViewModel.clearUserData()
+                stripeViewModel.clearPaymentData()
+
                 navController.navigate(Destination.Welcome.route) {
                     popUpTo(0) { inclusive = true }
                 }

@@ -94,6 +94,15 @@ class StripeViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Clear all payment data (call on logout)
+     */
+    fun clearPaymentData() {
+        _uiState.value = StripeUiState()
+        // Reload publishable key as it's needed for any session
+        loadPublishableKey()
+    }
+
     fun clearPaymentError() {
         _uiState.value = _uiState.value.copy(paymentError = null)
     }
