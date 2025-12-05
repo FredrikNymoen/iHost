@@ -4,7 +4,6 @@ import androidx.compose.runtime.*
 import no.ntnu.prog2007.ihost.viewmodel.AuthUiState
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
-import no.ntnu.prog2007.ihost.viewmodel.StripeViewModel
 import no.ntnu.prog2007.ihost.viewmodel.UserViewModel
 
 /**
@@ -17,7 +16,6 @@ fun NavigationEffects(
     eventViewModel: EventViewModel,
     friendViewModel: FriendViewModel,
     userViewModel: UserViewModel,
-    stripeViewModel: StripeViewModel
 ) {
     var hasNavigatedOnLogin by remember { mutableStateOf(false) }
 
@@ -43,8 +41,7 @@ fun NavigationEffects(
                 clearAllViewModels(
                     eventViewModel = eventViewModel,
                     friendViewModel = friendViewModel,
-                    userViewModel = userViewModel,
-                    stripeViewModel = stripeViewModel
+                    userViewModel = userViewModel
                 )
                 navigationState.navigateToWelcome()
             }
@@ -58,11 +55,9 @@ fun NavigationEffects(
 private fun clearAllViewModels(
     eventViewModel: EventViewModel,
     friendViewModel: FriendViewModel,
-    userViewModel: UserViewModel,
-    stripeViewModel: StripeViewModel
+    userViewModel: UserViewModel
 ) {
     eventViewModel.clearEvents()
     friendViewModel.clearFriendships()
     userViewModel.clearUserData()
-    stripeViewModel.clearPaymentData()
 }

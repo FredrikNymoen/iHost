@@ -37,35 +37,6 @@ class UserViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(UserUiState())
     val uiState: StateFlow<UserUiState> = _uiState.asStateFlow()
 
-    /**
-     * Load all users
-     */
-    fun loadAllUsers() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-
-            userRepository.getAllUsers().fold(
-                onSuccess = { users ->
-                    _uiState.update {
-                        it.copy(
-                            users = users,
-                            isLoading = false
-                        )
-                    }
-                    Log.d("UserViewModel", "Loaded ${users.size} users")
-                },
-                onFailure = { error ->
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = error.message ?: "Failed to load users"
-                        )
-                    }
-                    Log.e("UserViewModel", "Error loading users", error)
-                }
-            )
-        }
-    }
 
     /**
      * Load user profile by UID

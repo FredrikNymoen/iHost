@@ -9,7 +9,6 @@ import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.FirebaseApp
-import no.ntnu.prog2007.ihost.service.StripePaymentService
 import no.ntnu.prog2007.ihost.ui.components.layout.AppScaffold
 import no.ntnu.prog2007.ihost.ui.components.splash.SplashScreen
 import no.ntnu.prog2007.ihost.ui.navigation.config.Destination
@@ -27,9 +26,6 @@ class MainActivity : ComponentActivity() {
 
         // Initialize Firebase
         FirebaseApp.initializeApp(this)
-
-        // Initialize Stripe PaymentSheet
-        StripePaymentService.initializePaymentSheet(this)
 
         setContent {
             var showSplash by remember { mutableStateOf(true) }
@@ -53,7 +49,6 @@ fun IHostApp() {
     // ViewModels
     val authViewModel: AuthViewModel = viewModel()
     val eventViewModel: EventViewModel = viewModel()
-    val stripeViewModel: StripeViewModel = viewModel()
     val friendViewModel: FriendViewModel = viewModel()
     val userViewModel: UserViewModel = viewModel()
 
@@ -79,8 +74,7 @@ fun IHostApp() {
         navigationState = navigationState,
         eventViewModel = eventViewModel,
         friendViewModel = friendViewModel,
-        userViewModel = userViewModel,
-        stripeViewModel = stripeViewModel
+        userViewModel = userViewModel
     )
 
     // Also clear auth data on logout
@@ -96,7 +90,6 @@ fun IHostApp() {
         navigationState = navigationState,
         authViewModel = authViewModel,
         eventViewModel = eventViewModel,
-        stripeViewModel = stripeViewModel,
         friendViewModel = friendViewModel,
         userViewModel = userViewModel,
         startDestination = startDestination

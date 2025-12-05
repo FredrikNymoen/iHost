@@ -110,7 +110,6 @@ fun CreatorActionButtons(
 @Composable
 fun PendingInvitationActions(
     isFreeEvent: Boolean,
-    isProcessingPayment: Boolean,
     onAccept: () -> Unit,
     onDecline: () -> Unit
 ) {
@@ -136,27 +135,19 @@ fun PendingInvitationActions(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 ),
-                enabled = !isProcessingPayment,
                 shape = RoundedCornerShape(12.dp)
             ) {
-                if (isProcessingPayment) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Accept",
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = if (isFreeEvent) "Accept" else "Buy & Accept",
-                        style = MaterialTheme.typography.titleSmall
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = "Accept",
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (isFreeEvent) "Accept" else "Buy & Accept",
+                    style = MaterialTheme.typography.titleSmall
+                )
+
             }
 
             Button(

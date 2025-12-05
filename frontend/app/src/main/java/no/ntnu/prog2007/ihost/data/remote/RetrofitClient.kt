@@ -88,7 +88,4 @@ object RetrofitClient {
         retrofit.create(FriendshipApi::class.java)
     }
 
-    val stripeApi: StripeApi by lazy {
-        retrofit.create(StripeApi::class.java)
-    }
 }

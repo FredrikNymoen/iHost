@@ -23,7 +23,6 @@ import no.ntnu.prog2007.ihost.ui.screens.profile.main.ProfileScreen
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
-import no.ntnu.prog2007.ihost.viewmodel.StripeViewModel
 import no.ntnu.prog2007.ihost.viewmodel.UserViewModel
 
 /**
@@ -184,8 +183,7 @@ fun NavGraphBuilder.profileScreen(
 fun NavGraphBuilder.eventDetailScreen(
     navController: NavHostController,
     eventViewModel: EventViewModel,
-    authViewModel: AuthViewModel,
-    stripeViewModel: StripeViewModel
+    authViewModel: AuthViewModel
 ) {
     composable(
         route = Destination.EventDetail.route,
@@ -198,7 +196,6 @@ fun NavGraphBuilder.eventDetailScreen(
             eventId = eventId,
             viewModel = eventViewModel,
             authViewModel = authViewModel,
-            stripeViewModel = stripeViewModel,
             onBack = {
                 navController.popBackStack()
             },

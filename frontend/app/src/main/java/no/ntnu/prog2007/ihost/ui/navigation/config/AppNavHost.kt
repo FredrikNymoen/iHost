@@ -8,7 +8,6 @@ import no.ntnu.prog2007.ihost.ui.navigation.graph.*
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
-import no.ntnu.prog2007.ihost.viewmodel.StripeViewModel
 import no.ntnu.prog2007.ihost.viewmodel.UserViewModel
 
 /**
@@ -19,7 +18,6 @@ fun AppNavHost(
     navController: NavHostController,
     authViewModel: AuthViewModel,
     eventViewModel: EventViewModel,
-    stripeViewModel: StripeViewModel,
     friendViewModel: FriendViewModel,
     userViewModel: UserViewModel,
     modifier: Modifier = Modifier,
@@ -43,7 +41,7 @@ fun AppNavHost(
         profileScreen(navController, authViewModel, userViewModel, eventViewModel, friendViewModel)
 
         // Detail screens with arguments
-        eventDetailScreen(navController, eventViewModel, authViewModel, stripeViewModel)
+        eventDetailScreen(navController, eventViewModel, authViewModel)
         editEventScreen(navController, eventViewModel)
         inviteUsersScreen(navController, eventViewModel, friendViewModel, authViewModel)
 

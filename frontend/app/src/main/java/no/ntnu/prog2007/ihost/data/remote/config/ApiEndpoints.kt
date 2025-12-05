@@ -6,5 +6,4 @@ object ApiEndpoints {
     const val EVENT_USERS = "api/event-users"
     const val IMAGES = "api/images"
     const val FRIENDSHIPS = "api/friendships"
-    const val STRIPE = "api/stripe"
 }

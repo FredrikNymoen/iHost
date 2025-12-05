@@ -25,7 +25,6 @@ fun AppScaffold(
     navigationState: NavigationState,
     authViewModel: AuthViewModel,
     eventViewModel: EventViewModel,
-    stripeViewModel: StripeViewModel,
     friendViewModel: FriendViewModel,
     userViewModel: UserViewModel,
     startDestination: String
@@ -69,7 +68,6 @@ fun AppScaffold(
                 navController = navController,
                 authViewModel = authViewModel,
                 eventViewModel = eventViewModel,
-                stripeViewModel = stripeViewModel,
                 friendViewModel = friendViewModel,
                 userViewModel = userViewModel,
                 modifier = Modifier.padding(padding),

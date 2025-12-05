@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import no.ntnu.prog2007.ihost.ui.components.layout.TopBar
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
-import no.ntnu.prog2007.ihost.viewmodel.StripeViewModel
 import no.ntnu.prog2007.ihost.ui.screens.events.eventdetail.components.EventDetailHeader
 import no.ntnu.prog2007.ihost.ui.screens.events.eventdetail.components.EventInfoSection
 import no.ntnu.prog2007.ihost.ui.screens.events.eventdetail.components.AttendeesSection
@@ -38,7 +37,6 @@ fun EventDetailScreen(
     eventId: String,
     viewModel: EventViewModel,
     authViewModel: AuthViewModel,
-    stripeViewModel: StripeViewModel,
     onBack: () -> Unit,
     onEdit: (String) -> Unit,
     onInviteUsers: (String) -> Unit
@@ -54,9 +52,6 @@ fun EventDetailScreen(
     var attendeeUserNames by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
     var attendeeFirsNames by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
     var attendeeLastNames by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
-
-    // Stripe state
-    val stripeUiState by stripeViewModel.uiState.collectAsState()
 
     // Get attendees from event_users
     val eventAttendees = uiState.eventAttendees[eventId] ?: emptyList()
@@ -222,7 +217,6 @@ fun EventDetailScreen(
                     // Pending Invitation - Accept/Decline Buttons
                     PendingInvitationActions(
                         isFreeEvent = event.free,
-                        isProcessingPayment = stripeUiState.isProcessingPayment,
                         onAccept = {
                             val myEventUser = eventAttendees.find { it.userId == currentUserId }
                             if (myEventUser != null) {
