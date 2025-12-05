@@ -1,6 +1,5 @@
 package no.ntnu.prog2007.ihostapi.service.impl
 
-import com.google.cloud.firestore.Firestore
 import com.google.firebase.auth.FirebaseAuth
 import no.ntnu.prog2007.ihostapi.exception.ResourceNotFoundException
 import no.ntnu.prog2007.ihostapi.model.dto.CreateUserRequest
@@ -20,8 +19,7 @@ import java.util.logging.Logger
 @Service
 class UserServiceImpl(
     private val userRepository: UserRepository,
-    private val firebaseAuth: FirebaseAuth,
-    private val firestore: Firestore
+    private val firebaseAuth: FirebaseAuth
 ) : UserService {
     private val logger = Logger.getLogger(UserServiceImpl::class.java.name)
 
@@ -85,15 +83,8 @@ class UserServiceImpl(
     }
 
     override fun getAllUsers(): List<UserResponse> {
-        val usersQuery = firestore.collection(UserRepository.COLLECTION_NAME)
-            .get()
-            .get()
-
-        return usersQuery.documents.mapNotNull { doc ->
-            // User object doesn't contain uid field anymore
-            // The document ID is the uid
-            val user = doc.toObject(User::class.java)
-            user?.let { mapToUserResponse(it, doc.id) }
+        return userRepository.findAll().map { (uid, user) ->
+            mapToUserResponse(user, uid)
         }
     }
 

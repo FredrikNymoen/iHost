@@ -87,4 +87,14 @@ class UserRepository(
             null
         }
     }
+
+    fun findAll(): List<Pair<String, User>> {
+        val query = firestore.collection(COLLECTION_NAME)
+            .get()
+            .get()
+
+        return query.documents.mapNotNull { doc ->
+            doc.toObject(User::class.java)?.let { Pair(doc.id, it) }
+        }
+    }
 }

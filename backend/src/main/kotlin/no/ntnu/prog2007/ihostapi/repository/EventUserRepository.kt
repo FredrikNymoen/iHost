@@ -86,4 +86,40 @@ class EventUserRepository(
 
         return query.size()
     }
+
+    fun update(id: String, updates: Map<String, Any?>): Boolean {
+        return try {
+            firestore.collection(COLLECTION_NAME)
+                .document(id)
+                .update(updates)
+                .get()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    fun findByEventIdAndStatus(eventId: String, status: String): List<Pair<String, EventUser>> {
+        val query = firestore.collection(COLLECTION_NAME)
+            .whereEqualTo("eventId", eventId)
+            .whereEqualTo("status", status.uppercase())
+            .get()
+            .get()
+
+        return query.documents.mapNotNull { doc ->
+            doc.toObject(EventUser::class.java)?.let { Pair(doc.id, it) }
+        }
+    }
+
+    fun findByUserIdAndStatus(userId: String, status: String): List<Pair<String, EventUser>> {
+        val query = firestore.collection(COLLECTION_NAME)
+            .whereEqualTo("userId", userId)
+            .whereEqualTo("status", status.uppercase())
+            .get()
+            .get()
+
+        return query.documents.mapNotNull { doc ->
+            doc.toObject(EventUser::class.java)?.let { Pair(doc.id, it) }
+        }
+    }
 }

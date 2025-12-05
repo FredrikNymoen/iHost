@@ -1,6 +1,5 @@
 package no.ntnu.prog2007.ihostapi.service.impl
 
-import com.google.cloud.firestore.Firestore
 import no.ntnu.prog2007.ihostapi.exception.ResourceNotFoundException
 import no.ntnu.prog2007.ihostapi.model.dto.EventUserResponse
 import no.ntnu.prog2007.ihostapi.model.entity.EventUser
@@ -20,8 +19,7 @@ import java.util.logging.Logger
 @Service
 class EventUserServiceImpl(
     private val eventUserRepository: EventUserRepository,
-    private val eventRepository: EventRepository,
-    private val firestore: Firestore
+    private val eventRepository: EventRepository
 ) : EventUserService {
     private val logger = Logger.getLogger(EventUserServiceImpl::class.java.name)
 
@@ -73,14 +71,13 @@ class EventUserServiceImpl(
         }
 
         val now = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-        firestore.collection(EventUserRepository.COLLECTION_NAME)
-            .document(eventUserId)
-            .update(
-                mapOf(
-                    "status" to EventUserStatus.ACCEPTED.name,
-                    "respondedAt" to now
-                )
-            ).get()
+        eventUserRepository.update(
+            eventUserId,
+            mapOf(
+                "status" to EventUserStatus.ACCEPTED.name,
+                "respondedAt" to now
+            )
+        )
 
         logger.info("User $userId accepted invitation to event ${eventUser.eventId}")
         return eventUser.eventId
@@ -95,14 +92,13 @@ class EventUserServiceImpl(
         }
 
         val now = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-        firestore.collection(EventUserRepository.COLLECTION_NAME)
-            .document(eventUserId)
-            .update(
-                mapOf(
-                    "status" to EventUserStatus.DECLINED.name,
-                    "respondedAt" to now
-                )
-            ).get()
+        eventUserRepository.update(
+            eventUserId,
+            mapOf(
+                "status" to EventUserStatus.DECLINED.name,
+                "respondedAt" to now
+            )
+        )
 
         logger.info("User $userId declined invitation to event ${eventUser.eventId}")
         return eventUser.eventId
@@ -110,15 +106,9 @@ class EventUserServiceImpl(
 
     override fun getEventAttendees(eventId: String, status: String?): List<EventUserResponse> {
         val eventUsers = if (status != null) {
-            // Filter by status
-            firestore.collection(EventUserRepository.COLLECTION_NAME)
-                .whereEqualTo("eventId", eventId)
-                .whereEqualTo("status", status.uppercase())
-                .get()
-                .get()
-                .documents.mapNotNull { doc ->
-                    doc.toObject(EventUser::class.java)?.let { EventUserResponse.from(it, doc.id) }
-                }
+            eventUserRepository.findByEventIdAndStatus(eventId, status).map { (docId, eventUser) ->
+                EventUserResponse.from(eventUser, docId)
+            }
         } else {
             eventUserRepository.findByEventId(eventId).map { (docId, eventUser) ->
                 EventUserResponse.from(eventUser, docId)
@@ -130,14 +120,7 @@ class EventUserServiceImpl(
 
     override fun getMyEvents(userId: String, status: String?): List<Map<String, Any?>> {
         val eventUsers = if (status != null) {
-            firestore.collection(EventUserRepository.COLLECTION_NAME)
-                .whereEqualTo("userId", userId)
-                .whereEqualTo("status", status.uppercase())
-                .get()
-                .get()
-                .documents.mapNotNull { doc ->
-                    doc.toObject(EventUser::class.java)
-                }
+            eventUserRepository.findByUserIdAndStatus(userId, status).map { (_, eventUser) -> eventUser }
         } else {
             eventUserRepository.findByUserId(userId).map { (_, eventUser) -> eventUser }
         }
