@@ -24,8 +24,6 @@ data class CreateUserRequest(
     val firstName: String,
     val lastName: String? = null,
 
-    val phoneNumber: String? = null,
-
     val photoUrl: String? = null
 )
 
@@ -45,6 +43,20 @@ data class AuthResponse(
 data class UpdateUserRequest(
     val firstName: String? = null,
     val lastName: String? = null,
+    val photoUrl: String? = null
+)
+
+/**
+ * Response containing user data with uid
+ * Used when returning user information to frontend
+ */
+data class UserResponse(
+    val uid: String,
+    val email: String,
+    val username: String,
+    val firstName: String,
+    val lastName: String? = null,
     val photoUrl: String? = null,
-    val phoneNumber: String? = null
+    val createdAt: String? = null,
+    val updatedAt: String? = null
 )

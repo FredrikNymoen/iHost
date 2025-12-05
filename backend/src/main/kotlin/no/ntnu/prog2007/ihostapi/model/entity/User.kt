@@ -6,14 +6,11 @@ import jakarta.validation.constraints.Size
 
 /**
  * User model representing a user in the system
- * Stored in both Firebase Auth and Firestore
+ * Stored in Firestore (uid is the document ID, not a field)
  *
  * Timestamps are stored as ISO-8601 strings in Firestore to avoid serialization issues
  */
 data class User(
-    @field:NotBlank(message = "UID is required")
-    val uid: String = "",
-
     @field:NotBlank(message = "Email is required")
     @field:Email(message = "Email must be valid")
     val email: String = "",
@@ -28,13 +25,9 @@ data class User(
 
     val lastName: String? = null,
 
-    val phoneNumber: String? = null,
-
     val photoUrl: String? = null,
 
     val createdAt: String? = null,
 
-    val updatedAt: String? = null,
-
-    val isEmailVerified: Boolean = false
+    val updatedAt: String? = null
 )

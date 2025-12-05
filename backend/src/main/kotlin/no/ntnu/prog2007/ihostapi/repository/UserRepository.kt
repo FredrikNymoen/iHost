@@ -28,9 +28,9 @@ class UserRepository(
         }
     }
 
-    fun save(user: User): User {
+    fun save(user: User, uid: String): User {
         firestore.collection(COLLECTION_NAME)
-            .document(user.uid)
+            .document(uid)
             .set(user)
             .get()
         return user

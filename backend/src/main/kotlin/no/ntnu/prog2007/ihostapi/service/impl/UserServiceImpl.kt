@@ -5,6 +5,7 @@ import com.google.firebase.auth.FirebaseAuth
 import no.ntnu.prog2007.ihostapi.exception.ResourceNotFoundException
 import no.ntnu.prog2007.ihostapi.model.dto.CreateUserRequest
 import no.ntnu.prog2007.ihostapi.model.dto.UpdateUserRequest
+import no.ntnu.prog2007.ihostapi.model.dto.UserResponse
 import no.ntnu.prog2007.ihostapi.model.entity.User
 import no.ntnu.prog2007.ihostapi.repository.UserRepository
 import no.ntnu.prog2007.ihostapi.service.UserService
@@ -24,8 +25,9 @@ class UserServiceImpl(
 ) : UserService {
     private val logger = Logger.getLogger(UserServiceImpl::class.java.name)
 
-    override fun getUserById(uid: String): User? {
-        return userRepository.findById(uid)
+    override fun getUserById(uid: String): UserResponse? {
+        val user = userRepository.findById(uid) ?: return null
+        return mapToUserResponse(user, uid)
     }
 
     override fun createUser(request: CreateUserRequest): User {
@@ -50,22 +52,19 @@ class UserServiceImpl(
         val timestamp = now.format(formatter)
 
         val user = User(
-            uid = request.uid,
             email = request.email,
             username = request.username,
-            phoneNumber = request.phoneNumber,
             photoUrl = request.photoUrl,
             createdAt = timestamp,
             updatedAt = timestamp,
-            isEmailVerified = userRecord.isEmailVerified,
             firstName = request.firstName,
             lastName = request.lastName
         )
 
-        return userRepository.save(user)
+        return userRepository.save(user, request.uid)
     }
 
-    override fun updateUser(uid: String, request: UpdateUserRequest): User {
+    override fun updateUser(uid: String, request: UpdateUserRequest): UserResponse {
         val currentUser = userRepository.findById(uid)
             ?: throw ResourceNotFoundException("User not found")
 
@@ -78,21 +77,40 @@ class UserServiceImpl(
             firstName = request.firstName ?: currentUser.firstName,
             lastName = request.lastName ?: currentUser.lastName,
             photoUrl = request.photoUrl ?: currentUser.photoUrl,
-            phoneNumber = request.phoneNumber ?: currentUser.phoneNumber,
             updatedAt = timestamp
         )
 
-        return userRepository.save(updatedUser)
+        val savedUser = userRepository.save(updatedUser, uid)
+        return mapToUserResponse(savedUser, uid)
     }
 
-    override fun getAllUsers(): List<User> {
+    override fun getAllUsers(): List<UserResponse> {
         val usersQuery = firestore.collection(UserRepository.COLLECTION_NAME)
             .get()
             .get()
 
         return usersQuery.documents.mapNotNull { doc ->
-            doc.toObject(User::class.java)
+            // User object doesn't contain uid field anymore
+            // The document ID is the uid
+            val user = doc.toObject(User::class.java)
+            user?.let { mapToUserResponse(it, doc.id) }
         }
+    }
+
+    /**
+     * Helper function to map User entity to UserResponse DTO
+     */
+    private fun mapToUserResponse(user: User, uid: String): UserResponse {
+        return UserResponse(
+            uid = uid,
+            email = user.email,
+            username = user.username,
+            firstName = user.firstName,
+            lastName = user.lastName,
+            photoUrl = user.photoUrl,
+            createdAt = user.createdAt,
+            updatedAt = user.updatedAt
+        )
     }
 
     override fun isUsernameAvailable(username: String): Boolean {

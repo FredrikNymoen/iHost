@@ -6,7 +6,7 @@ import no.ntnu.prog2007.ihostapi.exception.UnauthorizedException
 import no.ntnu.prog2007.ihostapi.model.dto.AuthResponse
 import no.ntnu.prog2007.ihostapi.model.dto.CreateUserRequest
 import no.ntnu.prog2007.ihostapi.model.dto.UpdateUserRequest
-import no.ntnu.prog2007.ihostapi.model.entity.User
+import no.ntnu.prog2007.ihostapi.model.dto.UserResponse
 import no.ntnu.prog2007.ihostapi.service.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -26,7 +26,7 @@ class UserController(
      * Get all users (for inviting users to events)
      */
     @GetMapping
-    fun getAllUsers(): ResponseEntity<List<User>> {
+    fun getAllUsers(): ResponseEntity<List<UserResponse>> {
         val uid = getCurrentUserId() // Verify authentication
         val users = userService.getAllUsers()
 
@@ -38,7 +38,7 @@ class UserController(
      * Get user by UID (public endpoint)
      */
     @GetMapping("/{uid}")
-    fun getUserByUid(@PathVariable uid: String): ResponseEntity<User> {
+    fun getUserByUid(@PathVariable uid: String): ResponseEntity<UserResponse> {
         val user = userService.getUserById(uid)
             ?: throw IllegalArgumentException("User not found")
 
@@ -53,13 +53,13 @@ class UserController(
     fun registerUser(@Valid @RequestBody request: CreateUserRequest): ResponseEntity<AuthResponse> {
         val user = userService.createUser(request)
 
-        logger.info("User profile created in Firestore for UID: ${user.uid}")
+        logger.info("User profile created in Firestore for UID: ${request.uid}")
 
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(
                 AuthResponse(
-                    uid = user.uid,
+                    uid = request.uid,
                     email = user.email,
                     username = user.username,
                     message = "Brukerprofil opprettet. Du kan nå logge inn."
@@ -74,7 +74,7 @@ class UserController(
     fun updateUserProfile(
         @PathVariable uid: String,
         @Valid @RequestBody request: UpdateUserRequest
-    ): ResponseEntity<User> {
+    ): ResponseEntity<UserResponse> {
         val currentUserId = getCurrentUserId()
 
         // Verify user is updating their own profile

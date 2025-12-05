@@ -139,8 +139,7 @@ class UserViewModel : ViewModel() {
         uid: String,
         firstName: String? = null,
         lastName: String? = null,
-        photoUrl: String? = null,
-        phoneNumber: String? = null
+        photoUrl: String? = null
     ) {
         viewModelScope.launch {
             _uiState.update { it.copy(isProfileLoading = true, errorMessage = null) }
@@ -149,8 +148,7 @@ class UserViewModel : ViewModel() {
                 uid = uid,
                 firstName = firstName,
                 lastName = lastName,
-                photoUrl = photoUrl,
-                phoneNumber = phoneNumber
+                photoUrl = photoUrl
             ).fold(
                 onSuccess = { updatedUser ->
                     _uiState.update {

@@ -78,15 +78,13 @@ class UserRepository(
         uid: String,
         firstName: String? = null,
         lastName: String? = null,
-        photoUrl: String? = null,
-        phoneNumber: String? = null
+        photoUrl: String? = null
     ): Result<User> {
         return try {
             val updateRequest = UpdateUserRequest(
                 firstName = firstName,
                 lastName = lastName,
-                photoUrl = photoUrl,
-                phoneNumber = phoneNumber
+                photoUrl = photoUrl
             )
             val userDto = userApi.updateUserProfile(uid, updateRequest)
             val updatedUser = mapToUser(userDto)
@@ -103,13 +101,11 @@ class UserRepository(
             uid = dto.uid,
             email = dto.email,
             username = dto.username,
-            phoneNumber = dto.phoneNumber,
-            photoUrl = dto.photoUrl,
-            createdAt = dto.createdAt,
-            updatedAt = dto.updatedAt,
             firstName = dto.firstName,
             lastName = dto.lastName,
-            isEmailVerified = dto.isEmailVerified
+            photoUrl = dto.photoUrl,
+            createdAt = dto.createdAt,
+            updatedAt = dto.updatedAt
         )
     }
 }

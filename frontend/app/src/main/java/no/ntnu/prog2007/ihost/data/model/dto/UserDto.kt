@@ -10,13 +10,11 @@ data class UserResponse(
     @SerializedName("uid") val uid: String,
     @SerializedName("email") val email: String,
     @SerializedName("username") val username: String,
-    @SerializedName("phoneNumber") val phoneNumber: String? = null,
-    @SerializedName("photoUrl") val photoUrl: String? = null,
-    @SerializedName("createdAt") val createdAt: String? = null,
-    @SerializedName("updatedAt") val updatedAt: String? = null,
     @SerializedName("firstName") val firstName: String,
     @SerializedName("lastName") val lastName: String? = null,
-    @SerializedName("isEmailVerified") val isEmailVerified: Boolean = false
+    @SerializedName("photoUrl") val photoUrl: String? = null,
+    @SerializedName("createdAt") val createdAt: String? = null,
+    @SerializedName("updatedAt") val updatedAt: String? = null
 )
 
 /**
@@ -33,8 +31,6 @@ data class CreateUserRequest(
     val firstName: String,
     @SerializedName("lastName")
     val lastName: String? = null,
-    @SerializedName("phoneNumber")
-    val phoneNumber: String? = null,
     @SerializedName("photoUrl")
     val photoUrl: String? = null
 )
@@ -48,9 +44,7 @@ data class UpdateUserRequest(
     @SerializedName("lastName")
     val lastName: String? = null,
     @SerializedName("photoUrl")
-    val photoUrl: String? = null,
-    @SerializedName("phoneNumber")
-    val phoneNumber: String? = null
+    val photoUrl: String? = null
 )
 
 /**
