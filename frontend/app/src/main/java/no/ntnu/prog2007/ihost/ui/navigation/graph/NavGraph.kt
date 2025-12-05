@@ -1,4 +1,4 @@
-package no.ntnu.prog2007.ihost.ui.navigation
+package no.ntnu.prog2007.ihost.ui.navigation.graph
 
 import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavGraphBuilder
@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import no.ntnu.prog2007.ihost.ui.navigation.config.Destination
 import no.ntnu.prog2007.ihost.ui.screens.addevent.AddEventScreen
 import no.ntnu.prog2007.ihost.ui.screens.auth.welcome.WelcomeScreen
 import no.ntnu.prog2007.ihost.ui.screens.auth.login.LoginScreen
@@ -292,4 +293,3 @@ fun NavGraphBuilder.friendsListScreen(
         )
     }
 }
-

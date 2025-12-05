@@ -9,7 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
-import no.ntnu.prog2007.ihost.ui.navigation.Destination
+import no.ntnu.prog2007.ihost.ui.navigation.config.Destination
 
 @Composable
 fun BottomNavigationBar(

@@ -1,9 +1,10 @@
-package no.ntnu.prog2007.ihost.ui.navigation
+package no.ntnu.prog2007.ihost.ui.navigation.config
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import no.ntnu.prog2007.ihost.ui.navigation.graph.*
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel

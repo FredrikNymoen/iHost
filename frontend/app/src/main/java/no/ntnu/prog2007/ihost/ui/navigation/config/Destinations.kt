@@ -1,4 +1,4 @@
-package no.ntnu.prog2007.ihost.ui.navigation
+package no.ntnu.prog2007.ihost.ui.navigation.config
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
