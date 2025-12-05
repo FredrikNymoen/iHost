@@ -39,6 +39,10 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.springframework.security:spring-security-test")
+    // MockK - Kotlin mocking library
+    testImplementation("io.mockk:mockk:1.13.8")
+    // AssertJ - Fluent assertions
+    testImplementation("org.assertj:assertj-core:3.24.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
 }
