@@ -75,22 +75,6 @@ class EventUserRepository(
         }
     }
 
-    /**
-     * Get all events for the current user
-     * @param status Optional filter by status (PENDING, ACCEPTED, DECLINED, CREATOR)
-     */
-    suspend fun getMyEvents(status: String? = null): Result<List<EventWithMetadata>> {
-        return try {
-            val eventsDto = eventUserApi.getMyEvents(status)
-            val events = eventsDto.map { mapToEventWithMetadata(it) }
-            Log.d("EventUserRepository", "Loaded ${events.size} events for current user")
-            Result.success(events)
-        } catch (e: Exception) {
-            Log.e("EventUserRepository", "Error loading user events", e)
-            Result.failure(e)
-        }
-    }
-
     private fun mapToEventUser(dto: EventUserResponse): EventUser {
         return EventUser(
             id = dto.id,
@@ -103,24 +87,4 @@ class EventUserRepository(
         )
     }
 
-    private fun mapToEventWithMetadata(dto: EventWithMetadataResponse): EventWithMetadata {
-        return EventWithMetadata(
-            id = dto.id,
-            event = Event(
-                title = dto.event.title,
-                description = dto.event.description,
-                eventDate = dto.event.eventDate,
-                eventTime = dto.event.eventTime,
-                location = dto.event.location,
-                creatorUid = dto.event.creatorUid,
-                free = dto.event.free,
-                price = dto.event.price,
-                createdAt = dto.event.createdAt,
-                updatedAt = dto.event.updatedAt,
-                shareCode = dto.event.shareCode
-            ),
-            userStatus = dto.userStatus,
-            userRole = dto.userRole
-        )
-    }
 }

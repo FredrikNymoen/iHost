@@ -100,14 +100,6 @@ class AuthRepository(
      */
     fun getCurrentUser(): FirebaseUser? = firebaseAuth.currentUser
 
-    /**
-     * Get ID token for authenticated requests
-     */
-    suspend fun getIdToken(): String? = try {
-        firebaseAuth.currentUser?.getIdToken(true)?.await()?.token
-    } catch (e: Exception) {
-        null
-    }
 
     /**
      * Send password reset email using Firebase

@@ -29,20 +29,6 @@ class EventRepository(
         }
     }
 
-    /**
-     * Get single event by ID
-     */
-    suspend fun getEventById(eventId: String): Result<EventWithMetadata> {
-        return try {
-            val eventDto = eventApi.getEventById(eventId)
-            val event = mapToEventWithMetadata(eventDto)
-            Log.d("EventRepository", "Loaded event: ${event.event.title}")
-            Result.success(event)
-        } catch (e: Exception) {
-            Log.e("EventRepository", "Error loading event with ID: $eventId", e)
-            Result.failure(e)
-        }
-    }
 
     /**
      * Get event by share code
