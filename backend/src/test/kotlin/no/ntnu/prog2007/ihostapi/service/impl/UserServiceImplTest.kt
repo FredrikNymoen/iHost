@@ -33,7 +33,6 @@ class UserServiceImplTest {
     // Mocks for dependendencies
     private lateinit var userRepository: UserRepository
     private lateinit var firebaseAuth: FirebaseAuth
-    private lateinit var firestore: Firestore
 
     // Service under test
     private lateinit var userService: UserServiceImpl
@@ -43,13 +42,11 @@ class UserServiceImplTest {
         // Initialize mocks
         userRepository = mockk()
         firebaseAuth = mockk()
-        firestore = mockk()
 
         // Initialize service with mocked dependencies
         userService = UserServiceImpl(
             userRepository,
-            firebaseAuth,
-            firestore
+            firebaseAuth
         )
     }
 
