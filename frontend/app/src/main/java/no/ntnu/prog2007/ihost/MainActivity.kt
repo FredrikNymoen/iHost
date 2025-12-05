@@ -54,6 +54,12 @@ fun IHostApp() {
 
     val authUiState by authViewModel.uiState.collectAsState()
 
+    // Show loading screen while checking authentication
+    if (authUiState.isCheckingAuth) {
+        SplashScreen { }
+        return
+    }
+
     // Determine start destination based on login state
     val startDestination = if (authUiState.isLoggedIn) {
         Destination.Events.route

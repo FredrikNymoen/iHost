@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import no.ntnu.prog2007.ihost.data.repository.AuthRepository
 import no.ntnu.prog2007.ihost.data.repository.UserRepository
 
@@ -20,7 +21,8 @@ data class AuthUiState(
     val isLoggedIn: Boolean = false,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val registrationSuccess: Boolean = false
+    val registrationSuccess: Boolean = false,
+    val isCheckingAuth: Boolean = true
 )
 
 /**
@@ -50,7 +52,54 @@ class AuthViewModel : ViewModel() {
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
     init {
-        checkCurrentUser()
+        checkAndVerifyCurrentUser()
+    }
+
+    /**
+     * Check if user is logged in and verify their auth token is valid
+     */
+    private fun checkAndVerifyCurrentUser() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isCheckingAuth = true) }
+
+            val user = auth.currentUser
+            if (user != null) {
+                try {
+                    // Force token refresh to verify user still exists in Firebase
+                    user.getIdToken(true).await()
+
+                    // Token is valid, user is authenticated
+                    _uiState.update {
+                        it.copy(
+                            currentUser = user,
+                            isLoggedIn = true,
+                            isCheckingAuth = false
+                        )
+                    }
+                    Log.d("AuthViewModel", "User authenticated: ${user.email}")
+                } catch (e: Exception) {
+                    // Token refresh failed - user no longer exists or token is invalid
+                    Log.e("AuthViewModel", "Auth verification failed: ${e.message}", e)
+                    auth.signOut()
+                    _uiState.update {
+                        it.copy(
+                            currentUser = null,
+                            isLoggedIn = false,
+                            isCheckingAuth = false
+                        )
+                    }
+                }
+            } else {
+                // No user logged in
+                _uiState.update {
+                    it.copy(
+                        currentUser = null,
+                        isLoggedIn = false,
+                        isCheckingAuth = false
+                    )
+                }
+            }
+        }
     }
 
     /**
@@ -79,11 +128,6 @@ class AuthViewModel : ViewModel() {
      */
     fun clearRegistrationSuccess() {
         _uiState.update { it.copy(registrationSuccess = false) }
-    }
-
-    private fun checkCurrentUser() {
-        val user = auth.currentUser
-        _uiState.update { it.copy(currentUser = user, isLoggedIn = user != null) }
     }
 
     /**
