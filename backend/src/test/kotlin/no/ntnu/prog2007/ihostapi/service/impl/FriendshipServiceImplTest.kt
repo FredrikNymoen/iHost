@@ -1,7 +1,5 @@
 package no.ntnu.prog2007.ihostapi.service.impl
 
-import com.google.api.core.ApiFuture
-import com.google.cloud.firestore.*
 import io.mockk.*
 import no.ntnu.prog2007.ihostapi.exception.ResourceNotFoundException
 import no.ntnu.prog2007.ihostapi.model.entity.Friendship
@@ -22,7 +20,6 @@ import org.junit.jupiter.api.assertThrows
  * Mockk is used for mocking dependencies
  *
  * Testing following cases:
- *
  * - Test business logic validations (self-friendship, duplicates)
  * - Test authorization rules (only recipient can accept/decline)
  * - Test state transitions (PENDING → ACCEPTED/DECLINED)
@@ -30,39 +27,19 @@ import org.junit.jupiter.api.assertThrows
 @DisplayName("FriendshipServiceImpl Tests")
 class FriendshipServiceImplTest {
 
-    // Mocks for dependencies
+    // Mock for repository dependency
     private lateinit var friendshipRepository: FriendshipRepository
-    private lateinit var firestore: Firestore
 
     // Service under test
     private lateinit var friendshipService: FriendshipServiceImpl
 
-    // Mock Firestore objects
-    private lateinit var mockCollection: CollectionReference
-    private lateinit var mockDocumentRef: DocumentReference
-    private lateinit var mockQuery: Query
-    private lateinit var mockQuerySnapshot: QuerySnapshot
-    private lateinit var mockQueryApiFuture: ApiFuture<QuerySnapshot>
-    private lateinit var mockAddApiFuture: ApiFuture<DocumentReference>
-    private lateinit var mockWriteResult: ApiFuture<WriteResult>
-
     @BeforeEach
     fun setup() {
-        // Initialize mocks
+        // Initialize mock
         friendshipRepository = mockk()
-        firestore = mockk()
-        
-        // Mock Firestore components
-        mockCollection = mockk()
-        mockDocumentRef = mockk()
-        mockQuery = mockk()
-        mockQuerySnapshot = mockk()
-        mockQueryApiFuture = mockk()
-        mockAddApiFuture = mockk()
-        mockWriteResult = mockk()
 
-        // Initialize service with mocked dependencies
-        friendshipService = FriendshipServiceImpl(friendshipRepository, firestore)
+        // Initialize service with mocked dependency (no Firestore anymore!)
+        friendshipService = FriendshipServiceImpl(friendshipRepository)
     }
 
     @AfterEach
@@ -90,8 +67,9 @@ class FriendshipServiceImplTest {
 
             assertEquals("Cannot send friend request to yourself", exception.message)
             
-            // Verify no database calls were made
-            verify(exactly = 0) { firestore.collection(any()) }
+            // Verify no repository calls were made
+            verify(exactly = 0) { friendshipRepository.findByUsers(any(), any()) }
+            verify(exactly = 0) { friendshipRepository.save(any(), any(), any(), any(), any(), any()) }
         }
 
         @Test
@@ -102,9 +80,7 @@ class FriendshipServiceImplTest {
             val toUser = "user456"
             
             // Mock that a friendship already exists
-            val mockDoc = mockk<QueryDocumentSnapshot>()
-            every { mockDoc.id } returns "friendship789"
-            every { mockDoc.toObject(Friendship::class.java) } returns Friendship(
+            val existingFriendship = Friendship(
                 id = "friendship789",
                 user1Id = fromUser,
                 user2Id = toUser,
@@ -114,14 +90,7 @@ class FriendshipServiceImplTest {
                 respondedAt = null
             )
 
-            every { firestore.collection(FriendshipRepository.COLLECTION_NAME) } returns mockCollection
-            every { mockCollection.whereEqualTo("user1Id", fromUser) } returns mockQuery
-            every { mockQuery.whereEqualTo("user2Id", toUser) } returns mockQuery
-            every { mockQuery.limit(1) } returns mockQuery
-            every { mockQuery.get() } returns mockQueryApiFuture
-            every { mockQueryApiFuture.get() } returns mockQuerySnapshot
-            every { mockQuerySnapshot.isEmpty } returns false
-            every { mockQuerySnapshot.documents } returns listOf(mockDoc)
+            every { friendshipRepository.findByUsers(fromUser, toUser) } returns existingFriendship
 
             // Act & Assert
             val exception = assertThrows<IllegalArgumentException> {
@@ -131,8 +100,8 @@ class FriendshipServiceImplTest {
             assertEquals("Friendship request already exists", exception.message)
             
             // Verify we checked for existing friendship but didn't create a new one
-            verify { mockQuery.get() }
-            verify(exactly = 0) { mockCollection.add(any()) }
+            verify(exactly = 1) { friendshipRepository.findByUsers(fromUser, toUser) }
+            verify(exactly = 0) { friendshipRepository.save(any(), any(), any(), any(), any(), any()) }
         }
 
         @Test
@@ -141,28 +110,37 @@ class FriendshipServiceImplTest {
             // Arrange
             val fromUser = "user123"
             val toUser = "user456"
-            val generatedId = "friendship789"
+            val savedFriendship = Friendship(
+                id = "friendship789",
+                user1Id = fromUser,
+                user2Id = toUser,
+                status = "PENDING",
+                requestedBy = fromUser,
+                requestedAt = "2024-01-01T12:00:00",
+                respondedAt = null
+            )
 
             // Mock that no existing friendship exists
-            every { firestore.collection(FriendshipRepository.COLLECTION_NAME) } returns mockCollection
-            every { mockCollection.whereEqualTo("user1Id", any()) } returns mockQuery
-            every { mockQuery.whereEqualTo("user2Id", any()) } returns mockQuery
-            every { mockQuery.limit(1) } returns mockQuery
-            every { mockQuery.get() } returns mockQueryApiFuture
-            every { mockQueryApiFuture.get() } returns mockQuerySnapshot
-            every { mockQuerySnapshot.isEmpty } returns true
-
-            // Mock the creation of new friendship
-            every { mockCollection.add(any()) } returns mockAddApiFuture
-            every { mockAddApiFuture.get() } returns mockDocumentRef
-            every { mockDocumentRef.id } returns generatedId
+            every { friendshipRepository.findByUsers(fromUser, toUser) } returns null
+            
+            // Mock the repository save method
+            every { 
+                friendshipRepository.save(
+                    user1Id = fromUser,
+                    user2Id = toUser,
+                    status = "PENDING",
+                    requestedBy = fromUser,
+                    requestedAt = any(),
+                    respondedAt = null
+                )
+            } returns savedFriendship
 
             // Act
             val result = friendshipService.sendFriendRequest(fromUser, toUser)
 
             // Assert
             assertNotNull(result)
-            assertEquals(generatedId, result.id)
+            assertEquals(savedFriendship.id, result.id)
             assertEquals(fromUser, result.user1Id)
             assertEquals(toUser, result.user2Id)
             assertEquals("PENDING", result.status)
@@ -170,8 +148,9 @@ class FriendshipServiceImplTest {
             assertNotNull(result.requestedAt)
             assertNull(result.respondedAt)
 
-            // Verify Firestore interactions
-            verify { mockCollection.add(any()) }
+            // Verify repository interactions
+            verify(exactly = 1) { friendshipRepository.findByUsers(fromUser, toUser) }
+            verify(exactly = 1) { friendshipRepository.save(any(), any(), any(), any(), any(), any()) }
         }
     }
 
@@ -189,7 +168,7 @@ class FriendshipServiceImplTest {
             val friendshipId = "nonexistent123"
             val userId = "user123"
 
-            every { friendshipRepository.findById(friendshipId) } returns null
+            every { friendshipRepository.findById(friendshipId) } returns null // Friendship not found
 
             // Act & Assert
             assertThrows<ResourceNotFoundException> {
@@ -223,6 +202,9 @@ class FriendshipServiceImplTest {
             }
 
             assertEquals("You can only accept requests sent to you", exception.message)
+            
+            // Verify update was never called
+            verify(exactly = 0) { friendshipRepository.update(any()) }
         }
 
         @Test
@@ -249,6 +231,7 @@ class FriendshipServiceImplTest {
             }
 
             assertEquals("Friendship is not pending", exception.message)
+            verify(exactly = 0) { friendshipRepository.update(any()) }
         }
 
         @Test
@@ -268,10 +251,7 @@ class FriendshipServiceImplTest {
             )
 
             every { friendshipRepository.findById(friendshipId) } returns friendship
-            every { firestore.collection(FriendshipRepository.COLLECTION_NAME) } returns mockCollection
-            every { mockCollection.document(friendshipId) } returns mockDocumentRef
-            every { mockDocumentRef.set(any()) } returns mockWriteResult
-            every { mockWriteResult.get() } returns mockk()
+            every { friendshipRepository.update(any()) } returns true // Mock successful update
 
             // Act
             val result = friendshipService.acceptFriendRequest(friendshipId, recipientId)
@@ -282,8 +262,8 @@ class FriendshipServiceImplTest {
             assertEquals("ACCEPTED", result.status)
             assertNotNull(result.respondedAt, "respondedAt should be set when accepting")
 
-            // Verify Firestore update was called
-            verify { mockDocumentRef.set(any()) }
+            // Verify repository update was called
+            verify(exactly = 1) { friendshipRepository.update(any()) }
         }
     }
 
@@ -318,6 +298,7 @@ class FriendshipServiceImplTest {
             }
 
             assertEquals("You can only decline requests sent to you", exception.message)
+            verify(exactly = 0) { friendshipRepository.update(any()) }
         }
 
         @Test
@@ -337,10 +318,7 @@ class FriendshipServiceImplTest {
             )
 
             every { friendshipRepository.findById(friendshipId) } returns friendship
-            every { firestore.collection(FriendshipRepository.COLLECTION_NAME) } returns mockCollection
-            every { mockCollection.document(friendshipId) } returns mockDocumentRef
-            every { mockDocumentRef.set(any()) } returns mockWriteResult
-            every { mockWriteResult.get() } returns mockk()
+            every { friendshipRepository.update(any()) } returns true
 
             // Act
             val result = friendshipService.declineFriendRequest(friendshipId, recipientId)
@@ -351,7 +329,7 @@ class FriendshipServiceImplTest {
             assertEquals("DECLINED", result.status)
             assertNotNull(result.respondedAt)
 
-            verify { mockDocumentRef.set(any()) }
+            verify(exactly = 1) { friendshipRepository.update(any()) }
         }
     }
 
@@ -401,6 +379,7 @@ class FriendshipServiceImplTest {
             }
 
             assertEquals("You can only remove your own friendships", exception.message)
+            verify(exactly = 0) { friendshipRepository.delete(any()) }
         }
 
         @Test
@@ -420,16 +399,13 @@ class FriendshipServiceImplTest {
             )
 
             every { friendshipRepository.findById(friendshipId) } returns friendship
-            every { firestore.collection(FriendshipRepository.COLLECTION_NAME) } returns mockCollection
-            every { mockCollection.document(friendshipId) } returns mockDocumentRef
-            every { mockDocumentRef.delete() } returns mockWriteResult
-            every { mockWriteResult.get() } returns mockk()
+            every { friendshipRepository.delete(friendshipId) } returns true
 
             // Act
             friendshipService.removeFriend(friendshipId, userId)
 
             // Assert - no exception thrown means success
-            verify { mockDocumentRef.delete() }
+            verify(exactly = 1) { friendshipRepository.delete(friendshipId) }
         }
 
         @Test
@@ -449,16 +425,13 @@ class FriendshipServiceImplTest {
             )
 
             every { friendshipRepository.findById(friendshipId) } returns friendship
-            every { firestore.collection(FriendshipRepository.COLLECTION_NAME) } returns mockCollection
-            every { mockCollection.document(friendshipId) } returns mockDocumentRef
-            every { mockDocumentRef.delete() } returns mockWriteResult
-            every { mockWriteResult.get() } returns mockk()
+            every { friendshipRepository.delete(friendshipId) } returns true
 
             // Act
             friendshipService.removeFriend(friendshipId, userId)
 
             // Assert
-            verify { mockDocumentRef.delete() }
+            verify(exactly = 1) { friendshipRepository.delete(friendshipId) }
         }
     }
 }
