@@ -2,7 +2,7 @@ package no.ntnu.prog2007.ihost.ui.screens.events.main.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.LocalActivity
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -28,7 +28,7 @@ fun FloatingActionButtons(
             )
         ) {
             Icon(
-                imageVector = Icons.Default.Add,
+                imageVector = Icons.Default.LocalActivity,
                 contentDescription = "Join Event with Code"
             )
         }

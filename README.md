@@ -28,7 +28,7 @@ Stores user information. Document ID is used as `uid`.
 
 ```
 users/
-  └── {uid} (document ID = user ID)
+  └── {uid} (document ID)
       ├── email: String
       ├── username: String (4-12 characters)
       ├── firstName: String
@@ -59,7 +59,7 @@ Stores events created by users. Document ID is used as event ID.
 
 ```
 events/
-  └── {eventId} (document ID = event ID)
+  └── {eventId} (document ID)
       ├── title: String
       ├── description: String?
       ├── eventDate: String (YYYY-MM-DD)
@@ -94,7 +94,7 @@ Junction table that connects users to events with status and role.
 
 ```
 event_users/
-  └── {documentId} (auto-generated)
+  └── {Id} (document ID)
       ├── eventId: String (ref to events/{eventId})
       ├── userId: String (ref to users/{uid})
       ├── status: String (PENDING | ACCEPTED | DECLINED | CREATOR)
@@ -167,7 +167,7 @@ Stores metadata for images associated with events. The actual images are stored 
 
 ```
 event_images/
-  └── {imageId} (auto-generated document ID)
+  └── {imageId} (document ID)
       ├── path: String (Cloudinary URL)
       ├── eventId: String (ref to events/{eventId})
       └── createdAt: String (ISO-8601)
