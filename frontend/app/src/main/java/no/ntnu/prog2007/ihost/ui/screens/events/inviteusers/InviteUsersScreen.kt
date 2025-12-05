@@ -16,7 +16,7 @@ import no.ntnu.prog2007.ihost.data.model.domain.getOtherUserId
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
-import no.ntnu.prog2007.ihost.ui.components.TopBar
+import no.ntnu.prog2007.ihost.ui.components.layout.TopBar
 import no.ntnu.prog2007.ihost.ui.screens.events.inviteusers.components.SearchBar
 import no.ntnu.prog2007.ihost.ui.screens.events.inviteusers.components.FloatingInviteButton
 import no.ntnu.prog2007.ihost.ui.screens.events.inviteusers.components.ErrorState

@@ -6,7 +6,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import no.ntnu.prog2007.ihost.ui.components.TopBar
+import no.ntnu.prog2007.ihost.ui.components.layout.TopBar
 import no.ntnu.prog2007.ihost.ui.screens.profile.friendslist.components.*
 import no.ntnu.prog2007.ihost.ui.components.states.ErrorStateWithRetry
 import no.ntnu.prog2007.ihost.ui.components.states.LoadingState

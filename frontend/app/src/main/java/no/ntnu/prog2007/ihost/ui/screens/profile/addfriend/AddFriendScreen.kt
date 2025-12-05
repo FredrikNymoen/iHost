@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.delay
 import no.ntnu.prog2007.ihost.data.model.domain.getOtherUserId
-import no.ntnu.prog2007.ihost.ui.components.TopBar
+import no.ntnu.prog2007.ihost.ui.components.layout.TopBar
 import no.ntnu.prog2007.ihost.ui.components.states.ErrorStateWithRetry
 import no.ntnu.prog2007.ihost.ui.components.states.LoadingState
 import no.ntnu.prog2007.ihost.ui.screens.profile.addfriend.components.*

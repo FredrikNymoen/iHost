@@ -1,14 +1,14 @@
-package no.ntnu.prog2007.ihost.ui.screens.profile.addfriend.components
+package no.ntnu.prog2007.ihost.ui.screens.events.inviteusers.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,22 +20,27 @@ import coil3.compose.AsyncImage
 import no.ntnu.prog2007.ihost.data.model.domain.User
 
 @Composable
-fun UserItemWithAddButton(
+fun UserSelectionCard(
     user: User,
-    onAddFriend: () -> Unit
+    isSelected: Boolean,
+    onToggle: () -> Unit
 ) {
-    var requestSent by remember { mutableStateOf(false) }
-
-    Surface(
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected)
+                MaterialTheme.colorScheme.secondary
+            else
+                MaterialTheme.colorScheme.surface
+        ),
         shape = RoundedCornerShape(12.dp),
-        tonalElevation = 2.dp
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .clickable { onToggle() }
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -65,7 +70,7 @@ fun UserItemWithAddButton(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = user.username.firstOrNull()?.uppercase() ?: "?",
+                            text = user.firstName.firstOrNull()?.uppercase() ?: "?",
                             color = MaterialTheme.colorScheme.onPrimary,
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp
@@ -76,48 +81,47 @@ fun UserItemWithAddButton(
                 Column {
                     Text(
                         text = "${user.firstName} ${user.lastName ?: ""}".trim(),
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = if (isSelected)
+                            MaterialTheme.colorScheme.onSecondary
+                        else
+                            MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )
                     Text(
                         text = "@${user.username}",
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        color = if (isSelected)
+                            MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.7f)
+                        else
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         fontSize = 14.sp
                     )
                 }
             }
 
-            // Add friend button
-            if (requestSent) {
+            // Selection indicator
+            if (isSelected) {
                 Surface(
-                    modifier = Modifier.size(40.dp),
-                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(32.dp),
+                    color = MaterialTheme.colorScheme.primary,
                     shape = CircleShape
                 ) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = "Request sent",
-                        tint = MaterialTheme.colorScheme.onSecondary,
-                        modifier = Modifier.padding(8.dp)
+                        contentDescription = "Selected",
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.padding(6.dp)
                     )
                 }
             } else {
-                IconButton(
-                    onClick = {
-                        requestSent = true
-                        onAddFriend()
-                    },
+                Box(
                     modifier = Modifier
-                        .size(40.dp)
-                        .background(MaterialTheme.colorScheme.primary, CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PersonAdd,
-                        contentDescription = "Add friend",
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
+                        .size(32.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                            shape = CircleShape
+                        )
+                )
             }
         }
     }

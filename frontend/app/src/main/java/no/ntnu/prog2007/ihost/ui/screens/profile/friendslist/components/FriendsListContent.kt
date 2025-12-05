@@ -4,9 +4,6 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PersonRemove
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -14,7 +11,6 @@ import androidx.compose.ui.unit.dp
 import no.ntnu.prog2007.ihost.data.model.domain.Friendship
 import no.ntnu.prog2007.ihost.data.model.domain.User
 import no.ntnu.prog2007.ihost.data.model.domain.getOtherUserId
-import no.ntnu.prog2007.ihost.ui.components.UserCardWithIconAction
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
 
 @Composable
@@ -42,12 +38,9 @@ fun FriendsListContent(
             val friendUser = friendUserId?.let { userDetailsMap[it] }
 
             if (friendUser != null) {
-                UserCardWithIconAction(
+                FriendUserCard(
                     user = friendUser,
-                    icon = Icons.Default.PersonRemove,
-                    iconTint = MaterialTheme.colorScheme.error,
-                    iconDescription = "Remove friend",
-                    onIconClick = {
+                    onRemove = {
                         friendViewModel.removeFriend(
                             friendshipId = friendship.id,
                             onSuccess = {

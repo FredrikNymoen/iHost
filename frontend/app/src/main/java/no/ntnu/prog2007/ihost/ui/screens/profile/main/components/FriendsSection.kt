@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.*
@@ -18,8 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import no.ntnu.prog2007.ihost.ui.components.UserCardWithTwoActions
-import no.ntnu.prog2007.ihost.ui.components.UserCardWithIconAction
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendUiState
@@ -152,12 +148,11 @@ fun FriendsSection(
                     friendUiState.pendingRequests.forEach { friendship ->
                         val requesterUser = friendUiState.userDetailsMap[friendship.user1Id]
                         if (requesterUser != null) {
-                            UserCardWithTwoActions(
+                            UserItemWithTwoActions(
                                 user = requesterUser,
-                                firstIcon = Icons.Default.Check,
-                                firstIconTint = MaterialTheme.colorScheme.primary,
-                                firstIconDescription = "Accept",
-                                onFirstIconClick = {
+                                backgroundColor = Color(0xFFEFEBE9),
+                                textColor = Color(0xFF4E342E),
+                                onAccept = {
                                     friendViewModel.acceptFriendRequest(
                                         friendshipId = friendship.id,
                                         onSuccess = {
@@ -176,10 +171,7 @@ fun FriendsSection(
                                         }
                                     )
                                 },
-                                secondIcon = Icons.Default.Close,
-                                secondIconTint = MaterialTheme.colorScheme.error,
-                                secondIconDescription = "Decline",
-                                onSecondIconClick = {
+                                onDecline = {
                                     friendViewModel.declineFriendRequest(
                                         friendshipId = friendship.id,
                                         onSuccess = {
@@ -197,15 +189,12 @@ fun FriendsSection(
                                             ).show()
                                         }
                                     )
-                                },
-                                backgroundColor = Color(0xFFEFEBE9), // Light brown
-                                textColor = Color(0xFF4E342E), // Dark brown
-                                showCard = false
+                                }
                             )
                             if (friendship != friendUiState.pendingRequests.last()) {
                                 HorizontalDivider(
                                     modifier = Modifier.padding(vertical = 12.dp),
-                                    color = Color(0xFF4E342E).copy(alpha = 0.2f) // Dark brown with transparency
+                                    color = Color(0xFF4E342E).copy(alpha = 0.2f)
                                 )
                             }
                         }
@@ -257,11 +246,10 @@ fun FriendsSection(
                     friendUiState.sentRequests.forEach { friendship ->
                         val recipientUser = friendUiState.userDetailsMap[friendship.user2Id]
                         if (recipientUser != null) {
-                            UserCardWithIconAction(
+                            UserItemWithIconAction(
                                 user = recipientUser,
-                                icon = Icons.Default.Close,
-                                iconTint = MaterialTheme.colorScheme.error,
-                                iconDescription = "Cancel request",
+                                backgroundColor = Color(0xFFD7CCC8),
+                                textColor = Color(0xFF3E2723),
                                 onIconClick = {
                                     friendViewModel.removeFriend(
                                         friendshipId = friendship.id,
@@ -280,15 +268,12 @@ fun FriendsSection(
                                             ).show()
                                         }
                                     )
-                                },
-                                backgroundColor = Color(0xFFD7CCC8), // Lighter brown
-                                textColor = Color(0xFF3E2723), // Darker brown
-                                showCard = false
+                                }
                             )
                             if (friendship != friendUiState.sentRequests.last()) {
                                 HorizontalDivider(
                                     modifier = Modifier.padding(vertical = 12.dp),
-                                    color = Color(0xFF3E2723).copy(alpha = 0.2f) // Darker brown with transparency
+                                    color = Color(0xFF3E2723).copy(alpha = 0.2f)
                                 )
                             }
                         }

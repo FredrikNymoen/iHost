@@ -20,7 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import com.google.android.gms.maps.model.LatLng
-import no.ntnu.prog2007.ihost.ui.components.TopBar
+import no.ntnu.prog2007.ihost.ui.components.layout.TopBar
 import no.ntnu.prog2007.ihost.ui.components.events.EventImageSection
 import no.ntnu.prog2007.ihost.ui.components.events.ImageSourceDialog
 import no.ntnu.prog2007.ihost.ui.components.events.LocationPickerDialog

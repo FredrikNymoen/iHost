@@ -1,14 +1,13 @@
-package no.ntnu.prog2007.ihost.ui.screens.profile.addfriend.components
+package no.ntnu.prog2007.ihost.ui.screens.profile.friendslist.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.PersonRemove
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,22 +19,22 @@ import coil3.compose.AsyncImage
 import no.ntnu.prog2007.ihost.data.model.domain.User
 
 @Composable
-fun UserItemWithAddButton(
+fun FriendUserCard(
     user: User,
-    onAddFriend: () -> Unit
+    onRemove: () -> Unit
 ) {
-    var requestSent by remember { mutableStateOf(false) }
-
-    Surface(
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
         shape = RoundedCornerShape(12.dp),
-        tonalElevation = 2.dp
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -65,7 +64,7 @@ fun UserItemWithAddButton(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = user.username.firstOrNull()?.uppercase() ?: "?",
+                            text = user.firstName.firstOrNull()?.uppercase() ?: "?",
                             color = MaterialTheme.colorScheme.onPrimary,
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp
@@ -88,36 +87,15 @@ fun UserItemWithAddButton(
                 }
             }
 
-            // Add friend button
-            if (requestSent) {
-                Surface(
-                    modifier = Modifier.size(40.dp),
-                    color = MaterialTheme.colorScheme.secondary,
-                    shape = CircleShape
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Request sent",
-                        tint = MaterialTheme.colorScheme.onSecondary,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-            } else {
-                IconButton(
-                    onClick = {
-                        requestSent = true
-                        onAddFriend()
-                    },
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(MaterialTheme.colorScheme.primary, CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PersonAdd,
-                        contentDescription = "Add friend",
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
+            IconButton(
+                onClick = onRemove,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PersonRemove,
+                    contentDescription = "Remove friend",
+                    tint = MaterialTheme.colorScheme.error
+                )
             }
         }
     }
