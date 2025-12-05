@@ -266,9 +266,6 @@ class EventViewModel: ViewModel() {
         }
     }
 
-    // Join/Leave functionality removed - managed through event_users now
-    // Use acceptInvitation/declineInvitation in EventUserController instead
-
     /**
      * Fetch an event by its share code and add it to the list of events if not already present.
      * Calls onSuccess callback with the fetched event upon successful retrieval.
@@ -350,54 +347,6 @@ class EventViewModel: ViewModel() {
     }
 
     /**
-     * Get user Username by UID
-     * @param uid The user's UID
-     * @return The user's Username, or "User" if fetch fails
-     */
-    suspend fun getUserUserName(uid: String): String {
-        return userRepository.getUserByUid(uid).fold(
-            onSuccess = { user ->
-                print(user.username)
-                user.username
-            },
-            onFailure = { error ->
-                Log.e("EventViewModel", "Error fetching user name for $uid: ${error.message}", error)
-                "User"
-            }
-        )
-    }
-
-    /**
-     * Get user Last name by UID
-     * @param uid The user's UID
-     * @return The user's Last name, or "User" if fetch fails
-     */
-    suspend fun getUserLastName(uid: String): String? {
-        return userRepository.getUserByUid(uid).fold(
-            onSuccess = { user -> user.lastName },
-            onFailure = { error ->
-                Log.e("EventViewModel", "Error fetching user name for $uid: ${error.message}", error)
-                "User"
-            }
-        )
-    }
-
-    /**
-     * Get user First name by UID
-     * @param uid The user's UID
-     * @return The user's First name, or "User" if fetch fails
-     */
-    suspend fun getUserFirstName(uid: String): String {
-        return userRepository.getUserByUid(uid).fold(
-            onSuccess = { user -> user.firstName },
-            onFailure = { error ->
-                Log.e("EventViewModel", "Error fetching user name for $uid: ${error.message}", error)
-                "User"
-            }
-        )
-    }
-
-    /**
      * Get user by UID
      * @param uid The user's UID
      * @return The User object, or null if fetch fails
@@ -412,19 +361,6 @@ class EventViewModel: ViewModel() {
         )
     }
 
-    /**
-     * Get all users
-     * @return List of all users
-     */
-    suspend fun getAllUsers(): List<User> {
-        return userRepository.getAllUsers().fold(
-            onSuccess = { users -> users },
-            onFailure = { error ->
-                Log.e("EventViewModel", "Error fetching all users: ${error.message}", error)
-                emptyList()
-            }
-        )
-    }
 
     /**
      * Invite users to an event
@@ -446,16 +382,6 @@ class EventViewModel: ViewModel() {
                 }
             )
         }
-    }
-
-    /**
-     * Reset all event data (call this when user logs out)
-     */
-    fun resetEvents() {
-        _uiState.update {
-            EventUiState() // Reset to initial empty state
-        }
-        eventsLoaded = false
     }
 
     /**

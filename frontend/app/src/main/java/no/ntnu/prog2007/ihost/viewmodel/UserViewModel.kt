@@ -98,41 +98,6 @@ class UserViewModel : ViewModel() {
     }
 
     /**
-     * Check if username is available
-     */
-    fun checkUsernameAvailability(username: String) {
-        if (username.isBlank()) {
-            _uiState.update { it.copy(isUsernameAvailable = null) }
-            return
-        }
-
-        viewModelScope.launch {
-            _uiState.update { it.copy(isCheckingUsername = true) }
-
-            userRepository.isUsernameAvailable(username).fold(
-                onSuccess = { available ->
-                    _uiState.update {
-                        it.copy(
-                            isUsernameAvailable = available,
-                            isCheckingUsername = false
-                        )
-                    }
-                    Log.d("UserViewModel", "Username '$username' available: $available")
-                },
-                onFailure = { error ->
-                    _uiState.update {
-                        it.copy(
-                            isCheckingUsername = false,
-                            errorMessage = error.message ?: "Failed to check username"
-                        )
-                    }
-                    Log.e("UserViewModel", "Error checking username", error)
-                }
-            )
-        }
-    }
-
-    /**
      * Update user profile
      */
     fun updateUserProfile(
@@ -232,13 +197,6 @@ class UserViewModel : ViewModel() {
      */
     fun clearUserData() {
         _uiState.value = UserUiState()
-    }
-
-    /**
-     * Clear error message
-     */
-    fun clearError() {
-        _uiState.update { it.copy(errorMessage = null) }
     }
 
     /**

@@ -245,13 +245,6 @@ class AuthViewModel : ViewModel() {
     }
 
     /**
-     * Get Firebase ID token for authenticated requests
-     */
-    suspend fun getIdToken(): String? {
-        return authRepository.getIdToken()
-    }
-
-    /**
      * Send password reset email
      */
     fun sendPasswordResetEmail(email: String, onResult: (Boolean) -> Unit) {
