@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.testTag
 
 @Composable
 fun CreateEventButton(
@@ -27,7 +28,8 @@ fun CreateEventButton(
             onClick = onClick,
             modifier = Modifier
                 .weight(1f)
-                .height(60.dp),
+                .height(60.dp)
+                .testTag("createEventButton"),
             enabled = enabled,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,

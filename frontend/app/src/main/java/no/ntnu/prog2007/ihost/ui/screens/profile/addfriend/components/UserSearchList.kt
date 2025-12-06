@@ -42,7 +42,8 @@ fun UserSearchList(
         ) {
             items(
                 items = filteredUsers,
-                key = { user -> user.uid }
+                key = { user -> user.uid.ifEmpty { user.hashCode().toString() } }
+
             ) { user ->
                 UserItemWithAddButton(
                     user = user,

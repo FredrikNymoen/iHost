@@ -272,17 +272,17 @@ fun AddEventScreen(
 
         CreateEventButton(
             onClick = {
-                val selectedDate = LocalDate.parse(eventDate)
-                val eventDateTime = if (eventTime.isNotEmpty()) {
-                    LocalDateTime.of(selectedDate, LocalTime.parse(eventTime))
-                } else {
-                    selectedDate.atStartOfDay()
+                if (eventTime.isNotEmpty()) {
+                    val selectedDate = LocalDate.parse(eventDate)
+                    val eventDateTime = LocalDateTime.of(selectedDate, LocalTime.parse(eventTime))
+
+                    if (eventDateTime.isBefore(nowInNorway)) {
+                        dateTimeError = "Event time cannot be in the past"
+                        return@CreateEventButton
+                    }
                 }
 
-                if (eventDateTime.isBefore(nowInNorway)) {
-                    dateTimeError = "Event time cannot be in the past"
-                    return@CreateEventButton
-                }
+                dateTimeError = null // Clear any previous error
 
                 val priceValue = 0.0
                 viewModel.createEvent(

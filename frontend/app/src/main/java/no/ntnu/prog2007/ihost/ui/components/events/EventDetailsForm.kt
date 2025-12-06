@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.testTag
 
 @Composable
 fun EventDetailsForm(
@@ -37,7 +38,8 @@ fun EventDetailsForm(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = topPadding.dp)
-                .padding(bottom = 16.dp),
+                .padding(bottom = 16.dp)
+                .testTag("eventTitleField"),
             enabled = !isLoading,
             textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
             colors = OutlinedTextFieldDefaults.colors(
@@ -54,7 +56,8 @@ fun EventDetailsForm(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
-                .heightIn(min = 80.dp),
+                .heightIn(min = 80.dp)
+                .testTag("eventDescriptionField"),
             minLines = 3,
             enabled = !isLoading,
             textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
@@ -72,7 +75,8 @@ fun EventDetailsForm(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
-                .clickable { onDateClick() },
+                .clickable { onDateClick() }
+                .testTag("eventDateField"),
             enabled = false,
             readOnly = true,
             trailingIcon = {
@@ -98,7 +102,8 @@ fun EventDetailsForm(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
-                .clickable { onTimeClick() },
+                .clickable { onTimeClick() }
+                .testTag("eventTimeField"),
             enabled = false,
             readOnly = true,
             trailingIcon = {
@@ -124,7 +129,8 @@ fun EventDetailsForm(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
-                .clickable { onLocationClick() },
+                .clickable { onLocationClick() }
+                .testTag("eventLocationField"),
             enabled = false,
             readOnly = true,
             textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
