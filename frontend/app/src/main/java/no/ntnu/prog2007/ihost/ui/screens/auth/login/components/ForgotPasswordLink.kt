@@ -8,6 +8,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
 
+/**
+ * Clickable "Forgot Password?" link
+ *
+ * Displays a text button link that navigates to password reset flow
+ * when clicked. Aligned to the start of the container.
+ *
+ * @param onClick Callback invoked when link is clicked
+ * @param modifier Optional modifier for styling and layout customization
+ */
 @Composable
 fun ForgotPasswordLink(
     onClick: () -> Unit,

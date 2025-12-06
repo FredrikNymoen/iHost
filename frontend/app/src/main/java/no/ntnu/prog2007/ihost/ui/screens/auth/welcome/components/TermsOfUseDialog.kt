@@ -10,6 +10,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Terms of Use dialog displaying app's terms and conditions
+ *
+ * Shows a scrollable alert dialog containing the complete terms of use
+ * with sections covering service description, user responsibilities, account
+ * registration, data storage, content ownership, termination, and disclaimers.
+ *
+ * @param onDismiss Callback invoked when dialog is dismissed or closed
+ */
 @Composable
 fun TermsOfUseDialog(
     onDismiss: () -> Unit
@@ -96,6 +105,13 @@ fun TermsOfUseDialog(
     )
 }
 
+/**
+ * Terms of use section title
+ *
+ * Displays a bold, emphasized text for terms of use section headings.
+ *
+ * @param text The section title text to display
+ */
 @Composable
 private fun SectionTitle(text: String) {
     Text(
@@ -107,6 +123,14 @@ private fun SectionTitle(text: String) {
     )
 }
 
+/**
+ * Terms of use section body text
+ *
+ * Displays formatted body text for terms of use section content
+ * with consistent styling and line height.
+ *
+ * @param text The section body text to display
+ */
 @Composable
 private fun SectionBody(text: String) {
     Text(

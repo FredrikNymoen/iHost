@@ -13,12 +13,20 @@ import androidx.compose.ui.window.Dialog
 
 
 /**
- * Dialog for joining events using a provided share code.
+ * Dialog for joining events via share code
+ *
+ * Displays a dialog with text input for entering event share codes in format "IH-XXXXX".
+ * Validates code format before submission and shows error message for invalid codes.
+ * Displays loading indicator during join operation.
+ *
+ * @param onDismiss Callback invoked when dialog is dismissed or cancelled
+ * @param onSubmit Callback invoked with entered code when valid code is submitted
+ * @param isLoading Whether join operation is in progress (shows loading indicator)
  */
 @Composable
 fun JoinEventDialog(
-    onDismiss: () -> Unit, // Called when the dialog is dismissed
-    onSubmit: (String) -> Unit, // Called with the entered code when submitted
+    onDismiss: () -> Unit,
+    onSubmit: (String) -> Unit,
     isLoading: Boolean = false
 ) {
     var codeInput by remember { mutableStateOf("") }
@@ -128,8 +136,13 @@ fun JoinEventDialog(
 }
 
 /**
- * Validates if the input matches expected event code format
- * i.e., "IH-XXXXX" where X is an uppercase letter or digit.
+ * Validates event share code format
+ *
+ * Checks if code matches expected format "IH-XXXXX" where X is an uppercase
+ * letter (A-Z) or digit (0-9).
+ *
+ * @param code The event share code to validate
+ * @return true if code matches format, false otherwise
  */
 private fun isValidEventCode(code: String): Boolean {
     val pattern = Regex("IH-[A-Z0-9]{5}")

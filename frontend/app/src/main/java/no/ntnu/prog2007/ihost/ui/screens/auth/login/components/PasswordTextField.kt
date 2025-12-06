@@ -14,6 +14,19 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.platform.testTag
 
+/**
+ * Password input text field with visibility toggle
+ *
+ * Displays an outlined text field configured for password input with lock icon,
+ * toggle button for showing/hiding password text, and password keyboard type.
+ *
+ * @param value Current password text value
+ * @param onValueChange Callback invoked when password text changes
+ * @param passwordVisible Whether password is currently visible (not masked)
+ * @param onTogglePasswordVisibility Callback invoked when visibility toggle is clicked
+ * @param enabled Whether the field is enabled for user input
+ * @param modifier Optional modifier for styling and layout customization
+ */
 @Composable
 fun PasswordTextField(
     value: String,

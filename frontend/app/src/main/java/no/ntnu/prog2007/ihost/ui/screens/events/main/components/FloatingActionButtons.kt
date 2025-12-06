@@ -9,6 +9,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/**
+ * Floating action buttons for event screen actions
+ *
+ * Displays a vertical stack of two floating action buttons:
+ * - Primary button for joining events via share code
+ * - Secondary button for refreshing event list
+ *
+ * @param onJoinEvent Callback invoked when join event button is clicked
+ * @param onRefresh Callback invoked when refresh button is clicked
+ */
 @Composable
 fun FloatingActionButtons(
     onJoinEvent: () -> Unit,

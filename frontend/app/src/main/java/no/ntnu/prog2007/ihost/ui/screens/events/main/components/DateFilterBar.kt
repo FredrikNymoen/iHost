@@ -13,6 +13,16 @@ import androidx.compose.ui.unit.sp
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+/**
+ * Date filter bar with future/past event toggle
+ *
+ * Displays current date and a segmented control toggle for filtering events
+ * by time (future events vs past events). Shows today's date in dd.MM.yy format.
+ *
+ * @param timeFilter Current time filter selection (0 = future, 1 = past)
+ * @param onTimeFilterChange Callback invoked when filter selection changes
+ * @param modifier Optional modifier for styling and layout customization
+ */
 @Composable
 fun DateFilterBar(
     timeFilter: Int,

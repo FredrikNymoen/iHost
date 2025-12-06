@@ -10,6 +10,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.platform.testTag
 
+/**
+ * Email input text field for authentication forms
+ *
+ * Displays an outlined text field configured for email input with email icon,
+ * email keyboard type, and input validation support.
+ *
+ * @param value Current email text value
+ * @param onValueChange Callback invoked when email text changes
+ * @param enabled Whether the field is enabled for user input
+ * @param modifier Optional modifier for styling and layout customization
+ */
 @Composable
 fun EmailTextField(
     value: String,

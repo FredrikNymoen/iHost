@@ -10,6 +10,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Welcome screen action buttons
+ *
+ * Displays primary "Login" button and secondary "Register" outlined button
+ * stacked vertically for authentication navigation.
+ *
+ * @param onNavigateToLogin Callback invoked when Login button is clicked
+ * @param onNavigateToSignUp Callback invoked when Register button is clicked
+ * @param modifier Optional modifier for styling and layout customization
+ */
 @Composable
 fun WelcomeButtons(
     onNavigateToLogin: () -> Unit,

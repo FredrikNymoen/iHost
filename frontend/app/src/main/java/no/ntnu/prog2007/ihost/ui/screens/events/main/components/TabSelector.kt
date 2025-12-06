@@ -8,6 +8,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
+/**
+ * Tab selector for filtering event list
+ *
+ * Displays two toggle buttons for switching between "Invites" and "My events" tabs.
+ * Selected tab is highlighted with different colors and elevation. Provides visual
+ * feedback for current selection.
+ *
+ * @param selectedTab Current selected tab index (0 = Invites, 1 = My events)
+ * @param onTabSelected Callback invoked when tab selection changes
+ * @param modifier Optional modifier for styling and layout customization
+ */
 @Composable
 fun TabSelector(
     selectedTab: Int,

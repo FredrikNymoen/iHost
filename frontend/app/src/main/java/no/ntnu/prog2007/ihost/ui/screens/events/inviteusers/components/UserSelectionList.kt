@@ -8,6 +8,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import no.ntnu.prog2007.ihost.data.model.domain.User
 
+/**
+ * Searchable list of users for event invitation
+ *
+ * Displays a scrollable list of users that can be selected for event invitations.
+ * Automatically filters users based on search query matching name or username.
+ * Shows selection state for each user.
+ *
+ * @param users Complete list of users available to invite
+ * @param searchQuery Current search query text for filtering users
+ * @param selectedUserIds Set of UIDs for currently selected users
+ * @param onUserToggle Callback invoked when user selection is toggled
+ * @param modifier Optional modifier for styling and layout customization
+ */
 @Composable
 fun UserSelectionList(
     users: List<User>,

@@ -7,6 +7,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/**
+ * Error state display for invite users screen
+ *
+ * Shows an error message with a "Go Back" button when an error occurs
+ * during user invitation process.
+ *
+ * @param errorMessage Error message to display, null shows "Unknown error"
+ * @param onGoBack Callback invoked when "Go Back" button is clicked
+ */
 @Composable
 fun ErrorState(
     errorMessage: String?,
@@ -37,6 +46,14 @@ fun ErrorState(
     }
 }
 
+/**
+ * Empty state display for invite users screen
+ *
+ * Shows a centered message when there are no users to invite.
+ * Message varies based on whether user has friends or not.
+ *
+ * @param hasUsers Whether the user has any friends in their list
+ */
 @Composable
 fun EmptyState(
     hasUsers: Boolean
@@ -53,6 +70,11 @@ fun EmptyState(
     }
 }
 
+/**
+ * Loading state display for invite users screen
+ *
+ * Shows a centered circular progress indicator while loading user data.
+ */
 @Composable
 fun LoadingState() {
     Box(
