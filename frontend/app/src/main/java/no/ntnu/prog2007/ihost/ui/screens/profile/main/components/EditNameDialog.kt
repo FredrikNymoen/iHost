@@ -6,6 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.testTag
 
 @Composable
 fun EditNameDialog(
@@ -34,7 +35,9 @@ fun EditNameDialog(
                     onValueChange = { firstName = it },
                     label = { Text("First Name") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("firstNameField")
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 OutlinedTextField(
@@ -42,7 +45,9 @@ fun EditNameDialog(
                     onValueChange = { lastName = it },
                     label = { Text("Last Name") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("lastNameField")
                 )
             }
         },
