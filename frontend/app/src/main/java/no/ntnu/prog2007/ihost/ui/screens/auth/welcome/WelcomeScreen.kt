@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import no.ntnu.prog2007.ihost.ui.screens.auth.welcome.components.WelcomeLogo
 import no.ntnu.prog2007.ihost.ui.screens.auth.welcome.components.WelcomeButtons
+import no.ntnu.prog2007.ihost.ui.screens.auth.welcome.components.LegalLinks
 
 @Composable
 fun WelcomeScreen(
@@ -18,15 +19,23 @@ fun WelcomeScreen(
             .fillMaxSize()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        WelcomeLogo()
+        Spacer(modifier = Modifier.height(1.dp))
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            WelcomeLogo()
 
-        WelcomeButtons(
-            onNavigateToLogin = onNavigateToLogin,
-            onNavigateToSignUp = onNavigateToSignUp
-        )
+            Spacer(modifier = Modifier.height(48.dp))
+
+            WelcomeButtons(
+                onNavigateToLogin = onNavigateToLogin,
+                onNavigateToSignUp = onNavigateToSignUp
+            )
+        }
+
+        LegalLinks()
     }
 }
