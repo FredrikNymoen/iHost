@@ -9,6 +9,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Password mismatch error message component
+ *
+ * Displays an error message when password and confirm password fields don't match.
+ * Only shown when validation fails; conditionally rendered based on [show] parameter.
+ *
+ * @param show Boolean flag indicating whether to display the error message
+ * @param modifier Optional Modifier for customizing layout
+ */
 @Composable
 fun PasswordMismatchError(
     show: Boolean,

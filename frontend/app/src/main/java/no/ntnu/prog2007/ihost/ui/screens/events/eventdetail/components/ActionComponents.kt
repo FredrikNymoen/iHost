@@ -15,12 +15,22 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
-// Enum for status types
+/**
+ * Status type enumeration for event participation
+ */
 enum class StatusType {
     ACCEPTED, PENDING, DECLINED, NOT_INVITED
 }
 
-// Creator Action Buttons
+/**
+ * Creator action buttons component
+ *
+ * Displays action buttons for event creators: invite users, edit event, and delete event.
+ *
+ * @param onInviteUsers Callback invoked when user clicks invite button
+ * @param onEdit Callback invoked when user clicks edit button
+ * @param onDelete Callback invoked when user clicks delete button
+ */
 @Composable
 fun CreatorActionButtons(
     onInviteUsers: () -> Unit,
@@ -106,7 +116,16 @@ fun CreatorActionButtons(
     }
 }
 
-// Pending Invitation Actions
+/**
+ * Pending invitation actions component
+ *
+ * Displays accept and decline buttons for users with pending event invitations.
+ * Shows context-specific text based on whether event requires payment.
+ *
+ * @param isFreeEvent Whether the event is free (no payment required)
+ * @param onAccept Callback invoked when user accepts the invitation
+ * @param onDecline Callback invoked when user declines the invitation
+ */
 @Composable
 fun PendingInvitationActions(
     isFreeEvent: Boolean,
@@ -169,7 +188,16 @@ fun PendingInvitationActions(
     }
 }
 
-// Status Card Component
+/**
+ * Status card component
+ *
+ * Displays event participation status with color-coded styling.
+ * Dynamically colors based on status type (accepted, pending, declined).
+ *
+ * @param message Status message to display
+ * @param statusType Type of status determining color scheme
+ * @param icon Optional icon to display alongside message
+ */
 @Composable
 fun StatusCard(
     message: String,

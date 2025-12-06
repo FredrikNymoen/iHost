@@ -19,6 +19,17 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import no.ntnu.prog2007.ihost.data.model.domain.User
 
+/**
+ * User selection card component
+ *
+ * Card displaying user information with selection checkbox for bulk invitation.
+ * Changes background color when selected and displays check icon.
+ * Shows user avatar or initial placeholder if no photo available.
+ *
+ * @param user User data to display
+ * @param isSelected Whether the user is currently selected
+ * @param onToggle Callback invoked when user clicks to toggle selection state
+ */
 @Composable
 fun UserSelectionCard(
     user: User,

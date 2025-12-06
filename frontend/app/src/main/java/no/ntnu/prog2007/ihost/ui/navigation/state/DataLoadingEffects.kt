@@ -8,6 +8,14 @@ import no.ntnu.prog2007.ihost.viewmodel.UserViewModel
 
 /**
  * Handles initial data loading when app starts with logged in user
+ *
+ * Triggered once on app launch to validate authentication and load necessary
+ * data if the user is already logged in. Ensures the app has fresh data
+ * from the backend and validates that the Firebase token is still valid.
+ *
+ * @param authUiState Current authentication state
+ * @param eventViewModel ViewModel to load events data
+ * @param userViewModel ViewModel to load and validate user profile
  */
 @Composable
 fun DataLoadingEffects(

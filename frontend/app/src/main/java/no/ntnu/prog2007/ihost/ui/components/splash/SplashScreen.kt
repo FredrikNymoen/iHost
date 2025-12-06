@@ -14,6 +14,12 @@ import androidx.compose.ui.unit.sp
 
 /**
  * Custom splash screen with "iHost" branding
+ *
+ * Displays the app logo on a warm cream background for 0.8 seconds
+ * before transitioning to the main app. Used during app launch to
+ * provide a polished loading experience.
+ *
+ * @param onSplashFinished Callback invoked when splash duration completes
  */
 @Composable
 fun SplashScreen(onSplashFinished: () -> Unit) {

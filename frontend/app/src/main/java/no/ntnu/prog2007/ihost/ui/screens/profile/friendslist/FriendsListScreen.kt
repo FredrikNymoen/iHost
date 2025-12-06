@@ -13,6 +13,23 @@ import no.ntnu.prog2007.ihost.ui.components.states.LoadingState
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
 
+/**
+ * Friends list screen
+ *
+ * Displays current user's confirmed friends with quick actions to message or unfriend.
+ * Shows total friend count in header. Handles loading, error, and empty states.
+ *
+ * Features:
+ * - List of all confirmed friends
+ * - Friend count displayed in title
+ * - Message and unfriend actions for each friend
+ * - Loading and error state handling
+ * - Empty state when user has no friends
+ *
+ * @param friendViewModel FriendViewModel for friend operations and data
+ * @param authViewModel AuthViewModel for current user context
+ * @param onBack Callback invoked when user navigates back to Profile
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FriendsListScreen(

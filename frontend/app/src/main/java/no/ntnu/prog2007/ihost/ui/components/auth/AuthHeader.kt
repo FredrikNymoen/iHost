@@ -9,6 +9,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Authentication screen header component
+ *
+ * Displays a title and subtitle for authentication screens (login, signup, etc.)
+ * with consistent styling and layout.
+ *
+ * @param title Main heading text displayed prominently in primary color
+ * @param subtitle Descriptive text shown below the title in muted color
+ * @param modifier Optional modifier for styling and layout customization
+ */
 @Composable
 fun AuthHeader(
     title: String,

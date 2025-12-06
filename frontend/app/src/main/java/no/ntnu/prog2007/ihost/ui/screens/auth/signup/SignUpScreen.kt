@@ -14,6 +14,23 @@ import no.ntnu.prog2007.ihost.ui.screens.auth.signup.components.SignUpPasswordTe
 import no.ntnu.prog2007.ihost.ui.screens.auth.signup.components.PasswordMismatchError
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 
+/**
+ * User sign-up screen
+ *
+ * First step of the account creation flow where users enter their email and password.
+ * Validates email uniqueness and password confirmation before allowing progression to
+ * the PersonalInfoScreen.
+ *
+ * Features:
+ * - Email input with real-time validation
+ * - Password and confirm password inputs with visibility toggle
+ * - Error display for mismatched passwords or existing email
+ * - Navigation back to welcome or forward to personal info
+ *
+ * @param viewModel AuthViewModel for authentication operations
+ * @param onNavigateBack Callback to return to Welcome screen
+ * @param onNavigateToPersonalInfo Callback to navigate to personal info entry screen
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(

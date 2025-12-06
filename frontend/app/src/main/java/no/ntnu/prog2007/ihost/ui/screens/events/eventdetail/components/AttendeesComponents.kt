@@ -13,13 +13,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
-// Data class for attendee info
+/**
+ * Attendee information data class
+ *
+ * @param name Display name of the attendee
+ * @param username Username handle of the attendee
+ */
 data class AttendeeInfo(
     val name: String,
     val username: String
 )
 
-// Host Chip Component
+/**
+ * Host chip component
+ *
+ * Displays event host/creator information with star icon.
+ *
+ * @param name Name of the event host
+ * @param username Username of the event host
+ */
 @Composable
 fun HostChip(
     name: String,
@@ -61,7 +73,14 @@ fun HostChip(
     }
 }
 
-// Attendee Chip Component
+/**
+ * Attendee chip component
+ *
+ * Displays individual attendee information with check icon.
+ *
+ * @param name Name of the attendee
+ * @param username Username of the attendee
+ */
 @Composable
 fun AttendeeChip(
     name: String,
@@ -103,7 +122,16 @@ fun AttendeeChip(
     }
 }
 
-// Attendees Section
+/**
+ * Attendees section component
+ *
+ * Displays event host and list of confirmed attendees.
+ * Shows placeholder message when no other attendees have joined.
+ *
+ * @param hostName Name of the event host/creator
+ * @param hostUsername Username of the event host/creator
+ * @param attendees List of confirmed attendees
+ */
 @Composable
 fun AttendeesSection(
     hostName: String,

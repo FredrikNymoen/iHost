@@ -11,6 +11,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Email sent confirmation component
+ *
+ * Displays a success message after password reset email is sent.
+ * Shows confirmation text with the email address and button to return to login.
+ *
+ * @param email The email address where reset link was sent
+ * @param onBackToLogin Callback invoked when user clicks back to login button
+ * @param modifier Optional Modifier for customizing layout
+ */
 @Composable
 fun EmailSentConfirmation(
     email: String,

@@ -15,6 +15,16 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
+/**
+ * Event countdown timer component
+ *
+ * Displays a live countdown to event start time, updating every second.
+ * Shows days/hours format if more than 2 days away, or hours/minutes/seconds if closer.
+ * Displays "Event started" when event time has passed.
+ *
+ * @param eventDate Event date in ISO format (yyyy-MM-dd)
+ * @param eventTime Event time in HH:mm format (24-hour)
+ */
 @Composable
 fun EventTimer(eventDate: String?, eventTime: String?) {
     var timeRemaining by remember { mutableStateOf("") }

@@ -8,6 +8,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/**
+ * Search field component
+ *
+ * Text input field for searching users to add as friends.
+ *
+ * @param value Current search input value
+ * @param onValueChange Callback invoked when search text changes
+ * @param placeholder Placeholder text to display when field is empty
+ * @param modifier Optional Modifier for customizing layout
+ */
 @Composable
 fun SearchField(
     value: String,

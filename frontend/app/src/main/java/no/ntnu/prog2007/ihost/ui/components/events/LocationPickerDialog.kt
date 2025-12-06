@@ -43,7 +43,13 @@ import java.util.Locale
 
 /**
  * Performs reverse geocoding to get formatted address from coordinates
+ *
+ * Converts geographic coordinates to a human-readable address string.
  * Format: "Gatenavn Gatenummer, Postnummer Poststed"
+ *
+ * @param context Android context for accessing Geocoder
+ * @param latLng Geographic coordinates to convert
+ * @return Formatted address string or null if geocoding fails
  */
 suspend fun getAddressFromLocation(context: Context, latLng: LatLng): String? {
     return withContext(Dispatchers.IO) {
@@ -81,7 +87,12 @@ suspend fun getAddressFromLocation(context: Context, latLng: LatLng): String? {
 
 /**
  * Formats address with preference for full address line
+ *
  * This gives better results for locations like NTNU, businesses, etc.
+ * Cleans up the address by removing country suffix.
+ *
+ * @param address Android Address object from Geocoder
+ * @return Formatted address string without country suffix
  */
 private fun formatAddress(address: Address): String {
     // Get the full first address line (most complete and accurate)
@@ -133,6 +144,21 @@ private fun formatAddress(address: Address): String {
     }
 }
 
+/**
+ * Location picker dialog with interactive map
+ *
+ * Provides a full-screen dialog for selecting event locations using Google Maps.
+ * Features include:
+ * - Interactive map with draggable marker
+ * - Address search with autocomplete predictions (Google Places API)
+ * - Reverse geocoding to get address from map clicks
+ * - Search result debouncing for better performance
+ *
+ * @param initialLocation Initial location string to display in search field
+ * @param onDismiss Callback invoked when dialog is dismissed
+ * @param onLocationSelected Callback invoked when location is confirmed
+ *                           Receives formatted address string and LatLng coordinates
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocationPickerDialog(

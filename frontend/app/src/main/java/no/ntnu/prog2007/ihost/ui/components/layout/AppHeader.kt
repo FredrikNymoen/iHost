@@ -11,6 +11,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Main application header with branding
+ *
+ * Displays the "iHost" application logo/title at the top of the screen.
+ * Includes status bar spacing and consistent styling.
+ *
+ * @param modifier Optional modifier for styling and layout customization
+ */
 @Composable
 fun AppHeader(
     modifier: Modifier = Modifier

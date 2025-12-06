@@ -7,6 +7,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
+/**
+ * Name input field component
+ *
+ * Text field for entering first or last name during account creation.
+ * Displays person icon and supports both first name and last name inputs via dynamic label.
+ *
+ * @param value Current name input value
+ * @param onValueChange Callback invoked when name value changes
+ * @param label Display label for the field (e.g., "First Name" or "Last Name")
+ * @param modifier Optional Modifier for customizing layout
+ */
 @Composable
 fun NameTextField(
     value: String,

@@ -8,6 +8,15 @@ import androidx.compose.ui.unit.dp
 import no.ntnu.prog2007.ihost.ui.screens.auth.welcome.components.WelcomeLogo
 import no.ntnu.prog2007.ihost.ui.screens.auth.welcome.components.WelcomeButtons
 
+/**
+ * Welcome landing screen
+ *
+ * First screen shown to unauthenticated users.
+ * Displays app branding and provides options to login or sign up.
+ *
+ * @param onNavigateToLogin Callback to navigate to login screen
+ * @param onNavigateToSignUp Callback to navigate to signup flow
+ */
 @Composable
 fun WelcomeScreen(
     onNavigateToLogin: () -> Unit,

@@ -24,6 +24,26 @@ import no.ntnu.prog2007.ihost.ui.screens.events.inviteusers.components.EmptyStat
 import no.ntnu.prog2007.ihost.ui.screens.events.inviteusers.components.LoadingState
 import no.ntnu.prog2007.ihost.ui.screens.events.inviteusers.components.UserSelectionList
 
+/**
+ * Event user invitation screen
+ *
+ * Allows event creators to select and send invitations to friends and other users.
+ * Displays friends first, followed by non-friend users, with search capability.
+ * Tracks selected users and sends bulk invitations when ready.
+ *
+ * Features:
+ * - List of all users excluding event attendees
+ * - Search functionality to find specific users
+ * - Multi-select with checkbox for batch invitations
+ * - Floating action button to send selected invitations
+ * - Loading and error state handling
+ *
+ * @param eventId Unique identifier of the event users are being invited to
+ * @param viewModel EventViewModel for sending invitations
+ * @param friendViewModel FriendViewModel to access friends list
+ * @param authViewModel AuthViewModel for current user context
+ * @param onBack Callback invoked when user navigates back
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InviteUsersScreen(

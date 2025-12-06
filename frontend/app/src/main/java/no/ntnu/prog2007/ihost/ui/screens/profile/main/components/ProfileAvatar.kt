@@ -16,6 +16,18 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 
+/**
+ * Profile avatar component
+ *
+ * Displays user's profile photo as circular avatar.
+ * Shows placeholder icon if no photo available.
+ * Clickable to open avatar change dialog.
+ *
+ * @param photoUrl User's profile photo URL; null shows placeholder
+ * @param isLoading Whether profile is being updated
+ * @param onChangeAvatar Callback invoked when user clicks avatar to change it
+ * @param modifier Optional Modifier for customizing layout
+ */
 @Composable
 fun ProfileAvatar(
     photoUrl: String?,

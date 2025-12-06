@@ -17,7 +17,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
-// Modern Info Card Component
+/**
+ * Info card component
+ *
+ * Modern card displaying event information with icon, label, and value.
+ * Optionally clickable for user interactions like opening maps for location.
+ *
+ * @param icon Icon to display in the card
+ * @param label Label describing the information
+ * @param value The actual value or content to display
+ * @param onClick Optional click handler for making card interactive
+ * @param modifier Optional Modifier for customizing layout
+ */
 @Composable
 fun InfoCard(
     icon: ImageVector,

@@ -21,6 +21,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 
+/**
+ * Event image display and selection component
+ *
+ * Displays an event image with options to add, change, or remove it. Shows either
+ * a selected local image URI or an existing image URL. When no image is present,
+ * displays a placeholder with add image prompt.
+ *
+ * @param selectedImageUri Local image URI from device (camera/gallery)
+ * @param existingImageUrl Remote image URL (from server/cloud storage)
+ * @param imageKey Key to force image recomposition when changed
+ * @param placeholderText Text shown when no image is selected
+ * @param onAddImageClick Callback invoked when add/change image area is clicked
+ * @param onRemoveImage Callback invoked when remove button is clicked
+ */
 @Composable
 fun EventImageSection(
     selectedImageUri: Uri?,

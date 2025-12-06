@@ -11,6 +11,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Create event button component
+ *
+ * Primary action button for submitting a new event creation form.
+ * Displays loading indicator during submission and respects enabled state.
+ *
+ * @param onClick Callback invoked when user clicks the button
+ * @param enabled Whether the button is clickable; typically controlled by form validation
+ * @param isLoading Whether the event creation is currently in progress
+ */
 @Composable
 fun CreateEventButton(
     onClick: () -> Unit,

@@ -10,6 +10,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
+/**
+ * Image source selection dialog
+ *
+ * Presents users with two options for adding an event image: taking a photo
+ * with the camera or selecting an existing image from the gallery.
+ *
+ * @param onDismiss Callback invoked when dialog is dismissed (cancel button or outside click)
+ * @param onTakePhoto Callback invoked when "Take Photo" button is clicked
+ * @param onSelectFromGallery Callback invoked when "Gallery" button is clicked
+ */
 @Composable
 fun ImageSourceDialog(
     onDismiss: () -> Unit,

@@ -18,6 +18,24 @@ import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
 import androidx.compose.runtime.collectAsState
 
+/**
+ * Add friend screen
+ *
+ * Allows users to search for and send friend requests to other users.
+ * Displays all users excluding those already connected (friends, pending, or sent requests).
+ * Includes search functionality with 300ms debounce for performance.
+ *
+ * Features:
+ * - Search bar to find users by name or username
+ * - User list excluding connected users
+ * - Quick "Add Friend" buttons for each user
+ * - Loading and error state handling
+ * - Real-time friend request status updates
+ *
+ * @param friendViewModel FriendViewModel for friend operations
+ * @param authViewModel AuthViewModel for current user context
+ * @param onBack Callback invoked when user navigates back to Profile
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddFriendScreen(

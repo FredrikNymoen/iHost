@@ -11,6 +11,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/**
+ * Event details input form component
+ *
+ * Provides a comprehensive form for creating or editing event details including
+ * title, description, date, time, and location. Date, time, and location fields
+ * are clickable and trigger respective picker dialogs.
+ *
+ * @param title Current event title value
+ * @param onTitleChange Callback invoked when title text changes
+ * @param description Current event description value
+ * @param onDescriptionChange Callback invoked when description text changes
+ * @param eventDate Formatted event date string (read-only, clickable)
+ * @param onDateClick Callback invoked when date field is clicked
+ * @param eventTime Formatted event time string (read-only, clickable)
+ * @param onTimeClick Callback invoked when time field is clicked
+ * @param location Current location string (read-only, clickable)
+ * @param onLocationClick Callback invoked when location field is clicked
+ * @param isLoading Whether the form is in loading state (disables editable fields)
+ * @param showLocationError Whether to show error state on location field
+ * @param topPadding Top padding in dp for the form
+ */
 @Composable
 fun EventDetailsForm(
     title: String,

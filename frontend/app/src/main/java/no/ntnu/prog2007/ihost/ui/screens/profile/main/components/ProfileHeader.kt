@@ -12,6 +12,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
+/**
+ * Profile header component
+ *
+ * Displays user profile information: full name (editable), username, and email.
+ * Name is clickable to open edit dialog when not loading.
+ *
+ * @param firstName User's first name
+ * @param lastName User's last name (optional)
+ * @param username User's username handle
+ * @param email User's email address (optional)
+ * @param isLoading Whether profile is being updated
+ * @param onEditName Callback invoked when user clicks on name to edit
+ * @param modifier Optional Modifier for customizing layout
+ */
 @Composable
 fun ProfileHeader(
     firstName: String,

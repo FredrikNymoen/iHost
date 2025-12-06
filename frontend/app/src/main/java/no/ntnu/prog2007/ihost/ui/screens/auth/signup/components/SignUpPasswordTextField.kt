@@ -13,6 +13,21 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 
+/**
+ * Sign-up password input field component
+ *
+ * Specialized password text field for signup flow with password visibility toggle.
+ * Used for both initial password and password confirmation inputs.
+ *
+ * @param value Current password input value
+ * @param onValueChange Callback invoked when password value changes
+ * @param label Display label for the input field (e.g., "Password" or "Confirm Password")
+ * @param passwordVisible Whether to show password as plain text
+ * @param onTogglePasswordVisibility Callback to toggle password visibility
+ * @param isError Whether the field should display error styling
+ * @param enabled Whether the input field is enabled
+ * @param modifier Optional Modifier for customizing layout
+ */
 @Composable
 fun SignUpPasswordTextField(
     value: String,

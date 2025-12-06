@@ -19,6 +19,15 @@ import coil3.compose.AsyncImage
 import no.ntnu.prog2007.ihost.data.model.domain.Event
 import no.ntnu.prog2007.ihost.data.model.domain.EventImage
 
+/**
+ * Event detail header component
+ *
+ * Displays event image with countdown timer overlay and event title.
+ * Image is optional; placeholder card is shown if no image available.
+ *
+ * @param event Event data containing title and other basic information
+ * @param eventImages List of event images; first image is displayed
+ */
 @Composable
 fun EventDetailHeader(
     event: Event,

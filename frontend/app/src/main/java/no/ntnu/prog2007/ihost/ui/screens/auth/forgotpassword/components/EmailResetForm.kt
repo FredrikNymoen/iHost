@@ -13,6 +13,19 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Email reset form component
+ *
+ * Form for requesting a password reset by entering email address.
+ * Displays loading state during submission and validates non-empty email.
+ *
+ * @param email Current email input value
+ * @param onEmailChange Callback invoked when email value changes
+ * @param isLoading Whether the reset request is being processed
+ * @param onSendResetLink Callback invoked when user submits the form
+ * @param onBackToLogin Callback invoked when user clicks back button
+ * @param modifier Optional Modifier for customizing layout
+ */
 @Composable
 fun EmailResetForm(
     email: String,

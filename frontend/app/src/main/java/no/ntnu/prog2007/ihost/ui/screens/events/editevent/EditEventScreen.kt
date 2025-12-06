@@ -34,6 +34,22 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+/**
+ * Edit event screen
+ *
+ * Form for updating an existing event with capabilities to modify:
+ * - Basic info: title, description, date, time
+ * - Location with Google Maps integration
+ * - Event image (add new, keep existing, or remove)
+ *
+ * Pre-fills form with current event data retrieved from ViewModel state.
+ * On successful update, navigates back to Event Detail screen.
+ *
+ * @param eventId Unique identifier of the event being edited
+ * @param viewModel EventViewModel for event update operations
+ * @param onBack Callback invoked when user cancels or navigates back
+ * @param onEventUpdated Callback invoked after successful event update
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditEventScreen(

@@ -14,6 +14,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
+/**
+ * Customizable top app bar component
+ *
+ * A styled Material3 TopAppBar with custom typography for the title.
+ * Configured with transparent background and zero window insets.
+ *
+ * @param title Composable for the app bar title
+ * @param modifier Optional modifier for styling and layout customization
+ * @param navigationIcon Composable for the navigation icon (typically back button)
+ * @param actions Composable lambda for action items (e.g., menu icons)
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(

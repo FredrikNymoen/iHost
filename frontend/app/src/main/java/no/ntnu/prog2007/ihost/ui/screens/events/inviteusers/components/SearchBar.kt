@@ -9,6 +9,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/**
+ * Search bar component
+ *
+ * Text input field for searching users to invite to an event.
+ *
+ * @param searchText Current search query text
+ * @param onSearchTextChange Callback invoked when search text changes
+ * @param isLoading Whether data is currently being loaded/searched
+ * @param modifier Optional Modifier for customizing layout
+ */
 @Composable
 fun SearchBar(
     searchText: String,

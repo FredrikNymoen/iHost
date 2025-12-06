@@ -9,6 +9,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/**
+ * Floating invite button component
+ *
+ * Floating action button for sending invitations to selected users.
+ * Only visible when at least one user is selected.
+ * Shows loading indicator while invitations are being sent.
+ *
+ * @param selectedCount Number of users currently selected for invitation
+ * @param isSending Whether invitation send request is in progress
+ * @param onInvite Callback invoked when user clicks the button
+ */
 @Composable
 fun FloatingInviteButton(
     selectedCount: Int,

@@ -8,6 +8,18 @@ import no.ntnu.prog2007.ihost.viewmodel.UserViewModel
 
 /**
  * Handles navigation side effects based on authentication state
+ *
+ * Monitors authentication state changes and triggers appropriate navigation:
+ * - On login/signup: navigates to Events screen and loads fresh data
+ * - On logout: navigates to Welcome screen and clears all ViewModels
+ *
+ * Uses a flag to prevent duplicate navigation during the same session.
+ *
+ * @param authUiState Current authentication state
+ * @param navigationState Navigation state holder with route and navigation functions
+ * @param eventViewModel ViewModel to manage events data
+ * @param friendViewModel ViewModel to manage friendships data
+ * @param userViewModel ViewModel to manage user profile data
  */
 @Composable
 fun NavigationEffects(
@@ -51,6 +63,13 @@ fun NavigationEffects(
 
 /**
  * Clears all ViewModels on logout
+ *
+ * Resets all ViewModel state to prevent data leakage between user sessions.
+ * Called automatically when user logs out.
+ *
+ * @param eventViewModel ViewModel to clear events data
+ * @param friendViewModel ViewModel to clear friendships data
+ * @param userViewModel ViewModel to clear user profile data
  */
 private fun clearAllViewModels(
     eventViewModel: EventViewModel,

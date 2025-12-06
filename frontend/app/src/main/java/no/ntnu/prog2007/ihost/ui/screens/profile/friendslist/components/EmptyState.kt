@@ -8,6 +8,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
+/**
+ * Empty state component
+ *
+ * Displays a centered message when no data is available (e.g., empty friends list).
+ *
+ * @param message Message to display in the empty state
+ * @param modifier Optional Modifier for customizing layout
+ */
 @Composable
 fun EmptyState(
     message: String,

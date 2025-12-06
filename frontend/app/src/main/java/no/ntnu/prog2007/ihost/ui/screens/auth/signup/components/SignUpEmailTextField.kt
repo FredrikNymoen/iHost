@@ -11,6 +11,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Sign-up email input field component
+ *
+ * Specialized email text field for the signup flow with email icon and error display.
+ * Validates email format and checks for duplicate accounts.
+ *
+ * @param value Current email input value
+ * @param onValueChange Callback invoked when email value changes
+ * @param emailError Error message to display if email validation fails; null if valid
+ * @param enabled Whether the input field is enabled
+ * @param modifier Optional Modifier for customizing layout
+ */
 @Composable
 fun SignUpEmailTextField(
     value: String,

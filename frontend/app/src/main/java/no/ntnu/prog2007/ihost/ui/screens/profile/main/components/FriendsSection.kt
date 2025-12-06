@@ -20,6 +20,18 @@ import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
 import no.ntnu.prog2007.ihost.viewmodel.FriendUiState
 
+/**
+ * Friends section component
+ *
+ * Displays friends count and action buttons to add friends or view friends list.
+ * Shows pending friend requests count if available.
+ *
+ * @param friendViewModel FriendViewModel for friend operations
+ * @param authViewModel AuthViewModel for current user context
+ * @param friendUiState Current state of friends data
+ * @param onNavigateToAddFriend Callback to navigate to Add Friend screen
+ * @param onNavigateToFriendsList Callback to navigate to Friends List screen
+ */
 @Composable
 fun FriendsSection(
     friendViewModel: FriendViewModel,

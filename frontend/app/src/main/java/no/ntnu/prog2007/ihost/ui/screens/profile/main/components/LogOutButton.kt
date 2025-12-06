@@ -9,6 +9,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
+/**
+ * Log out button component
+ *
+ * Button for signing out the user from the application.
+ *
+ * @param onClick Callback invoked when user clicks log out button
+ * @param modifier Optional Modifier for customizing layout
+ */
 @Composable
 fun LogOutButton(
     onClick: () -> Unit,

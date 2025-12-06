@@ -11,6 +11,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Update event button component
+ *
+ * Primary action button for submitting event update form.
+ * Displays loading indicator during submission and respects enabled state.
+ *
+ * @param enabled Whether the button is clickable; typically controlled by form validation
+ * @param isLoading Whether the event update is currently in progress
+ * @param onClick Callback invoked when user clicks the button
+ */
 @Composable
 fun UpdateEventButton(
     enabled: Boolean,

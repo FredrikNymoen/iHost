@@ -12,6 +12,22 @@ import no.ntnu.prog2007.ihost.ui.screens.auth.forgotpassword.components.EmailRes
 import no.ntnu.prog2007.ihost.ui.screens.auth.forgotpassword.components.EmailSentConfirmation
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 
+/**
+ * Password reset screen
+ *
+ * Allows users to request a password reset email when they forget their credentials.
+ * Transitions from email form to confirmation message after successful submission.
+ *
+ * Features:
+ * - Email input with validation
+ * - Password reset email request
+ * - Confirmation message display after email sent
+ * - Error handling and display
+ * - Navigation back to login
+ *
+ * @param viewModel AuthViewModel for authentication operations
+ * @param onNavigateBack Callback to return to Login screen
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForgotPasswordScreen(

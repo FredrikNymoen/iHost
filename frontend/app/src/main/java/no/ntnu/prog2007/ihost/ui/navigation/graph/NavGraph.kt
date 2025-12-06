@@ -27,9 +27,26 @@ import no.ntnu.prog2007.ihost.viewmodel.UserViewModel
 
 /**
  * Extension functions for adding navigation destinations to NavGraphBuilder
+ *
+ * This file contains all NavGraphBuilder extension functions that define
+ * individual screen destinations. Each function configures a composable
+ * destination with its route, arguments, and navigation callbacks.
+ *
+ * Organized into sections:
+ * - Auth screens (welcome, login, signup, etc.)
+ * - Main app screens (events, add event, profile)
+ * - Detail screens with arguments (event detail, edit event, invite users)
+ * - Friend screens (add friend, friends list)
  */
 
-// Auth screens
+/**
+ * Welcome screen destination
+ *
+ * Landing screen for unauthenticated users with options to login or sign up.
+ *
+ * @param navController Navigation controller for managing transitions
+ * @param authViewModel ViewModel for authentication state
+ */
 fun NavGraphBuilder.welcomeScreen(
     navController: NavHostController,
     authViewModel: AuthViewModel

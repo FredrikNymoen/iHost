@@ -13,6 +13,21 @@ import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import java.time.LocalDate
 
+/**
+ * Events list component
+ *
+ * Displays filtered and paginated list of events.
+ * Filters by tab (invites vs my events) and time (future vs past).
+ * Shows event cards that navigate to detail view on click.
+ *
+ * @param events List of all events to filter and display
+ * @param selectedTab 0=invites (pending), 1=my events (created or accepted)
+ * @param timeFilter 0=future events, 1=past events
+ * @param authViewModel For current user context
+ * @param viewModel For event operations
+ * @param onEventClick Callback invoked when event card is clicked with event ID
+ * @param modifier Optional Modifier for customizing layout
+ */
 @Composable
 fun EventsList(
     events: List<EventWithMetadata>,

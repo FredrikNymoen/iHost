@@ -15,6 +15,24 @@ import no.ntnu.prog2007.ihost.ui.screens.auth.personalinfo.components.NameTextFi
 import no.ntnu.prog2007.ihost.ui.screens.auth.personalinfo.components.UsernameTextField
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 
+/**
+ * Personal information screen
+ *
+ * Second step of the account creation flow where users provide their name and username.
+ * Validates username availability in real-time with 500ms debounce and enforces format
+ * requirements (4-12 characters, alphanumeric and underscores only).
+ *
+ * Features:
+ * - First name and last name inputs
+ * - Username with real-time availability checking
+ * - Format validation (length, character constraints)
+ * - Error display for validation failures
+ * - Automatic redirect on successful account creation
+ *
+ * @param viewModel AuthViewModel for authentication operations
+ * @param onSignUp Callback invoked after successful account creation
+ * @param onNavigateBack Callback to return to SignUp screen
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PersonalInfoScreen(

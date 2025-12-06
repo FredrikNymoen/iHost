@@ -7,6 +7,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/**
+ * Profile statistics component
+ *
+ * Displays event-related statistics for the user's profile.
+ * Shows count of created events and invitations received.
+ *
+ * @param eventsCreated Number of events user has created
+ * @param eventsInvitedTo Number of events user has been invited to
+ * @param modifier Optional Modifier for customizing layout
+ */
 @Composable
 fun ProfileStatistics(
     eventsCreated: Int,
