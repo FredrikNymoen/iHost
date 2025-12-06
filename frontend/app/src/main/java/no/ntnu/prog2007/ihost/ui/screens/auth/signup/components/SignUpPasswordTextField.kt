@@ -23,7 +23,8 @@ fun SignUpPasswordTextField(
     onTogglePasswordVisibility: () -> Unit,
     isError: Boolean = false,
     enabled: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    testTag: String = "signUpPasswordField" // Default test tag, can be overriden for confirm password field
 ) {
     OutlinedTextField(
         value = value,
@@ -53,7 +54,7 @@ fun SignUpPasswordTextField(
         isError = isError,
         modifier = modifier
             .fillMaxWidth()
-            .testTag("signUpPasswordField"),
+            .testTag(testTag),
         enabled = enabled,
         textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
         colors = OutlinedTextFieldDefaults.colors(
