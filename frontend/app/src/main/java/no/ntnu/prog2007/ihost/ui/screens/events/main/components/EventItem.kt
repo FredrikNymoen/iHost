@@ -38,6 +38,19 @@ import no.ntnu.prog2007.ihost.data.model.domain.User
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 
+/**
+ * Event card item component for event list
+ *
+ * Displays comprehensive event information in a card format including image,
+ * title, date/time, location, host details, attendee count, and user's participation
+ * status (creator, accepted, pending, declined). Shows event image or gradient placeholder.
+ * Fetches and displays host user information asynchronously.
+ *
+ * @param eventWithMetadata Event data with user's participation metadata
+ * @param authViewModel ViewModel for accessing current user authentication state
+ * @param viewModel ViewModel for event data and operations
+ * @param onClick Callback invoked when card is clicked
+ */
 @Composable
 fun EventItem(
     eventWithMetadata: EventWithMetadata,

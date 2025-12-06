@@ -12,6 +12,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Welcome screen branding component
+ *
+ * Displays the iHost logo with app name and tagline "From idea to event in seconds"
+ * in centered layout with consistent brand styling.
+ *
+ * @param modifier Optional modifier for styling and layout customization
+ */
 @Composable
 fun WelcomeLogo(
     modifier: Modifier = Modifier

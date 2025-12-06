@@ -11,6 +11,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Legal links row with dialogs for Terms of Use and Privacy Policy
+ *
+ * Displays clickable links for "Terms of Use" and "Privacy Policy" separated by a bullet.
+ * Opens respective dialog modals when clicked, showing full legal text.
+ *
+ * @param modifier Optional modifier for styling and layout customization
+ */
 @Composable
 fun LegalLinks(
     modifier: Modifier = Modifier

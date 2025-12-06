@@ -83,7 +83,19 @@ fun InfoCard(
     }
 }
 
-// Event Info Section with Grid Layout
+/**
+ * Event information section with grid layout
+ *
+ * Displays event details in a responsive grid of info cards showing date,
+ * time (optional), location (optional, clickable), and attendee count.
+ * Layout adapts based on which optional fields are present.
+ *
+ * @param eventDate Event date string to display
+ * @param eventTime Event time string, null if no time specified
+ * @param location Event location string, null if no location specified
+ * @param attendeeCount Number of event attendees
+ * @param onLocationClick Callback invoked when location card is clicked
+ */
 @Composable
 fun EventInfoSection(
     eventDate: String,

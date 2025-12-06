@@ -6,6 +6,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/**
+ * Error message snackbar component
+ *
+ * Displays an error message in a snackbar with a "Close" action button.
+ * Used for showing temporary error notifications on the events screen.
+ *
+ * @param message Error message text to display
+ * @param onDismiss Callback invoked when snackbar is dismissed or closed
+ */
 @Composable
 fun ErrorMessage(
     message: String,

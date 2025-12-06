@@ -10,6 +10,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Privacy Policy dialog displaying app's privacy terms
+ *
+ * Shows a scrollable alert dialog containing the complete privacy policy
+ * with sections covering data collection, usage, storage, security, user rights,
+ * third-party services, and policy updates.
+ *
+ * @param onDismiss Callback invoked when dialog is dismissed or closed
+ */
 @Composable
 fun PrivacyPolicyDialog(
     onDismiss: () -> Unit
@@ -106,6 +115,13 @@ fun PrivacyPolicyDialog(
     )
 }
 
+/**
+ * Privacy policy section title
+ *
+ * Displays a bold, emphasized text for privacy policy section headings.
+ *
+ * @param text The section title text to display
+ */
 @Composable
 private fun SectionTitle(text: String) {
     Text(
@@ -117,6 +133,14 @@ private fun SectionTitle(text: String) {
     )
 }
 
+/**
+ * Privacy policy section body text
+ *
+ * Displays formatted body text for privacy policy section content
+ * with consistent styling and line height.
+ *
+ * @param text The section body text to display
+ */
 @Composable
 private fun SectionBody(text: String) {
     Text(
