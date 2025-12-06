@@ -1,0 +1,409 @@
+@startuml Frontend Class Diagram
+!theme plain
+
+title iHost Frontend - MVVM Architecture
+
+package "Domain Models" {
+    class User {
+        +uid: String
+        +email: String
+        +username: String
+        +firstName: String
+        +lastName: String
+        +photoUrl: String?
+        +createdAt: String
+        +updatedAt: String
+    }
+
+    class Event {
+        +title: String
+        +description: String
+        +eventDate: String
+        +eventTime: String
+        +location: String
+        +creatorUid: String
+        +free: Boolean
+        +price: Double?
+        +shareCode: String
+        +createdAt: String
+        +updatedAt: String
+    }
+
+    class EventWithMetadata {
+        +id: String
+        +event: Event
+        +userStatus: EventUserStatus?
+        +userRole: EventUserRole?
+    }
+
+    class EventUser {
+        +id: String
+        +eventId: String
+        +userId: String
+        +status: EventUserStatus
+        +role: EventUserRole
+        +invitedAt: String
+        +respondedAt: String?
+    }
+
+    class Friendship {
+        +id: String
+        +user1Id: String
+        +user2Id: String
+        +status: FriendshipStatus
+        +requestedBy: String
+        +requestedAt: String
+        +respondedAt: String?
+        --
+        +getOtherUserId(myId: String): String
+        +isRequestedByMe(myId: String): Boolean
+    }
+
+    enum EventUserStatus {
+        PENDING
+        ACCEPTED
+        DECLINED
+        CREATOR
+    }
+
+    enum EventUserRole {
+        CREATOR
+        ATTENDEE
+    }
+
+    enum FriendshipStatus {
+        PENDING
+        ACCEPTED
+        DECLINED
+    }
+}
+
+package "ViewModels" {
+    class AuthViewModel {
+        -authRepository: AuthRepository
+        --
+        +uiState: StateFlow<AuthUiState>
+        +registrationState: StateFlow<RegistrationState>
+        --
+        +signIn(email, password)
+        +signUp()
+        +signOut()
+        +updateRegistrationField(field, value)
+        +checkUsernameAvailability(username)
+        +checkEmailAvailability(email)
+        +sendPasswordResetEmail(email)
+        +resetRegistrationState()
+    }
+
+    class AuthUiState {
+        +currentUser: User?
+        +isLoggedIn: Boolean
+        +isLoading: Boolean
+        +errorMessage: String?
+        +registrationSuccess: Boolean
+    }
+
+    class RegistrationState {
+        +email: String
+        +password: String
+        +firstName: String
+        +lastName: String
+        +username: String
+    }
+
+    class EventViewModel {
+        -eventRepository: EventRepository
+        -eventUserRepository: EventUserRepository
+        -imageRepository: ImageRepository
+        --
+        +uiState: StateFlow<EventUiState>
+        --
+        +loadEvents()
+        +loadEventImages(eventId)
+        +loadEventAttendees(eventId)
+        +createEvent(event)
+        +updateEvent(eventId, updates)
+        +deleteEvent(eventId)
+        +clearEvents()
+    }
+
+    class EventUiState {
+        +events: List<EventWithMetadata>
+        +selectedEvent: EventWithMetadata?
+        +eventImages: Map<String, List<EventImage>>
+        +eventAttendees: Map<String, List<EventUser>>
+        +isLoading: Boolean
+        +errorMessage: String?
+    }
+
+    class UserViewModel {
+        -userRepository: UserRepository
+        --
+        +uiState: StateFlow<UserUiState>
+        --
+        +loadAllUsers()
+        +loadUserProfile(uid)
+        +updateUserProfile(uid, updates)
+        +uploadProfilePhoto(file)
+        +checkUsernameAvailability(username)
+    }
+
+    class UserUiState {
+        +users: List<User>
+        +selectedUser: User?
+        +isLoading: Boolean
+        +errorMessage: String?
+        +isUsernameAvailable: Boolean?
+        +lastUploadedPhotoUrl: String?
+    }
+
+    class FriendViewModel {
+        -friendshipRepository: FriendshipRepository
+        -userRepository: UserRepository
+        --
+        +uiState: StateFlow<FriendUiState>
+        --
+        +loadFriendships()
+        +loadUserDetails(userId)
+        +sendFriendRequest(toUserId)
+        +acceptFriendRequest(friendshipId)
+        +declineFriendRequest(friendshipId)
+        +removeFriend(friendshipId)
+    }
+
+    class FriendUiState {
+        +friends: List<Friendship>
+        +pendingRequests: List<Friendship>
+        +sentRequests: List<Friendship>
+        +allUsers: List<User>
+        +userDetailsMap: Map<String, User>
+        +isLoading: Boolean
+        +errorMessage: String?
+    }
+
+    class StripeViewModel {
+        -stripeRepository: StripeRepository
+        --
+        +uiState: StateFlow<StripeUiState>
+        --
+        +loadPublishableKey()
+        +initiatePayment(amount, eventId)
+    }
+
+    class StripeUiState {
+        +publishableKey: String?
+        +isProcessingPayment: Boolean
+        +paymentError: String?
+        +paymentSuccess: Boolean
+    }
+}
+
+package "Repositories" {
+    class AuthRepository {
+        -firebaseAuth: FirebaseAuth
+        -userApi: UserApi
+        --
+        +registerUser(email, password, userData): Result<User>
+        +signIn(email, password): Result<User>
+        +signOut()
+        +getCurrentUser(): User?
+        +sendPasswordResetEmail(email): Result<Unit>
+    }
+
+    class EventRepository {
+        -eventApi: EventApi
+        --
+        +getUserEvents(): Result<List<EventWithMetadata>>
+        +getEventById(id): Result<EventWithMetadata>
+        +createEvent(event): Result<EventWithMetadata>
+        +updateEvent(id, updates): Result<EventWithMetadata>
+        +deleteEvent(id): Result<Unit>
+        +getEventByCode(code): Result<EventWithMetadata>
+    }
+
+    class EventUserRepository {
+        -eventUserApi: EventUserApi
+        --
+        +inviteUsers(eventId, userIds): Result<Unit>
+        +acceptInvitation(eventUserId): Result<EventUser>
+        +declineInvitation(eventUserId): Result<EventUser>
+        +getEventAttendees(eventId, status): Result<List<EventUser>>
+        +getMyEvents(status): Result<List<EventUser>>
+    }
+
+    class FriendshipRepository {
+        -friendshipApi: FriendshipApi
+        --
+        +sendFriendRequest(toUserId): Result<Friendship>
+        +acceptFriendRequest(id): Result<Friendship>
+        +declineFriendRequest(id): Result<Friendship>
+        +removeFriend(id): Result<Unit>
+        +getPendingRequests(): Result<List<Friendship>>
+        +getFriends(): Result<List<Friendship>>
+        +getSentRequests(): Result<List<Friendship>>
+    }
+
+    class UserRepository {
+        -userApi: UserApi
+        --
+        +getAllUsers(): Result<List<User>>
+        +getUserByUid(uid): Result<User>
+        +updateUserProfile(uid, updates): Result<User>
+        +isUsernameAvailable(username): Result<Boolean>
+        +isEmailAvailable(email): Result<Boolean>
+    }
+}
+
+package "Remote API" {
+    interface UserApi <<Retrofit>> {
+        +registerUser(request): UserResponse
+        +getAllUsers(): List<UserResponse>
+        +getUserById(uid): UserResponse
+        +updateUser(uid, request): UserResponse
+        +isUsernameAvailable(username): Map
+        +isEmailAvailable(email): Map
+    }
+
+    interface EventApi <<Retrofit>> {
+        +getAllEvents(): List<EventWithMetadataResponse>
+        +getEventById(id): EventWithMetadataResponse
+        +createEvent(request): EventWithMetadataResponse
+        +updateEvent(id, request): EventWithMetadataResponse
+        +deleteEvent(id)
+        +getEventByCode(code): EventWithMetadataResponse
+    }
+
+    interface EventUserApi <<Retrofit>> {
+        +inviteUsers(request): InviteUsersResponse
+        +acceptInvitation(id): EventUserResponse
+        +declineInvitation(id): EventUserResponse
+        +getEventAttendees(eventId, status): List<EventUserResponse>
+        +getMyEvents(status): List<EventUserResponse>
+    }
+
+    interface FriendshipApi <<Retrofit>> {
+        +sendFriendRequest(request): Friendship
+        +acceptFriendRequest(id): Friendship
+        +declineFriendRequest(id): Friendship
+        +removeFriend(id)
+        +getPendingRequests(): List<Friendship>
+        +getFriends(): List<Friendship>
+        +getSentRequests(): List<Friendship>
+    }
+
+    class RetrofitClient <<Singleton>> {
+        -baseUrl: String
+        -firebaseAuth: FirebaseAuth
+        --
+        +{static} instance: RetrofitClient
+        +userApi: UserApi
+        +eventApi: EventApi
+        +eventUserApi: EventUserApi
+        +friendshipApi: FriendshipApi
+    }
+
+    class FirebaseAuthInterceptor {
+        -firebaseAuth: FirebaseAuth
+        --
+        +intercept(chain): Response
+    }
+}
+
+package "UI Layer" {
+    class LoginScreen <<Composable>> {
+        +authViewModel: AuthViewModel
+        --
+        +Content()
+    }
+
+    class EventsScreen <<Composable>> {
+        +eventViewModel: EventViewModel
+        +navController: NavController
+        --
+        +Content()
+    }
+
+    class EventDetailScreen <<Composable>> {
+        +eventViewModel: EventViewModel
+        +eventId: String
+        --
+        +Content()
+    }
+
+    class AddEventScreen <<Composable>> {
+        +eventViewModel: EventViewModel
+        --
+        +Content()
+    }
+
+    class ProfileScreen <<Composable>> {
+        +userViewModel: UserViewModel
+        +friendViewModel: FriendViewModel
+        --
+        +Content()
+    }
+}
+
+' Relationships
+EventWithMetadata *-- Event
+EventUser --> EventUserStatus
+EventUser --> EventUserRole
+Friendship --> FriendshipStatus
+
+AuthViewModel --> AuthRepository
+EventViewModel --> EventRepository
+EventViewModel --> EventUserRepository
+UserViewModel --> UserRepository
+FriendViewModel --> FriendshipRepository
+StripeViewModel --> "StripeRepository"
+
+AuthViewModel *-- AuthUiState
+AuthViewModel *-- RegistrationState
+EventViewModel *-- EventUiState
+UserViewModel *-- UserUiState
+FriendViewModel *-- FriendUiState
+StripeViewModel *-- StripeUiState
+
+AuthRepository --> UserApi
+AuthRepository --> "FirebaseAuth"
+EventRepository --> EventApi
+EventUserRepository --> EventUserApi
+FriendshipRepository --> FriendshipApi
+UserRepository --> UserApi
+
+RetrofitClient ..> UserApi : creates
+RetrofitClient ..> EventApi : creates
+RetrofitClient ..> EventUserApi : creates
+RetrofitClient ..> FriendshipApi : creates
+RetrofitClient --> FirebaseAuthInterceptor
+
+LoginScreen --> AuthViewModel
+EventsScreen --> EventViewModel
+EventDetailScreen --> EventViewModel
+AddEventScreen --> EventViewModel
+ProfileScreen --> UserViewModel
+ProfileScreen --> FriendViewModel
+
+EventUiState o-- EventWithMetadata : contains list
+EventUiState o-- EventUser : contains map
+FriendUiState o-- Friendship : contains lists
+FriendUiState o-- User : contains map
+
+note right of RetrofitClient
+  Base URL: http://10.0.2.2:8080
+  (Android emulator localhost)
+end note
+
+note right of FirebaseAuthInterceptor
+  Adds Authorization header:
+  Bearer <firebase-jwt-token>
+  to all API requests
+end note
+
+note bottom of AuthViewModel
+  Manages authentication state
+  Coordinates Firebase Auth
+  and backend registration
+end note
+
+@enduml

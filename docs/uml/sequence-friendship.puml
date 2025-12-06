@@ -1,0 +1,345 @@
+@startuml Friendship Flow
+!theme plain
+
+title Friend Request and Management Flow
+
+actor User1 as "User 1"
+actor User2 as "User 2"
+participant "ProfileScreen\n(User1)" as UI1
+participant "AddFriendScreen\n(User1)" as AddFriendUI
+participant "ProfileScreen\n(User2)" as UI2
+participant "FriendViewModel\n(User1)" as VM1
+participant "FriendViewModel\n(User2)" as VM2
+participant "FriendshipRepository" as Repo
+participant "FriendshipApi" as API
+participant "Backend\nFriendshipController" as Ctrl
+participant "FriendshipService" as Svc
+participant "Firestore" as DB
+
+== Load All Users for Friend Search ==
+
+User1 -> AddFriendUI: Navigate to Add Friend screen
+activate AddFriendUI
+
+AddFriendUI -> VM1: loadAllUsers()
+activate VM1
+
+VM1 -> "UserRepository": getAllUsers()
+activate "UserRepository"
+
+"UserRepository" -> "UserApi": getAllUsers()
+activate "UserApi"
+
+"UserApi" -> "Backend\nUserController": GET /api/users
+activate "Backend\nUserController"
+
+"Backend\nUserController" -> "UserService": getAllUsers()
+activate "UserService"
+
+"UserService" -> DB: collection("users").get()
+activate DB
+DB --> "UserService": List of all users
+deactivate DB
+
+"UserService" --> "Backend\nUserController": List<User>
+deactivate "UserService"
+
+"Backend\nUserController" --> "UserApi": List<UserResponse>
+deactivate "Backend\nUserController"
+
+"UserApi" --> "UserRepository": List<UserResponse>
+deactivate "UserApi"
+
+"UserRepository" --> VM1: Result.Success(users)
+deactivate "UserRepository"
+
+VM1 -> VM1: Update uiState (allUsers)
+
+VM1 --> AddFriendUI: Users loaded
+deactivate VM1
+
+AddFriendUI -> AddFriendUI: Display searchable user list
+deactivate AddFriendUI
+
+== Send Friend Request ==
+
+User1 -> AddFriendUI: Search for User2 and click "Add Friend"
+activate AddFriendUI
+
+AddFriendUI -> VM1: sendFriendRequest(user2Id)
+activate VM1
+
+VM1 -> Repo: sendFriendRequest(toUserId = user2Id)
+activate Repo
+
+Repo -> API: sendFriendRequest(FriendRequestRequest)
+activate API
+
+API -> Ctrl: POST /api/friendships/request\nBody: {toUserId: user2Id}
+activate Ctrl
+
+Ctrl -> Ctrl: Extract user1Id from SecurityContext
+
+Ctrl -> Svc: sendFriendRequest(fromUserId = user1Id, toUserId = user2Id)
+activate Svc
+
+Svc -> Svc: Validate:\n- user1Id != user2Id\n- No existing friendship
+
+Svc -> DB: collection("friendships")\n.whereIn("user1Id", [user1Id, user2Id])\n.whereIn("user2Id", [user1Id, user2Id])\n.get()
+activate DB
+
+alt Existing Friendship Found
+  DB --> Svc: Existing document
+  Svc --> Ctrl: Exception: "Friendship already exists"
+  Ctrl --> API: 400 Bad Request
+  API --> VM1: Error
+  VM1 --> AddFriendUI: Show error message
+else No Existing Friendship
+  DB --> Svc: Empty result
+  deactivate DB
+
+  Svc -> DB: collection("friendships").add({\n  user1Id: user1Id,\n  user2Id: user2Id,\n  status: PENDING,\n  requestedBy: user1Id,\n  requestedAt: now,\n  respondedAt: null\n})
+  activate DB
+  DB --> Svc: DocumentReference (friendshipId)
+  deactivate DB
+
+  Svc --> Ctrl: Friendship
+  deactivate Svc
+
+  Ctrl --> API: Friendship
+  deactivate Ctrl
+
+  API --> Repo: Friendship
+  deactivate API
+
+  Repo --> VM1: Result.Success(Friendship)
+  deactivate Repo
+
+  VM1 -> VM1: Update uiState\n(add to sentRequests)
+
+  VM1 --> AddFriendUI: Friend request sent
+  deactivate VM1
+
+  AddFriendUI -> AddFriendUI: Show "Request sent" message
+  deactivate AddFriendUI
+end
+
+== User2 Views Pending Requests ==
+
+User2 -> UI2: Navigate to Profile > Friend Requests
+activate UI2
+
+UI2 -> VM2: loadFriendships()
+activate VM2
+
+VM2 -> Repo: getPendingRequests()
+activate Repo
+
+Repo -> API: getPendingRequests()
+activate API
+
+API -> Ctrl: GET /api/friendships/pending
+activate Ctrl
+
+Ctrl -> Ctrl: Extract user2Id from SecurityContext
+
+Ctrl -> Svc: getPendingRequests(userId = user2Id)
+activate Svc
+
+note right of Svc
+  Returns friendships where:
+  - user2Id == userId
+  - status == PENDING
+  (User2 is the recipient)
+end note
+
+Svc -> DB: collection("friendships")\n.whereEqualTo("user2Id", user2Id)\n.whereEqualTo("status", PENDING)\n.get()
+activate DB
+DB --> Svc: QuerySnapshot (pending requests)
+deactivate DB
+
+Svc --> Ctrl: List<Friendship>
+deactivate Svc
+
+Ctrl --> API: List<Friendship>
+deactivate Ctrl
+
+API --> Repo: List<Friendship>
+deactivate API
+
+Repo --> VM2: Result.Success(friendships)
+deactivate Repo
+
+VM2 -> VM2: Update uiState (pendingRequests)
+
+VM2 -> "UserRepository": Load user details for each request
+activate "UserRepository"
+"UserRepository" --> VM2: User details
+deactivate "UserRepository"
+
+VM2 -> VM2: Update uiState (userDetailsMap)
+
+VM2 --> UI2: Pending requests loaded
+deactivate VM2
+
+UI2 -> UI2: Display pending requests\nwith user details
+deactivate UI2
+
+== Accept Friend Request ==
+
+User2 -> UI2: Click "Accept" on User1's request
+activate UI2
+
+UI2 -> VM2: acceptFriendRequest(friendshipId)
+activate VM2
+
+VM2 -> Repo: acceptFriendRequest(friendshipId)
+activate Repo
+
+Repo -> API: acceptFriendRequest(friendshipId)
+activate API
+
+API -> Ctrl: POST /api/friendships/{friendshipId}/accept
+activate Ctrl
+
+Ctrl -> Ctrl: Extract user2Id from SecurityContext
+
+Ctrl -> Svc: acceptFriendRequest(friendshipId, userId = user2Id)
+activate Svc
+
+Svc -> DB: collection("friendships")\n.document(friendshipId)\n.get()
+activate DB
+DB --> Svc: Friendship document
+deactivate DB
+
+Svc -> Svc: Verify user2Id == friendship.user2Id\n(only recipient can accept)
+
+Svc -> DB: collection("friendships")\n.document(friendshipId)\n.update({\n  status: ACCEPTED,\n  respondedAt: now\n})
+activate DB
+DB --> Svc: Success
+deactivate DB
+
+Svc --> Ctrl: Updated Friendship
+deactivate Svc
+
+Ctrl --> API: Friendship
+deactivate Ctrl
+
+API --> Repo: Friendship
+deactivate API
+
+Repo --> VM2: Result.Success(Friendship)
+deactivate Repo
+
+VM2 -> VM2: Update uiState:\n- Remove from pendingRequests\n- Add to friends list
+
+VM2 --> UI2: Friend request accepted
+deactivate VM2
+
+UI2 -> UI2: Show "You are now friends!" message
+deactivate UI2
+
+note over VM1
+  When User1 refreshes their
+  friend list, the friendship
+  will appear in their friends list
+end note
+
+== Decline Friend Request ==
+
+User2 -> UI2: Click "Decline" on request
+activate UI2
+
+UI2 -> VM2: declineFriendRequest(friendshipId)
+activate VM2
+
+VM2 -> Repo: declineFriendRequest(friendshipId)
+activate Repo
+
+Repo -> API: declineFriendRequest(friendshipId)
+activate API
+
+API -> Ctrl: POST /api/friendships/{friendshipId}/decline
+activate Ctrl
+
+Ctrl -> Svc: declineFriendRequest(friendshipId, userId = user2Id)
+activate Svc
+
+Svc -> DB: collection("friendships")\n.document(friendshipId)\n.update({\n  status: DECLINED,\n  respondedAt: now\n})
+activate DB
+DB --> Svc: Success
+deactivate DB
+
+Svc --> Ctrl: Updated Friendship
+deactivate Svc
+
+Ctrl --> API: Friendship
+deactivate Ctrl
+
+API --> Repo: Friendship
+deactivate API
+
+Repo --> VM2: Result.Success(Friendship)
+deactivate Repo
+
+VM2 -> VM2: Update uiState:\n- Remove from pendingRequests
+
+VM2 --> UI2: Request declined
+deactivate VM2
+
+UI2 -> UI2: Show "Request declined" message
+deactivate UI2
+
+== Remove Friend ==
+
+User1 -> UI1: Navigate to Friends List\nClick "Remove" on User2
+activate UI1
+
+UI1 -> VM1: removeFriend(friendshipId)
+activate VM1
+
+VM1 -> Repo: removeFriend(friendshipId)
+activate Repo
+
+Repo -> API: removeFriend(friendshipId)
+activate API
+
+API -> Ctrl: DELETE /api/friendships/{friendshipId}
+activate Ctrl
+
+Ctrl -> Svc: removeFriend(friendshipId, userId = user1Id)
+activate Svc
+
+Svc -> DB: collection("friendships")\n.document(friendshipId)\n.get()
+activate DB
+DB --> Svc: Friendship
+deactivate DB
+
+Svc -> Svc: Verify userId is user1Id or user2Id\n(either party can remove)
+
+Svc -> DB: collection("friendships")\n.document(friendshipId)\n.delete()
+activate DB
+DB --> Svc: Success
+deactivate DB
+
+Svc --> Ctrl: Success
+deactivate Svc
+
+Ctrl --> API: 200 OK
+deactivate Ctrl
+
+API --> Repo: Success
+deactivate API
+
+Repo --> VM1: Result.Success
+deactivate Repo
+
+VM1 -> VM1: Update uiState:\n- Remove from friends list
+
+VM1 --> UI1: Friend removed
+deactivate VM1
+
+UI1 -> UI1: Show "Friend removed" message
+deactivate UI1
+
+@enduml

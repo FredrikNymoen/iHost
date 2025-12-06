@@ -1,0 +1,161 @@
+@startuml Event Creation Flow
+!theme plain
+
+title Event Creation with Image Upload and Payment
+
+actor User
+participant "AddEventScreen" as UI
+participant "EventViewModel" as VM
+participant "EventRepository" as EventRepo
+participant "ImageRepository" as ImageRepo
+participant "EventApi" as EventAPI
+participant "ImageApi" as ImageAPI
+participant "Backend\nEventController" as EventCtrl
+participant "Backend\nImageController" as ImageCtrl
+participant "EventService" as EventSvc
+participant "ImageService" as ImageSvc
+participant "CloudinaryService" as CloudSvc
+participant "Cloudinary" as Cloud
+participant "Firestore" as DB
+
+== Event Creation ==
+
+User -> UI: Fill event form\n(title, description, date, time, location, price)
+User -> UI: Select event image
+activate UI
+
+UI -> UI: Show loading state
+
+UI -> VM: createEvent(event, imageFile)
+activate VM
+
+VM -> VM: Validate event data
+
+== Image Upload First ==
+
+VM -> ImageRepo: uploadEventImage(tempEventId, imageFile)
+activate ImageRepo
+
+ImageRepo -> ImageAPI: uploadEventImage(multipart file)
+activate ImageAPI
+
+ImageAPI -> ImageCtrl: POST /api/images/upload\nMultipart: file, eventId
+activate ImageCtrl
+
+ImageCtrl -> ImageSvc: uploadEventImage(eventId, file)
+activate ImageSvc
+
+ImageSvc -> ImageSvc: Validate file type\n(must be image/*)
+
+ImageSvc -> CloudSvc: uploadImage(file)
+activate CloudSvc
+
+CloudSvc -> Cloud: upload with transformations\n(width: 1920, height: 1080,\nquality: auto:good)
+activate Cloud
+Cloud --> CloudSvc: {secure_url, public_id}
+deactivate Cloud
+
+CloudSvc --> ImageSvc: imageUrl
+deactivate CloudSvc
+
+ImageSvc -> DB: collection("event_images")\n.add({imageUrl, eventId, createdAt})
+activate DB
+DB --> ImageSvc: DocumentReference
+deactivate DB
+
+ImageSvc --> ImageCtrl: {imageUrl, documentId}
+deactivate ImageSvc
+
+ImageCtrl --> ImageAPI: EventImageUploadResponse
+deactivate ImageCtrl
+
+ImageAPI --> ImageRepo: ImageUploadResponse
+deactivate ImageAPI
+
+ImageRepo --> VM: Result.Success(imageUrl)
+deactivate ImageRepo
+
+== Create Event with Image URL ==
+
+VM -> EventRepo: createEvent(eventWithImageUrl)
+activate EventRepo
+
+EventRepo -> EventAPI: createEvent(CreateEventRequest)
+activate EventAPI
+
+EventAPI -> EventCtrl: POST /api/events\nBody: event data + imageUrl
+activate EventCtrl
+
+EventCtrl -> EventCtrl: Extract userId from SecurityContext
+
+EventCtrl -> EventSvc: createEvent(event, creatorUid)
+activate EventSvc
+
+EventSvc -> EventSvc: Generate unique share code\n("IH-" + 5 random chars)
+
+EventSvc -> DB: collection("events").add(eventData)
+activate DB
+DB --> EventSvc: DocumentReference (eventId)
+deactivate DB
+
+EventSvc -> DB: collection("event_users").add({\n  eventId: eventId,\n  userId: creatorUid,\n  status: CREATOR,\n  role: CREATOR\n})
+activate DB
+DB --> EventSvc: Success
+deactivate DB
+
+note right of EventSvc
+  Creator automatically added
+  as CREATOR in event_users
+end note
+
+EventSvc --> EventCtrl: Pair(eventId, event)
+deactivate EventSvc
+
+EventCtrl -> EventCtrl: Wrap with metadata:\n{id, event, userStatus: CREATOR, userRole: CREATOR}
+
+EventCtrl --> EventAPI: EventWithMetadataResponse
+deactivate EventCtrl
+
+EventAPI --> EventRepo: EventWithMetadataResponse
+deactivate EventAPI
+
+EventRepo -> EventRepo: Map to EventWithMetadata domain model
+
+EventRepo --> VM: Result.Success(EventWithMetadata)
+deactivate EventRepo
+
+VM -> VM: Update uiState\n(add new event to events list)
+
+VM --> UI: Event created successfully
+deactivate VM
+
+UI -> UI: Hide loading, show success message
+UI -> UI: Navigate to EventDetailScreen(eventId)
+deactivate UI
+
+== Error Handling ==
+
+alt Image Upload Fails
+  ImageRepo --> VM: Result.Error("Upload failed")
+  VM --> UI: Show error message
+  UI -> UI: Stay on form, allow retry
+end
+
+alt Event Creation Fails
+  EventAPI --> EventRepo: HTTP error
+  EventRepo --> VM: Result.Error("Failed to create event")
+  VM --> UI: Show error message
+  note right of UI
+    Image already uploaded to Cloudinary
+    May need cleanup (orphaned image)
+  end note
+end
+
+alt Invalid Event Data
+  EventCtrl -> EventCtrl: Validate required fields
+  EventCtrl --> EventAPI: 400 Bad Request
+  EventAPI --> VM: Error
+  VM --> UI: Show validation errors
+end
+
+@enduml
