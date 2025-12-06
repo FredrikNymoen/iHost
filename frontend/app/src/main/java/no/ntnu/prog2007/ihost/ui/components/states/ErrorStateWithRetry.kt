@@ -7,6 +7,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/**
+ * Full-screen error state with retry button
+ *
+ * Displays an error message with a retry button, centered on screen.
+ * Used when data loading fails and user can retry the operation.
+ *
+ * @param errorMessage Error message to display to user
+ * @param onRetry Callback invoked when retry button is clicked
+ * @param modifier Optional modifier for styling
+ */
 @Composable
 fun ErrorStateWithRetry(
     errorMessage: String,

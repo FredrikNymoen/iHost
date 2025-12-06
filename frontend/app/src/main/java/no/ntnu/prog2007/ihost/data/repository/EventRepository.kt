@@ -10,12 +10,27 @@ import no.ntnu.prog2007.ihost.data.model.dto.UpdateEventRequest
 import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
 import no.ntnu.prog2007.ihost.data.remote.api.EventApi
 
+/**
+ * Repository for event-related API operations
+ *
+ * Handles communication with the backend Event API and maps DTOs
+ * to domain models. All methods return Result objects for proper
+ * error handling.
+ *
+ * @property eventApi The Retrofit API interface for event endpoints
+ */
 class EventRepository(
     private val eventApi: EventApi = RetrofitClient.eventApi
 ) {
 
     /**
-     * Get all events linked to the user
+     * Get all events linked to the current user
+     *
+     * Returns events where the user is creator, accepted attendee,
+     * or has a pending invitation. Each event includes metadata
+     * about the user's status and role.
+     *
+     * @return Result containing list of events with user metadata, or error
      */
     suspend fun getUserEvents(): Result<List<EventWithMetadata>> {
         return try {
@@ -32,6 +47,13 @@ class EventRepository(
 
     /**
      * Get event by share code
+     *
+     * Fetches an event using its unique 6-character share code.
+     * Creates an event_user with PENDING status for the current user
+     * if they're not already associated with the event.
+     *
+     * @param shareCode The 6-character share code
+     * @return Result containing event with user metadata, or error
      */
     suspend fun getEventByCode(shareCode: String): Result<EventWithMetadata> {
         return try {
@@ -46,7 +68,20 @@ class EventRepository(
     }
 
     /**
-     * Create new event
+     * Create a new event
+     *
+     * Creates an event on the backend. The creator is automatically
+     * added as an attendee with CREATOR role. A unique share code
+     * is generated for the event.
+     *
+     * @param title Event title (required)
+     * @param description Event description (optional)
+     * @param eventDate Event date in ISO format (required)
+     * @param eventTime Event time (optional)
+     * @param location Event location address (optional)
+     * @param free Whether the event is free (default: true)
+     * @param price Event price in NOK (only used if free=false)
+     * @return Result containing created event with user metadata, or error
      */
     suspend fun createEvent(
         title: String,
@@ -78,7 +113,18 @@ class EventRepository(
     }
 
     /**
-     * Update event
+     * Update an existing event
+     *
+     * Only the event creator can update an event. All parameters are
+     * optional - only provided values will be updated.
+     *
+     * @param eventId The ID of the event to update
+     * @param title New event title (optional)
+     * @param description New event description (optional)
+     * @param eventDate New event date (optional)
+     * @param eventTime New event time (optional)
+     * @param location New event location (optional)
+     * @return Result containing updated event with user metadata, or error
      */
     suspend fun updateEvent(
         eventId: String,
@@ -107,7 +153,13 @@ class EventRepository(
     }
 
     /**
-     * Delete event
+     * Delete an event
+     *
+     * Only the event creator can delete an event. Deletes all associated
+     * data including event_users and images.
+     *
+     * @param eventId The ID of the event to delete
+     * @return Result indicating success or error
      */
     suspend fun deleteEvent(eventId: String): Result<Unit> {
         return try {

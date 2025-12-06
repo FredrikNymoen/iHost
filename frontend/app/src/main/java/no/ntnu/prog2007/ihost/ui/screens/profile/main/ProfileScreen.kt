@@ -35,6 +35,29 @@ import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
 import no.ntnu.prog2007.ihost.viewmodel.UserViewModel
 import java.io.File
 
+/**
+ * User profile screen
+ *
+ * Displays user profile information and statistics:
+ * - Profile photo with edit capability
+ * - Name (editable)
+ * - Username (read-only)
+ * - Email (read-only)
+ * - Event statistics (created, invited to)
+ * - Friends section with quick actions
+ * - Log out button
+ *
+ * Supports profile photo upload from camera or gallery.
+ * Automatically loads user profile, events, and friendships on first visit.
+ *
+ * @param authViewModel AuthViewModel for current user context
+ * @param userViewModel UserViewModel for profile operations
+ * @param eventViewModel EventViewModel for event statistics
+ * @param friendViewModel FriendViewModel for friends list
+ * @param onLogOut Callback invoked when user logs out
+ * @param onNavigateToAddFriend Callback to navigate to Add Friend screen
+ * @param onNavigateToFriendsList Callback to navigate to Friends List screen
+ */
 @Composable
 fun ProfileScreen(
     authViewModel: AuthViewModel,

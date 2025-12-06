@@ -15,6 +15,20 @@ import no.ntnu.prog2007.ihost.ui.screens.auth.login.components.PasswordTextField
 import no.ntnu.prog2007.ihost.ui.screens.auth.login.components.ForgotPasswordLink
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 
+/**
+ * User login screen
+ *
+ * Allows existing users to sign in with email and password.
+ * Includes password visibility toggle and forgot password link.
+ * Validates that both fields are filled before enabling login.
+ *
+ * On successful login, user is automatically navigated to Events screen
+ * by the navigation effect in MainActivity.
+ *
+ * @param viewModel AuthViewModel for authentication operations
+ * @param onNavigateBack Callback to return to Welcome screen
+ * @param onNavigateToForgotPassword Callback to navigate to password reset
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(

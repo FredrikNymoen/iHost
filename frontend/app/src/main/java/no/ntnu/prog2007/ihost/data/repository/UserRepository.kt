@@ -7,12 +7,29 @@ import no.ntnu.prog2007.ihost.data.model.dto.UserResponse
 import no.ntnu.prog2007.ihost.data.remote.RetrofitClient
 import no.ntnu.prog2007.ihost.data.remote.api.UserApi
 
+/**
+ * Repository for user profile operations
+ *
+ * Handles user profile data operations including fetching user details,
+ * checking username/email availability, and updating profiles.
+ * Maps DTOs to domain models and provides Result-based error handling.
+ *
+ * Note: For Firebase authentication operations (login, register, logout),
+ * use AuthRepository instead.
+ *
+ * @property userApi The Retrofit API interface for user endpoints
+ */
 class UserRepository(
     private val userApi: UserApi = RetrofitClient.userApi
 ) {
 
     /**
-     * Get all users
+     * Get all users in the application
+     *
+     * Fetches all registered users. Typically used for the "Add Friend"
+     * feature to display users that can be added as friends.
+     *
+     * @return Result containing list of all users, or error
      */
     suspend fun getAllUsers(): Result<List<User>> {
         return try {
@@ -27,7 +44,13 @@ class UserRepository(
     }
 
     /**
-     * Get user by UID
+     * Get user by Firebase UID
+     *
+     * Fetches detailed user profile information for a specific user.
+     * Used to display user details in friend lists, event attendees, etc.
+     *
+     * @param uid The Firebase UID of the user
+     * @return Result containing user profile, or error
      */
     suspend fun getUserByUid(uid: String): Result<User> {
         return try {
@@ -43,6 +66,12 @@ class UserRepository(
 
     /**
      * Check if username is available
+     *
+     * Validates if a username is available for registration.
+     * Used during signup to ensure username uniqueness.
+     *
+     * @param username The username to check
+     * @return Result containing true if available, false if taken, or error
      */
     suspend fun isUsernameAvailable(username: String): Result<Boolean> {
         return try {
@@ -58,6 +87,12 @@ class UserRepository(
 
     /**
      * Check if email is available
+     *
+     * Validates if an email is available for registration.
+     * Used during signup to ensure email uniqueness.
+     *
+     * @param email The email address to check
+     * @return Result containing true if available, false if taken, or error
      */
     suspend fun isEmailAvailable(email: String): Result<Boolean> {
         return try {
@@ -72,7 +107,16 @@ class UserRepository(
     }
 
     /**
-     * Update user profile
+     * Update user profile information
+     *
+     * Updates one or more profile fields for a user. All parameters
+     * are optional - only provided values will be updated.
+     *
+     * @param uid The Firebase UID of the user to update
+     * @param firstName New first name (optional)
+     * @param lastName New last name (optional)
+     * @param photoUrl New profile photo URL (optional)
+     * @return Result containing updated user profile, or error
      */
     suspend fun updateUserProfile(
         uid: String,

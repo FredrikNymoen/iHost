@@ -11,6 +11,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import no.ntnu.prog2007.ihost.ui.navigation.config.Destination
 
+/**
+ * Bottom navigation bar for main app screens
+ *
+ * Displays navigation items for Events, Add Event, and Profile screens.
+ * Highlights the currently selected screen and handles navigation with
+ * state preservation.
+ *
+ * @param navController Navigation controller for handling navigation
+ * @param screens List of destinations to show in the bottom bar
+ * @param currentRoute Current active route for highlighting selected item
+ */
 @Composable
 fun BottomNavigationBar(
     navController: NavHostController,

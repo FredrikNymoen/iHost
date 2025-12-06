@@ -8,6 +8,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
+/**
+ * Full-screen loading indicator
+ *
+ * Displays a centered circular progress indicator that fills the available space.
+ * Used for screens that are loading initial data.
+ *
+ * @param modifier Optional modifier for styling
+ */
 @Composable
 fun LoadingState(
     modifier: Modifier = Modifier

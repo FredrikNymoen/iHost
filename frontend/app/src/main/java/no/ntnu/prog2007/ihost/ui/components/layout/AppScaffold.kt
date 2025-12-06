@@ -18,6 +18,20 @@ import no.ntnu.prog2007.ihost.viewmodel.*
 
 /**
  * Main app scaffold with gradient background, header, and bottom navigation
+ *
+ * Root composable for the authenticated app experience. Provides:
+ * - Gradient background from theme colors
+ * - Conditional top app header
+ * - Conditional bottom navigation bar
+ * - Navigation host for all screens
+ *
+ * @param navController Navigation controller for managing screen navigation
+ * @param navigationState Current navigation state (route, header/nav visibility)
+ * @param authViewModel ViewModel for authentication operations
+ * @param eventViewModel ViewModel for event operations
+ * @param friendViewModel ViewModel for friendship operations
+ * @param userViewModel ViewModel for user profile operations
+ * @param startDestination Initial destination route (Events or Welcome)
  */
 @Composable
 fun AppScaffold(

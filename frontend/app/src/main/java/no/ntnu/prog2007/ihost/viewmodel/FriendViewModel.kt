@@ -15,16 +15,40 @@ import no.ntnu.prog2007.ihost.data.repository.AuthRepository
 import no.ntnu.prog2007.ihost.data.repository.FriendshipRepository
 import no.ntnu.prog2007.ihost.data.repository.UserRepository
 
+/**
+ * UI state for friendship-related screens
+ *
+ * @property friends List of accepted friendships for the current user
+ * @property pendingRequests List of incoming friend requests awaiting acceptance
+ * @property sentRequests List of outgoing friend requests sent by current user
+ * @property allUsers List of all users in the app (for Add Friend feature)
+ * @property userDetailsMap Map of user IDs to User objects for displaying friend details
+ * @property isLoading Indicates if an operation is in progress
+ * @property errorMessage Error message to display, or null if no error
+ */
 data class FriendUiState(
     val friends: List<Friendship> = emptyList(),
     val pendingRequests: List<Friendship> = emptyList(),
     val sentRequests: List<Friendship> = emptyList(),
     val allUsers: List<User> = emptyList(),
-    val userDetailsMap: Map<String, User> = emptyMap(), // Map userId -> User details
+    val userDetailsMap: Map<String, User> = emptyMap(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null
 )
 
+/**
+ * ViewModel for managing friendship operations
+ *
+ * Handles friend requests, friendships, and user discovery.
+ * Maintains friendship state across the application using StateFlow.
+ *
+ * Key responsibilities:
+ * - Loading and managing friend lists
+ * - Sending, accepting, and declining friend requests
+ * - Removing friendships
+ * - Loading user details for displaying friend information
+ * - Managing the "Add Friend" user discovery feature
+ */
 class FriendViewModel : ViewModel() {
     private val authRepository = AuthRepository(FirebaseAuth.getInstance())
     private val friendshipRepository = FriendshipRepository()
@@ -92,6 +116,12 @@ class FriendViewModel : ViewModel() {
 
     /**
      * Load user details for friendships
+     *
+     * Fetches User objects for all users involved in the provided friendships
+     * (excluding the current user) and caches them in userDetailsMap.
+     * This enables displaying friend names and profile information in the UI.
+     *
+     * @param friendships List of friendships to load user details for
      */
     private fun loadUserDetails(friendships: List<Friendship>) {
         viewModelScope.launch {
@@ -155,6 +185,13 @@ class FriendViewModel : ViewModel() {
 
     /**
      * Send a friend request to another user
+     *
+     * Creates a new friendship with PENDING status. Reloads friendships
+     * on success to update the UI.
+     *
+     * @param toUserId The UID of the user to send the request to
+     * @param onSuccess Callback invoked on successful request
+     * @param onError Callback invoked on error with error message
      */
     fun sendFriendRequest(toUserId: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
@@ -191,6 +228,13 @@ class FriendViewModel : ViewModel() {
 
     /**
      * Accept a friend request
+     *
+     * Updates the friendship status to ACCEPTED. Reloads friendships
+     * to move the friendship from pending to accepted list.
+     *
+     * @param friendshipId The ID of the friendship document
+     * @param onSuccess Callback invoked on successful acceptance
+     * @param onError Callback invoked on error with error message
      */
     fun acceptFriendRequest(friendshipId: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
@@ -213,6 +257,13 @@ class FriendViewModel : ViewModel() {
 
     /**
      * Decline a friend request
+     *
+     * Deletes the friendship document. Reloads friendships to
+     * remove the request from the UI.
+     *
+     * @param friendshipId The ID of the friendship document
+     * @param onSuccess Callback invoked on successful decline
+     * @param onError Callback invoked on error with error message
      */
     fun declineFriendRequest(friendshipId: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
@@ -235,6 +286,13 @@ class FriendViewModel : ViewModel() {
 
     /**
      * Remove a friend
+     *
+     * Deletes an accepted friendship. Reloads friendships to
+     * remove the friend from the list.
+     *
+     * @param friendshipId The ID of the friendship document
+     * @param onSuccess Callback invoked on successful removal
+     * @param onError Callback invoked on error with error message
      */
     fun removeFriend(friendshipId: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {

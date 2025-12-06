@@ -32,6 +32,21 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+/**
+ * Create new event screen
+ *
+ * Form for creating a new event with:
+ * - Basic info: title, description, date, time
+ * - Location picker with Google Maps integration
+ * - Image upload from camera or gallery
+ * - Free/paid event toggle
+ *
+ * Validates that date/time is in the future before allowing creation.
+ * On successful creation, navigates back to Events screen.
+ *
+ * @param viewModel EventViewModel for event creation
+ * @param onEventCreated Callback invoked after successful event creation
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEventScreen(

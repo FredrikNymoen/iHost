@@ -10,7 +10,15 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.ui.graphics.vector.ImageVector
 
 /**
- * Destinations for navigation in the app
+ * Navigation destinations for the app
+ *
+ * Sealed class hierarchy defining all navigation routes in the application.
+ * Each destination has a route string, title, and optional icons for bottom navigation.
+ *
+ * @property route The navigation route string used by NavController
+ * @property title Display title for the destination
+ * @property selectedIcon Icon shown when destination is selected (bottom nav)
+ * @property unselectedIcon Icon shown when destination is not selected (bottom nav)
  */
 sealed class Destination(
     val route: String,
@@ -19,13 +27,25 @@ sealed class Destination(
     val unselectedIcon: ImageVector? = null
 ) {
     // Auth destinations
+
+    /** Landing screen shown to unauthenticated users */
     data object Welcome : Destination("welcome", "Welcome")
+
+    /** Login screen for existing users */
     data object Login : Destination("login", "Log in")
+
+    /** Final registration step - password creation */
     data object SignUp : Destination("signup", "Register")
+
+    /** First registration step - name and username entry */
     data object PersonalInfo : Destination("personal_info", "Personal info")
+
+    /** Password reset via email */
     data object ForgotPassword : Destination("forgot_password", "Forgot Password")
 
     // Main app destinations
+
+    /** Main events list screen (bottom nav) */
     data object Events : Destination(
         "events",
         "Events",
@@ -33,6 +53,7 @@ sealed class Destination(
         unselectedIcon = Icons.Default.MailOutline
     )
 
+    /** Create new event screen (bottom nav) */
     data object AddEvent : Destination(
         "add_event",
         "Add event",
@@ -40,6 +61,7 @@ sealed class Destination(
         unselectedIcon = Icons.Outlined.AddCircleOutline
     )
 
+    /** User profile screen (bottom nav) */
     data object Profile : Destination(
         "profile",
         "Profile",
@@ -48,19 +70,45 @@ sealed class Destination(
     )
 
     // Detail destinations with arguments
+
+    /**
+     * Event detail screen showing full event information
+     *
+     * @param eventId Path parameter for the event ID
+     */
     data object EventDetail : Destination("event_detail/{eventId}", "Event detaljer") {
+        /**
+         * Create navigation route with event ID
+         *
+         * @param eventId The event ID to navigate to
+         * @return Complete route string
+         */
         fun createRoute(eventId: String) = "event_detail/$eventId"
     }
 
+    /**
+     * Edit event screen (creator only)
+     *
+     * @param eventId Path parameter for the event ID
+     */
     data object EditEvent : Destination("edit_event/{eventId}", "Edit Event") {
         fun createRoute(eventId: String) = "edit_event/$eventId"
     }
 
+    /**
+     * Invite users to event screen (creator only)
+     *
+     * @param eventId Path parameter for the event ID
+     */
     data object InviteUsers : Destination("invite_users/{eventId}", "Invite Users") {
         fun createRoute(eventId: String) = "invite_users/$eventId"
     }
 
     // Friend destinations
+
+    /** Search and add new friends */
     data object AddFriend : Destination("add_friend", "Add Friend")
+
+    /** View friends list and manage friendships */
     data object FriendsList : Destination("friends_list", "Friends")
 }

@@ -11,15 +11,28 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 
+/**
+ * Repository for image upload and management operations
+ *
+ * Handles image uploads to Cloudinary through the backend API.
+ * Supports both event images and user profile photos.
+ * All images are uploaded as multipart form data.
+ *
+ * @property imageApi The Retrofit API interface for image endpoints
+ */
 class ImageRepository(
     private val imageApi: ImageApi = RetrofitClient.imageApi
 ) {
 
     /**
      * Upload an image for an event
-     * @param imageFile The image file to upload
-     * @param eventId The ID of the event
-     * @return Result containing the uploaded image URL
+     *
+     * Uploads an image file to Cloudinary and associates it with the event.
+     * The backend returns the Cloudinary URL which can be stored in the database.
+     *
+     * @param imageFile The image file to upload from local storage
+     * @param eventId The ID of the event to associate the image with
+     * @return Result containing the Cloudinary image URL, or error
      */
     suspend fun uploadEventImage(imageFile: File, eventId: String): Result<String> {
         return try {
@@ -38,6 +51,13 @@ class ImageRepository(
 
     /**
      * Get all images for a specific event
+     *
+     * Fetches all images associated with an event. Currently, the app
+     * supports one image per event, but the backend is designed to
+     * support multiple images.
+     *
+     * @param eventId The ID of the event
+     * @return Result containing list of event images, or error
      */
     suspend fun getEventImages(eventId: String): Result<List<EventImage>> {
         return try {
@@ -62,8 +82,12 @@ class ImageRepository(
 
     /**
      * Upload a profile photo for the current user
-     * @param imageFile The profile photo to upload
-     * @return Result containing the uploaded photo URL
+     *
+     * Uploads a profile photo to Cloudinary and returns the URL.
+     * The URL should then be stored in the user profile using UserRepository.
+     *
+     * @param imageFile The profile photo file to upload
+     * @return Result containing the Cloudinary photo URL, or error
      */
     suspend fun uploadProfilePhoto(imageFile: File): Result<String> {
         return try {

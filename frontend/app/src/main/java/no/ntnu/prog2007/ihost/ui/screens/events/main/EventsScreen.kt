@@ -18,6 +18,21 @@ import no.ntnu.prog2007.ihost.ui.screens.events.main.components.ErrorMessage
 import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
 
+/**
+ * Main events list screen
+ *
+ * Primary screen of the app showing user's events organized by tabs and filters:
+ * - Tabs: "Invites" (pending invitations) vs "My Events" (accepted/created)
+ * - Time Filter: "Future" (upcoming) vs "Past" (historical) events
+ * - Join Event: Enter share code to join an event
+ * - Refresh: Reload events from server
+ *
+ * Each event card displays basic info and can be clicked for full details.
+ *
+ * @param viewModel EventViewModel for event operations
+ * @param authViewModel AuthViewModel for user context
+ * @param onEventClick Callback invoked when event card is clicked with event ID
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventsScreen(

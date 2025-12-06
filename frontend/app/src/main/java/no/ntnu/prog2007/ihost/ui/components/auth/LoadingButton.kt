@@ -10,6 +10,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Button with loading state indicator
+ *
+ * Displays a circular progress indicator when loading, otherwise shows
+ * the button text. Automatically disables interaction during loading.
+ *
+ * @param onClick Callback invoked when button is clicked
+ * @param text Button text to display when not loading
+ * @param isLoading Whether to show loading indicator instead of text
+ * @param enabled Whether the button is enabled (disabled during loading)
+ * @param modifier Optional modifier for styling
+ */
 @Composable
 fun LoadingButton(
     onClick: () -> Unit,

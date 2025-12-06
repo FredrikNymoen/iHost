@@ -31,6 +31,32 @@ import no.ntnu.prog2007.ihost.ui.screens.events.eventdetail.components.StatusTyp
 import androidx.core.net.toUri
 
 
+/**
+ * Event detail screen
+ *
+ * Full event details including:
+ * - Event image
+ * - Title, description, date, time
+ * - Location with map link
+ * - Creator information
+ * - Attendees list (accepted)
+ * - Event status for current user
+ * - Share code for inviting others
+ *
+ * Role-specific actions:
+ * - Creator: Edit, Delete, Invite Users
+ * - Pending invitation: Accept, Decline
+ * - Accepted: View only
+ *
+ * Share functionality copies event share code to clipboard or opens share sheet.
+ *
+ * @param eventId The event ID to display
+ * @param viewModel EventViewModel for event operations
+ * @param authViewModel AuthViewModel for current user context
+ * @param onBack Callback to navigate back
+ * @param onEdit Callback to navigate to edit screen with event ID
+ * @param onInviteUsers Callback to navigate to invite users screen with event ID
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventDetailScreen(

@@ -19,15 +19,39 @@ import no.ntnu.prog2007.ihost.data.repository.EventUserRepository
 import no.ntnu.prog2007.ihost.data.repository.ImageRepository
 import no.ntnu.prog2007.ihost.data.repository.UserRepository
 
+/**
+ * UI state for event-related screens
+ *
+ * @property events List of events with metadata (status and role) for the current user
+ * @property isLoading Indicates if an operation is in progress
+ * @property errorMessage Error message to display, or null if no error
+ * @property selectedEvent Currently selected event for detail view
+ * @property eventImages Map of event IDs to their associated images
+ * @property eventAttendees Map of event IDs to their attendee lists (all statuses)
+ */
 data class EventUiState(
     val events: List<EventWithMetadata> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val selectedEvent: EventWithMetadata? = null,
-    val eventImages: Map<String, List<EventImage>> = emptyMap(), // Map of eventId to list of images
-    val eventAttendees: Map<String, List<EventUser>> = emptyMap() // Map of eventId to list of attendees
+    val eventImages: Map<String, List<EventImage>> = emptyMap(),
+    val eventAttendees: Map<String, List<EventUser>> = emptyMap()
 )
 
+/**
+ * ViewModel for managing event data and operations
+ *
+ * Handles event CRUD operations, image uploads, attendee management,
+ * and event invitations. Maintains a single source of truth for event
+ * data across the application using StateFlow.
+ *
+ * Key responsibilities:
+ * - Loading and caching events for the current user
+ * - Creating, updating, and deleting events
+ * - Managing event images through Cloudinary
+ * - Handling event invitations and attendee lists
+ * - Managing user participation (join, accept, decline)
+ */
 class EventViewModel: ViewModel() {
 
     private val eventRepository = EventRepository()
@@ -48,6 +72,12 @@ class EventViewModel: ViewModel() {
         eventsLoaded = false
     }
 
+    /**
+     * Ensures events are loaded exactly once
+     *
+     * Prevents redundant API calls by tracking load state.
+     * Typically called when navigating to event screens.
+     */
     fun ensureEventsLoaded() {
         if (!eventsLoaded) {
             loadEvents()
@@ -55,6 +85,13 @@ class EventViewModel: ViewModel() {
         }
     }
 
+    /**
+     * Load all events for the current user
+     *
+     * Fetches events from the backend and loads associated images and
+     * attendees for each event. Updates UI state with loading status
+     * and any errors encountered.
+     */
     fun loadEvents() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
@@ -181,6 +218,22 @@ class EventViewModel: ViewModel() {
         }
     }
 
+    /**
+     * Create a new event with optional image
+     *
+     * Creates the event on the backend, then uploads the image if provided.
+     * The creator is automatically added as an attendee with CREATOR status.
+     *
+     * @param context Android context for accessing content resolver
+     * @param title Event title (required)
+     * @param description Event description (optional)
+     * @param eventDate Event date in ISO format (required)
+     * @param eventTime Event time (optional)
+     * @param location Event location address (optional)
+     * @param free Whether the event is free
+     * @param price Event price (only used if free=false)
+     * @param imageUri URI of event image to upload (optional)
+     */
     fun createEvent(
         context: Context,
         title: String,
@@ -239,6 +292,14 @@ class EventViewModel: ViewModel() {
         }
     }
 
+    /**
+     * Delete an event
+     *
+     * Only the event creator can delete an event. Removes the event
+     * from the backend and updates the UI state.
+     *
+     * @param eventId The ID of the event to delete
+     */
     fun deleteEvent(eventId: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
@@ -300,6 +361,9 @@ class EventViewModel: ViewModel() {
 
 
 
+    /**
+     * Clear the current error message from UI state
+     */
     fun clearError() {
         _uiState.update { it.copy(errorMessage = null) }
     }
