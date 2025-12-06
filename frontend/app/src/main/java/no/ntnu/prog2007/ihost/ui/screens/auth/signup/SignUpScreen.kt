@@ -13,6 +13,7 @@ import no.ntnu.prog2007.ihost.ui.screens.auth.signup.components.SignUpEmailTextF
 import no.ntnu.prog2007.ihost.ui.screens.auth.signup.components.SignUpPasswordTextField
 import no.ntnu.prog2007.ihost.ui.screens.auth.signup.components.PasswordMismatchError
 import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
+import androidx.compose.ui.platform.testTag
 
 /**
  * User sign-up screen
@@ -101,7 +102,8 @@ fun SignUpScreen(
             passwordVisible = confirmPasswordVisible,
             onTogglePasswordVisibility = { confirmPasswordVisible = !confirmPasswordVisible },
             isError = confirmPassword.isNotEmpty() && registrationState.password != confirmPassword,
-            enabled = !uiState.isLoading
+            enabled = !uiState.isLoading,
+            testTag = "signUpConfirmPasswordField"
         )
 
         PasswordMismatchError(
@@ -122,7 +124,8 @@ fun SignUpScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp),
+                .height(50.dp)
+                .testTag("signUpNextButton"),
             enabled = !uiState.isLoading &&
                     registrationState.email.isNotBlank() &&
                     registrationState.password.isNotBlank() &&
@@ -138,6 +141,7 @@ fun SignUpScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp)
+                .testTag("signUpReturnButton")
         ) {
             Text("Return", fontSize = 16.sp)
         }

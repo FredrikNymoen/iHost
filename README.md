@@ -18,6 +18,75 @@ An Android application for organizing and managing social events with friends.
 - **Coil** - Image loading
 - **Firebase Auth SDK** - Authentication
 
+## Frontend Structure
+
+```
+frontend/
+└── app/
+    └── src/
+        └── main/
+            └── java/no/ntnu/prog2007/ihost/
+                ├── data/
+                │   ├── model/
+                │   │   ├── domain/      # Domain models
+                │   │   └── dto/          # Data Transfer Objects
+                │   ├── remote/
+                │   │   ├── api/          # Retrofit API interfaces
+                │   │   └── config/       # Network configuration
+                │   └── repository/       # Data repositories
+                ├── ui/
+                │   ├── components/
+                │   │   ├── auth/         # Auth-related components
+                │   │   ├── events/       # Event-related components
+                │   │   ├── layout/       # Layout components
+                │   │   ├── splash/       # Splash screen components
+                │   │   └── states/       # State management components
+                │   ├── navigation/
+                │   │   ├── config/       # Navigation configuration
+                │   │   ├── graph/        # Navigation graphs
+                │   │   └── state/        # Navigation state
+                │   ├── screens/
+                │   │   ├── addevent/     # Add event screen
+                │   │   ├── auth/         # Authentication screens
+                │   │   │   ├── forgotpassword/
+                │   │   │   ├── login/
+                │   │   │   ├── personalinfo/
+                │   │   │   ├── signup/
+                │   │   │   └── welcome/
+                │   │   ├── events/       # Event screens
+                │   │   │   ├── editevent/
+                │   │   │   ├── eventdetail/
+                │   │   │   ├── inviteusers/
+                │   │   │   └── main/
+                │   │   └── profile/      # Profile screens
+                │   │       ├── addfriend/
+                │   │       ├── friendslist/
+                │   │       └── main/
+                │   └── theme/            # Material 3 theme
+                ├── viewmodel/            # ViewModels
+                └── MainActivity.kt       # Entry point
+```
+
+## Backend Structure
+
+```
+backend/
+└── src/
+    └── main/
+        └── kotlin/no/ntnu/prog2007/ihostapi/
+            ├── config/           # Firebase and Spring Security configuration
+            ├── controller/       # REST API endpoints
+            ├── exception/        # Custom exceptions and error handling
+            ├── model/
+            │   ├── dto/          # Data Transfer Objects
+            │   └── entity/       # Domain entities
+            ├── repository/       # Data access layer
+            ├── security/
+            │   └── filter/       # Authentication filters
+            └── service/
+                └── impl/         # Service implementations
+```
+
 ## Firestore Database Structure
 
 The application uses 5 main collections in Firebase Firestore:

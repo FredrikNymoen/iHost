@@ -151,7 +151,7 @@ class AuthViewModel : ViewModel() {
                 Log.e("AuthViewModel", "Sign in error: ${e.message}", e)
                 _uiState.update {
                     it.copy(
-                        errorMessage = "Feil ved innlogging: ${e.localizedMessage}",
+                        errorMessage = "Failed to log in: ${e.localizedMessage}",
                         isLoading = false
                     )
                 }
@@ -205,7 +205,7 @@ class AuthViewModel : ViewModel() {
                                 Log.e("AuthViewModel", "Sign up error: ${e.message}", e)
                                 _uiState.update {
                                     it.copy(
-                                        errorMessage = "Feil ved registrering: ${e.localizedMessage}",
+                                        errorMessage = "Failed to register: ${e.localizedMessage}",
                                         isLoading = false,
                                         registrationSuccess = false
                                     )
@@ -217,7 +217,7 @@ class AuthViewModel : ViewModel() {
                 onFailure = { error ->
                     _uiState.update {
                         it.copy(
-                            errorMessage = "Feil ved sjekking av brukernavn: ${error.localizedMessage}",
+                            errorMessage = "Failed when checking usernames: ${error.localizedMessage}",
                             isLoading = false
                         )
                     }

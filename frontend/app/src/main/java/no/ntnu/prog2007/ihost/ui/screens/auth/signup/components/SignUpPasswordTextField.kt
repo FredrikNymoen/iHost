@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.platform.testTag
 
 /**
  * Sign-up password input field component
@@ -37,7 +38,8 @@ fun SignUpPasswordTextField(
     onTogglePasswordVisibility: () -> Unit,
     isError: Boolean = false,
     enabled: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    testTag: String = "signUpPasswordField" // Default test tag, can be overriden for confirm password field
 ) {
     OutlinedTextField(
         value = value,
@@ -65,7 +67,9 @@ fun SignUpPasswordTextField(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         singleLine = true,
         isError = isError,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag(testTag),
         enabled = enabled,
         textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
         colors = OutlinedTextFieldDefaults.colors(
