@@ -80,7 +80,7 @@ class EventViewModel: ViewModel() {
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = "Feil ved lasting av events: ${error.localizedMessage}"
+                            errorMessage = "Failed to load events: ${error.localizedMessage}"
                         )
                     }
                 }
@@ -231,7 +231,7 @@ class EventViewModel: ViewModel() {
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = "Feil ved opprettelse av event: ${error.localizedMessage}"
+                            errorMessage = "Failed when creating an event: ${error.localizedMessage}"
                         )
                     }
                 }
@@ -258,7 +258,7 @@ class EventViewModel: ViewModel() {
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = "Feil ved sletting av event: ${error.localizedMessage}"
+                            errorMessage = "Failed to delete an event: ${error.localizedMessage}"
                         )
                     }
                 }
@@ -290,7 +290,7 @@ class EventViewModel: ViewModel() {
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = "Feil ved henting av event: ${error.localizedMessage}"
+                            errorMessage = "Failed to fetch an event: ${error.localizedMessage}"
                         )
                     }
                 }
