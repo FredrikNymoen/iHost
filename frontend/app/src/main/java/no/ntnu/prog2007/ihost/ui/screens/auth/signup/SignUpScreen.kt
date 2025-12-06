@@ -84,7 +84,8 @@ fun SignUpScreen(
             passwordVisible = confirmPasswordVisible,
             onTogglePasswordVisibility = { confirmPasswordVisible = !confirmPasswordVisible },
             isError = confirmPassword.isNotEmpty() && registrationState.password != confirmPassword,
-            enabled = !uiState.isLoading
+            enabled = !uiState.isLoading,
+            testTag = "signUpConfirmPasswordField"
         )
 
         PasswordMismatchError(
