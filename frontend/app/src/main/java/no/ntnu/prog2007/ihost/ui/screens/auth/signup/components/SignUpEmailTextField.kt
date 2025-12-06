@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.testTag
 
 @Composable
 fun SignUpEmailTextField(
@@ -34,7 +35,9 @@ fun SignUpEmailTextField(
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             isError = emailError != null,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("signUpEmailField"),
             enabled = enabled,
             textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
             colors = OutlinedTextFieldDefaults.colors(
