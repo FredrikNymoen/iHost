@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.platform.testTag
 
 @Composable
 fun SignUpPasswordTextField(
@@ -50,7 +51,9 @@ fun SignUpPasswordTextField(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         singleLine = true,
         isError = isError,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag("signUpPasswordField"),
         enabled = enabled,
         textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
         colors = OutlinedTextFieldDefaults.colors(
