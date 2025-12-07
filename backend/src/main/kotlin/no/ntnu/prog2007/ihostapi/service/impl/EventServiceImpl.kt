@@ -25,6 +25,11 @@ class EventServiceImpl(
 ) : EventService {
     private val logger = Logger.getLogger(EventServiceImpl::class.java.name)
 
+    /**
+     * Get all events associated with a user
+     * @param userId The ID of the user
+     * @return List of event data maps containing event details and user's role/status
+     */
     override fun getAllEventsForUser(userId: String): List<Map<String, Any?>> {
         val eventUsers = eventUserRepository.findByUserId(userId)
 
@@ -47,6 +52,12 @@ class EventServiceImpl(
         }
     }
 
+    /**
+     * Get event details by ID
+     * @param eventId The ID of the event
+     * @param userId The ID of the user requesting the event
+     * @return Map containing event details and user's role/status, or null if not found
+     */
     override fun getEventById(eventId: String, userId: String): Map<String, Any?>? {
         val event = eventRepository.findById(eventId)
             ?: throw ResourceNotFoundException("Event not found")
@@ -64,6 +75,12 @@ class EventServiceImpl(
         )
     }
 
+    /**
+     * Create a new event
+     * @param request The event creation request with event details
+     * @param creatorUid The ID of the user creating the event
+     * @return Pair of event ID and the created Event entity
+     */
     override fun createEvent(request: CreateEventRequest, creatorUid: String): Pair<String, Event> {
         val now = LocalDateTime.now()
         val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
@@ -102,6 +119,14 @@ class EventServiceImpl(
         return Pair(eventId, savedEvent)
     }
 
+    /**
+     * Update an existing event
+     * @param eventId The ID of the event to update
+     * @param request The update request with new event details
+     * @param userId The ID of the user updating the event
+     * @return The updated Event entity
+     * @throws IllegalArgumentException if user is not the event creator
+     */
     override fun updateEvent(eventId: String, request: UpdateEventRequest, userId: String): Event {
         val event = eventRepository.findById(eventId)
             ?: throw ResourceNotFoundException("Event not found")
@@ -131,6 +156,13 @@ class EventServiceImpl(
         return updatedEvent
     }
 
+    /**
+     * Delete an event and its associated event-user relationships
+     * @param eventId The ID of the event to delete
+     * @param userId The ID of the user deleting the event
+     * @return The number of event-user relationships deleted
+     * @throws IllegalArgumentException if user is not the event creator
+     */
     override fun deleteEvent(eventId: String, userId: String): Int {
         val event = eventRepository.findById(eventId)
             ?: throw ResourceNotFoundException("Event not found")
@@ -148,6 +180,12 @@ class EventServiceImpl(
         return deletedCount
     }
 
+    /**
+     * Find an event by its share code
+     * @param shareCode The unique share code of the event
+     * @param userId The ID of the user searching for the event
+     * @return Map containing event details and user's role/status, or null if not found
+     */
     override fun findEventByShareCode(shareCode: String, userId: String): Map<String, Any?>? {
         val (eventId, event) = eventRepository.findByShareCode(shareCode)
             ?: throw ResourceNotFoundException("No event found with code: $shareCode")

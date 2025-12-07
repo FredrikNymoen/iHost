@@ -23,11 +23,23 @@ class UserServiceImpl(
 ) : UserService {
     private val logger = Logger.getLogger(UserServiceImpl::class.java.name)
 
+    /**
+     * Get user by UID
+     * @param uid The Firebase UID of the user
+     * @return UserResponse DTO or null if user not found
+     */
     override fun getUserById(uid: String): UserResponse? {
         val user = userRepository.findById(uid) ?: return null
         return mapToUserResponse(user, uid)
     }
 
+    /**
+     * Create a new user profile in Firestore after Firebase Auth registration
+     * @param request The user creation request containing user details
+     * @return The created User entity
+     * @throws ResourceNotFoundException if user doesn't exist in Firebase Auth
+     * @throws IllegalArgumentException if user profile already exists
+     */
     override fun createUser(request: CreateUserRequest): User {
         // Verify user exists in Firebase Auth
         val userRecord = try {
@@ -62,6 +74,13 @@ class UserServiceImpl(
         return userRepository.save(user, request.uid)
     }
 
+    /**
+     * Update user profile
+     * @param uid The Firebase UID of the user
+     * @param request The update request with new user details
+     * @return The updated UserResponse DTO
+     * @throws ResourceNotFoundException if user is not found
+     */
     override fun updateUser(uid: String, request: UpdateUserRequest): UserResponse {
         val currentUser = userRepository.findById(uid)
             ?: throw ResourceNotFoundException("User not found")
@@ -82,6 +101,10 @@ class UserServiceImpl(
         return mapToUserResponse(savedUser, uid)
     }
 
+    /**
+     * Get all users in the system
+     * @return List of UserResponse DTOs for all users
+     */
     override fun getAllUsers(): List<UserResponse> {
         return userRepository.findAll().map { (uid, user) ->
             mapToUserResponse(user, uid)
@@ -104,6 +127,11 @@ class UserServiceImpl(
         )
     }
 
+    /**
+     * Check if a username is available
+     * @param username The username to check
+     * @return true if username is available and meets length requirements (4-12 chars), false otherwise
+     */
     override fun isUsernameAvailable(username: String): Boolean {
         if (username.length !in 4..12) {
             return false
@@ -111,10 +139,20 @@ class UserServiceImpl(
         return userRepository.findByUsername(username) == null
     }
 
+    /**
+     * Get user by username
+     * @param username The username to search for
+     * @return User entity or null if not found
+     */
     override fun getUserByUsername(username: String): User? {
         return userRepository.findByUsername(username)
     }
 
+    /**
+     * Check if an email is available
+     * @param email The email to check
+     * @return true if email is not already in use, false otherwise
+     */
     override fun isEmailAvailable(email: String): Boolean {
         return userRepository.findByEmail(email) == null
     }

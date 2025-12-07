@@ -18,6 +18,13 @@ class FriendshipServiceImpl(
 ) : FriendshipService {
     private val logger = Logger.getLogger(FriendshipServiceImpl::class.java.name)
 
+    /**
+     * Send a friend request to another user
+     * @param fromUserId The ID of the user sending the request
+     * @param toUserId The ID of the user receiving the request
+     * @return The created Friendship entity
+     * @throws IllegalArgumentException if friendship already exists or user tries to befriend themselves
+     */
     override fun sendFriendRequest(fromUserId: String, toUserId: String): Friendship {
         // Prevent sending request to self
         if (fromUserId == toUserId) {
@@ -48,6 +55,13 @@ class FriendshipServiceImpl(
         return savedFriendship
     }
 
+    /**
+     * Accept a friend request
+     * @param friendshipId The ID of the friendship
+     * @param userId The ID of the user accepting the request
+     * @return The updated Friendship entity with ACCEPTED status
+     * @throws IllegalArgumentException if user is not the request recipient or friendship is not pending
+     */
     override fun acceptFriendRequest(friendshipId: String, userId: String): Friendship {
         val friendship = friendshipRepository.findById(friendshipId)
             ?: throw ResourceNotFoundException("Friendship not found")
@@ -78,6 +92,13 @@ class FriendshipServiceImpl(
         return updatedFriendship
     }
 
+    /**
+     * Decline a friend request
+     * @param friendshipId The ID of the friendship
+     * @param userId The ID of the user declining the request
+     * @return The updated Friendship entity with DECLINED status
+     * @throws IllegalArgumentException if user is not the request recipient or friendship is not pending
+     */
     override fun declineFriendRequest(friendshipId: String, userId: String): Friendship {
         val friendship = friendshipRepository.findById(friendshipId)
             ?: throw ResourceNotFoundException("Friendship not found")
@@ -108,6 +129,12 @@ class FriendshipServiceImpl(
         return updatedFriendship
     }
 
+    /**
+     * Remove a friend (delete friendship)
+     * @param friendshipId The ID of the friendship to remove
+     * @param userId The ID of the user removing the friend
+     * @throws IllegalArgumentException if user is not part of the friendship
+     */
     override fun removeFriend(friendshipId: String, userId: String) {
         val friendship = friendshipRepository.findById(friendshipId)
             ?: throw ResourceNotFoundException("Friendship not found")
@@ -122,18 +149,33 @@ class FriendshipServiceImpl(
         logger.info("Friendship removed: $friendshipId")
     }
 
+    /**
+     * Get pending friend requests received by a user
+     * @param userId The ID of the user
+     * @return List of pending Friendship entities where user is the recipient
+     */
     override fun getPendingRequests(userId: String): List<Friendship> {
         val friendships = friendshipRepository.findPendingRequestsForUser(userId)
         logger.info("Retrieved ${friendships.size} pending requests for user: $userId")
         return friendships
     }
 
+    /**
+     * Get accepted friendships for a user
+     * @param userId The ID of the user
+     * @return List of accepted Friendship entities where user is a participant
+     */
     override fun getFriends(userId: String): List<Friendship> {
         val friendships = friendshipRepository.findAcceptedFriendshipsForUser(userId)
         logger.info("Retrieved ${friendships.size} friends for user: $userId")
         return friendships
     }
 
+    /**
+     * Get pending friend requests sent by a user
+     * @param userId The ID of the user
+     * @return List of pending Friendship entities where user is the requester
+     */
     override fun getSentRequests(userId: String): List<Friendship> {
         val friendships = friendshipRepository.findSentRequestsByUser(userId)
         logger.info("Retrieved ${friendships.size} sent requests for user: $userId")
