@@ -14,14 +14,6 @@ An Android application for organizing and managing social events with friends. C
 
 ## Technology Stack
 
-### Backend
-- **Kotlin 1.9.25** with **Spring Boot 3.5.6**
-- **Firebase Firestore** - NoSQL document database
-- **Firebase Authentication** - Secure user authentication with JWT tokens
-- **Cloudinary** - Cloud-based image storage with automatic optimization
-- **Gradle with Kotlin DSL** - Build management
-- **MockK** - Kotlin-first testing framework
-
 ### Frontend (Android)
 - **Kotlin 2.0.21** with **Jetpack Compose**
 - **Material 3** - Modern Material Design components
@@ -32,6 +24,14 @@ An Android application for organizing and managing social events with friends. C
 - **Google Maps Compose** - Location features
 - **Navigation Compose** - Type-safe navigation
 - **Min SDK 26** (Android 8.0) | **Target SDK 36**
+
+### Backend
+- **Kotlin 1.9.25** with **Spring Boot 3.5.6**
+- **Firebase Firestore** - NoSQL document database
+- **Firebase Authentication** - Secure user authentication with JWT tokens
+- **Cloudinary** - Cloud-based image storage with automatic optimization
+- **Gradle with Kotlin DSL** - Build management
+- **MockK** - Kotlin-first testing framework
 
 ## Frontend Structure
 
@@ -550,6 +550,6 @@ cd backend
 - [ ] Multi-language support (i18n)
 - [ ] Dark mode theme
 
-## Contributors
+## PROG2007 - Mobile Programming
 
 Project developed as part of **PROG2007 - Mobile Programming** at **NTNU** (Norwegian University of Science and Technology).
