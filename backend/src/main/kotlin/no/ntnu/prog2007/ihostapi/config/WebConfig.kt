@@ -15,21 +15,17 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
  * **Security Note**: The current configuration allows all origins (`*`) for development
  * flexibility. In production, this should be restricted to known client origins
  * to prevent unauthorized cross-origin access.
+ *
+ * Configuration details:
+ * - `allowedOrigins("*")`: Permits requests from any origin
+ * - `allowedMethods`: Restricts to standard REST methods (no PATCH/OPTIONS explicitly)
+ * - `allowedHeaders("*")`: Accepts all headers including Authorization for JWT tokens
  */
+
 @Configuration
 class WebConfig : WebMvcConfigurer {
 
-    /**
-     * Registers CORS mappings for all API endpoints.
-     *
-     * Configuration details:
-     * - `/**`: Applies to all paths in the application
-     * - `allowedOrigins("*")`: Permits requests from any origin
-     * - `allowedMethods`: Restricts to standard REST methods (no PATCH/OPTIONS explicitly)
-     * - `allowedHeaders("*")`: Accepts all headers including Authorization for JWT tokens
-     *
-     * @param registry The CORS registry to configure
-     */
+
     override fun addCorsMappings(registry: CorsRegistry) {
         registry.addMapping("/**")
             .allowedOrigins("*")
