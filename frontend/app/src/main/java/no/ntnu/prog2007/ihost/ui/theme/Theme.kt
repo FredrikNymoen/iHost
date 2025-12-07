@@ -12,6 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
+/**
+ * Dark color scheme for night mode
+ *
+ * Uses darker brown tones with warm cream accents for text.
+ */
 private val DarkColorScheme = darkColorScheme(
     primary = RichBrown,
     secondary = WarmBrown,
@@ -25,6 +30,12 @@ private val DarkColorScheme = darkColorScheme(
     onSurface = WarmCream
 )
 
+/**
+ * Light color scheme for day mode
+ *
+ * Uses warm browns and cream tones for a welcoming aesthetic.
+ * Primary is rich brown, backgrounds are warm white/cream.
+ */
 private val LightColorScheme = lightColorScheme(
     primary = RichBrown,              // Rich dark brown - stands out
     secondary = WarmPeach,            // Light peach - soft accent
@@ -38,6 +49,16 @@ private val LightColorScheme = lightColorScheme(
     onSurface = DarkBrown             // Dark text on surface
 )
 
+/**
+ * Main theme composable for the iHost application
+ *
+ * Provides Material3 theming with warm brown color palette.
+ * Supports light/dark modes and optional dynamic colors on Android 12+.
+ *
+ * @param darkTheme Whether to use dark color scheme (default: follow system)
+ * @param dynamicColor Whether to use dynamic colors from system (Android 12+)
+ * @param content Content to be themed
+ */
 @Composable
 fun IHostTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

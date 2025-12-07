@@ -2,6 +2,14 @@ package no.ntnu.prog2007.ihost.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+/**
+ * Color palette for the iHost application
+ *
+ * Warm, neutral color scheme with brown tones for a welcoming,
+ * approachable aesthetic. Includes primary browns for accents,
+ * warm backgrounds, and legacy colors for compatibility.
+ */
+
 // Neutral warm color palette
 val WarmBrown = Color(0xFFD0B8AC)      // Soft brown/beige - for backgrounds
 val WarmPeach = Color(0xFFF3D8C7)       // Light peach - for secondary elements

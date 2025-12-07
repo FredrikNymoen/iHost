@@ -4,6 +4,8 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
+import no.ntnu.prog2007.ihost.BuildConfig
+import no.ntnu.prog2007.ihost.data.remote.api.*
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -11,10 +13,30 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 
+/**
+ * Singleton Retrofit client for API communication
+ *
+ * Provides configured Retrofit instances for all API interfaces.
+ * Includes Firebase authentication via the FirebaseAuthInterceptor
+ * which automatically adds the current user's ID token to all requests.
+ *
+ * Base URL is configured via BuildConfig.BASE_URL which points to:
+ * - `http://10.0.2.2:8080/` for Android emulator (maps to localhost:8080)
+ * - Backend runs on Spring Boot at port 8080
+ */
 object RetrofitClient {
-    private const val BASE_URL = "http://10.0.2.2:8080/"
+    private const val BASE_URL = BuildConfig.BASE_URL
 
-    // Interceptor that adds Firebase ID token to every request
+    /**
+     * OkHttp interceptor that adds Firebase ID token to every request
+     *
+     * Automatically fetches the current user's Firebase ID token and adds it
+     * to the Authorization header as "Bearer {token}". The backend validates
+     * this token using Firebase Admin SDK.
+     *
+     * Critical for authentication flow - without this, all protected endpoints
+     * will return 401 Unauthorized.
+     */
     private class FirebaseAuthInterceptor : Interceptor {
         @Throws(IOException::class)
         override fun intercept(chain: Interceptor.Chain): Response {
@@ -58,12 +80,53 @@ object RetrofitClient {
         .addInterceptor(FirebaseAuthInterceptor())
         .build()
 
-    val apiService: ApiService by lazy {
+    /**
+     * Configured Retrofit instance with authentication and JSON conversion
+     *
+     * Uses Gson for JSON serialization/deserialization and includes
+     * the Firebase auth interceptor for automatic token management.
+     */
+    private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(ApiService::class.java)
     }
+
+    /**
+     * API interface for user profile operations
+     */
+    val userApi: UserApi by lazy {
+        retrofit.create(UserApi::class.java)
+    }
+
+    /**
+     * API interface for event CRUD operations
+     */
+    val eventApi: EventApi by lazy {
+        retrofit.create(EventApi::class.java)
+    }
+
+    /**
+     * API interface for event participation management
+     */
+    val eventUserApi: EventUserApi by lazy {
+        retrofit.create(EventUserApi::class.java)
+    }
+
+    /**
+     * API interface for image uploads to Cloudinary
+     */
+    val imageApi: ImageApi by lazy {
+        retrofit.create(ImageApi::class.java)
+    }
+
+    /**
+     * API interface for friendship management
+     */
+    val friendshipApi: FriendshipApi by lazy {
+        retrofit.create(FriendshipApi::class.java)
+    }
+
 }

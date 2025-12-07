@@ -33,6 +33,10 @@ android {
         val mapsApiKey = localProperties.getProperty("GOOGLE_MAPS_API_KEY") ?: ""
         buildConfigField("String", "GOOGLE_MAPS_API_KEY", "\"$mapsApiKey\"")
         manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = mapsApiKey
+
+        // Add BASE_URL from local.properties
+        val baseUrl = localProperties.getProperty("BASE_URL") ?: "http://10.0.2.2:8080/"
+        buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
     }
 
     buildTypes {
@@ -54,6 +58,16 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+    // Fix for duplicate META-INF files from JUnit dependencies
+    packaging {
+        resources {
+            excludes += setOf(
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE-notice.md",
+                "META-INF/NOTICE.md"
+            )
+        }
     }
 
 }
@@ -101,6 +115,9 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
 
     testImplementation(libs.junit)
+    // MockK for instrumented tests
+    androidTestImplementation("io.mockk:mockk-android:1.13.8")
+    androidTestImplementation("io.mockk:mockk-agent:1.13.8")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -111,8 +128,8 @@ dependencies {
     // Icons
     implementation("androidx.compose.material:material-icons-extended")
 
-    // Stripe
-    implementation("com.stripe:stripe-android:20.49.0")
+    // Splash Screen API
+    implementation("androidx.core:core-splashscreen:1.0.1")
 
     // Google Maps
     implementation("com.google.maps.android:maps-compose:4.3.0")

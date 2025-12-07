@@ -4,53 +4,38 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.FirebaseApp
-import no.ntnu.prog2007.ihost.service.StripePaymentService
-import no.ntnu.prog2007.ihost.ui.components.AppHeader
-import no.ntnu.prog2007.ihost.ui.components.BottomNavigationBar
-import no.ntnu.prog2007.ihost.ui.navigation.NavigationGraph
-import no.ntnu.prog2007.ihost.ui.navigation.Screen
+import no.ntnu.prog2007.ihost.ui.components.layout.AppScaffold
+import no.ntnu.prog2007.ihost.ui.components.splash.SplashScreen
+import no.ntnu.prog2007.ihost.ui.navigation.config.Destination
+import no.ntnu.prog2007.ihost.ui.navigation.state.DataLoadingEffects
+import no.ntnu.prog2007.ihost.ui.navigation.state.NavigationEffects
+import no.ntnu.prog2007.ihost.ui.navigation.state.rememberNavigationState
 import no.ntnu.prog2007.ihost.ui.theme.IHostTheme
-import no.ntnu.prog2007.ihost.viewmodel.AuthViewModel
-import no.ntnu.prog2007.ihost.viewmodel.EventViewModel
-import no.ntnu.prog2007.ihost.viewmodel.StripeViewModel
-import no.ntnu.prog2007.ihost.viewmodel.FriendViewModel
+import no.ntnu.prog2007.ihost.viewmodel.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         // Initialize Firebase
         FirebaseApp.initializeApp(this)
 
-        // Initialize Stripe PaymentSheet BEFORE setContent
-        // Dette er KRITISK - må gjøres i onCreate() før aktiviteten blir RESUMED
-        StripePaymentService.initializePaymentSheet(this)
-
         setContent {
+            var showSplash by remember { mutableStateOf(true) }
+
             IHostTheme {
-                IHostApp()
+                if (showSplash) {
+                    SplashScreen { showSplash = false }
+                } else {
+                    IHostApp()
+                }
             }
         }
     }
@@ -59,116 +44,60 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun IHostApp() {
     val navController = rememberNavController()
+    val navigationState = rememberNavigationState(navController)
+
+    // ViewModels
     val authViewModel: AuthViewModel = viewModel()
-    val eventViewModel: EventViewModel = viewModel { EventViewModel(authViewModel) }
-    val stripeViewModel: StripeViewModel = viewModel()
-    val friendViewModel: FriendViewModel = viewModel { FriendViewModel(authViewModel) }
+    val eventViewModel: EventViewModel = viewModel()
+    val friendViewModel: FriendViewModel = viewModel()
+    val userViewModel: UserViewModel = viewModel()
 
     val authUiState by authViewModel.uiState.collectAsState()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
 
-    // Track if we've already handled initial navigation
-    var hasNavigatedOnLogin by remember { mutableStateOf(false) }
+    // Show loading screen while checking authentication
+    if (authUiState.isCheckingAuth) {
+        SplashScreen { }
+        return
+    }
 
     // Determine start destination based on login state
     val startDestination = if (authUiState.isLoggedIn) {
-        Screen.Events.route
+        Destination.Events.route
     } else {
-        Screen.Login.route
+        Destination.Welcome.route
     }
 
-    // Load events on app start if already logged in
-    LaunchedEffect(Unit) {
-        if (authUiState.isLoggedIn) {
-            eventViewModel.ensureEventsLoaded()
-        }
-    }
-
-    // Navigate when auth state changes
-    LaunchedEffect(authUiState.isLoggedIn, authUiState.isLoading, currentRoute) {
-        if (authUiState.isLoggedIn && !authUiState.isLoading) {
-            // User just logged in/signed up and loading is done
-            // Navigate if we're on Login/SignUp screen
-            if (currentRoute in listOf(Screen.Login.route, Screen.SignUp.route, Screen.PersonalInfo.route)) {
-                if (!hasNavigatedOnLogin) {
-                    hasNavigatedOnLogin = true
-                    // Load fresh events for the new user
-                    eventViewModel.loadEvents()
-                    // Navigate to Events
-                    navController.navigate(Screen.Events.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
-                }
-            }
-        } else if (!authUiState.isLoggedIn) {
-            // Reset flag when user is logged out
-            hasNavigatedOnLogin = false
-            // If user logged out and not on auth screens, navigate back to Login
-            if (currentRoute != null && currentRoute !in listOf(Screen.Login.route, Screen.SignUp.route, Screen.PersonalInfo.route)) {
-                eventViewModel.resetEvents()
-                navController.navigate(Screen.Login.route) {
-                    popUpTo(0) { inclusive = true }
-                }
-            }
-        }
-    }
-
-    // Screens for bottom navigation (only shown when logged in)
-    val bottomNavScreens = listOf(
-        Screen.Events,
-        Screen.AddEvent,
-        Screen.Profile
+    // Handle initial data loading
+    DataLoadingEffects(
+        authUiState = authUiState,
+        eventViewModel = eventViewModel,
+        userViewModel = userViewModel
     )
 
-    // Check if we should show bottom navigation and header
-    val shouldShowBottomNav = currentRoute in bottomNavScreens.map { it.route }
-    val shouldShowHeader = currentRoute != Screen.Login.route &&
-                           currentRoute != Screen.SignUp.route &&
-                           currentRoute?.startsWith("event_detail") != true &&
-                           currentRoute?.startsWith("edit_event") != true &&
-                           currentRoute?.startsWith("invite_users") != true &&
-                           currentRoute != Screen.AddFriend.route &&
-                           currentRoute != Screen.FriendsList.route
-
-    val gradientBrush = Brush.verticalGradient(
-        colors = listOf(
-            MaterialTheme.colorScheme.background,
-            MaterialTheme.colorScheme.surface
-        )
+    // Handle navigation based on auth state
+    NavigationEffects(
+        authUiState = authUiState,
+        navigationState = navigationState,
+        eventViewModel = eventViewModel,
+        friendViewModel = friendViewModel,
+        userViewModel = userViewModel
     )
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(gradientBrush)
-    ) {
-        Scaffold(
-            topBar = {
-                if (shouldShowHeader) {
-                    AppHeader()
-                }
-            },
-            bottomBar = {
-                if (shouldShowBottomNav) {
-                    BottomNavigationBar(
-                        navController = navController,
-                        screens = bottomNavScreens,
-                        currentRoute = currentRoute
-                    )
-                }
-            },
-            containerColor = Color.Transparent
-        ) { padding ->
-            NavigationGraph(
-                navController = navController,
-                authViewModel = authViewModel,
-                eventViewModel = eventViewModel,
-                stripeViewModel = stripeViewModel,
-                friendViewModel = friendViewModel,
-                modifier = Modifier.padding(padding),
-                startDestination = startDestination
-            )
+    // Also clear auth data on logout
+    LaunchedEffect(authUiState.isLoggedIn) {
+        if (!authUiState.isLoggedIn) {
+            authViewModel.clearAuthData()
         }
     }
+
+    // Render app scaffold
+    AppScaffold(
+        navController = navController,
+        navigationState = navigationState,
+        authViewModel = authViewModel,
+        eventViewModel = eventViewModel,
+        friendViewModel = friendViewModel,
+        userViewModel = userViewModel,
+        startDestination = startDestination
+    )
 }

@@ -1,296 +1,169 @@
 package no.ntnu.prog2007.ihostapi.controller
 
-import com.google.cloud.firestore.Firestore
-import no.ntnu.prog2007.ihostapi.model.*
-import org.springframework.http.HttpStatus
+import no.ntnu.prog2007.ihostapi.exception.UnauthorizedException
+import no.ntnu.prog2007.ihostapi.model.dto.*
+import no.ntnu.prog2007.ihostapi.service.EventUserService
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.logging.Logger
 
 /**
- * Controller for managing event-user relationships
- * Handles invitations, acceptances, and attendee management
+ * REST controller for managing event-user relationships and participation.
+ *
+ * This controller handles the many-to-many relationship between users and events
+ * through the EventUser junction entity. It manages:
+ * - Event invitations (sent by event creators or participants)
+ * - Invitation acceptance/decline workflow
+ * - Retrieving event attendees and user's events
+ *
+ * EventUser relationships track both the status (INVITED, ACCEPTED, DECLINED, CREATOR)
+ * and the role (CREATOR, PARTICIPANT) of each user in an event.
+ *
+ * @property eventUserService Business logic service for event-user operations
+ * @see no.ntnu.prog2007.ihostapi.service.EventUserService for business logic
+ * @see no.ntnu.prog2007.ihostapi.model.entity.EventUser for relationship model
  */
 @RestController
 @RequestMapping("/api/event-users")
 class EventUserController(
-    private val firestore: Firestore
+    private val eventUserService: EventUserService
 ) {
     private val logger = Logger.getLogger(EventUserController::class.java.name)
 
-    companion object {
-        const val EVENT_USERS_COLLECTION = "event_users"
-        const val EVENTS_COLLECTION = "events"
-    }
-
     /**
-     * Invite users to an event
-     * Only the event creator can invite users
+     * Sends event invitations to multiple users.
+     *
+     * Only event creators or existing participants can invite others.
+     * Creates EventUser records with INVITED status for each user.
+     * Duplicate invitations are handled gracefully by the service.
+     *
+     * @param request Contains eventId and list of user IDs to invite
+     * @return Success message with count of invited users
+     * @throws ForbiddenException if the current user cannot invite to this event
      */
     @PostMapping("/invite")
-    fun inviteUsers(
-        @RequestBody request: InviteUsersRequest
-    ): ResponseEntity<Any> {
-        return try {
-            val currentUserId = SecurityContextHolder.getContext().authentication.principal as? String
-                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
+    fun inviteUsers(@RequestBody request: InviteUsersRequest): ResponseEntity<Map<String, Any>> {
+        val currentUserId = getCurrentUserId()
+        val invitedUsers = eventUserService.inviteUsers(request.eventId, request.userIds, currentUserId)
 
-            // Verify event exists and user is the creator
-            val eventDoc = firestore.collection(EVENTS_COLLECTION)
-                .document(request.eventId)
-                .get()
-                .get()
+        logger.info("Invited ${invitedUsers.size} users to event ${request.eventId}")
 
-            if (!eventDoc.exists()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ErrorResponse("NOT_FOUND", "Event not found"))
-            }
-
-            val event = eventDoc.toObject(Event::class.java)
-            if (event?.creatorUid != currentUserId) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ErrorResponse("FORBIDDEN", "Only the event creator can invite users"))
-            }
-
-            val now = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-            val invitedUsers = mutableListOf<EventUserResponse>()
-
-            // Create event_user documents for each invited user
-            for (userId in request.userIds) {
-                // Check if user is already invited
-                val existingInvite = firestore.collection(EVENT_USERS_COLLECTION)
-                    .whereEqualTo("eventId", request.eventId)
-                    .whereEqualTo("userId", userId)
-                    .get()
-                    .get()
-
-                if (!existingInvite.isEmpty) {
-                    logger.info("User $userId already invited to event ${request.eventId}")
-                    continue
-                }
-
-                val eventUser = EventUser(
-                    eventId = request.eventId,
-                    userId = userId,
-                    status = EventUserStatus.PENDING,
-                    role = EventUserRole.ATTENDEE,
-                    invitedAt = now,
-                    respondedAt = null
-                )
-
-                val docRef = firestore.collection(EVENT_USERS_COLLECTION).document()
-                docRef.set(eventUser).get()
-                // Add EventUserResponse with Firestore document ID
-                invitedUsers.add(EventUserResponse.from(eventUser, docRef.id))
-            }
-
-            logger.info("Invited ${invitedUsers.size} users to event ${request.eventId}")
-
-            ResponseEntity.ok(mapOf(
-                "message" to "Users invited successfully",
-                "invitedCount" to invitedUsers.size,
-                "invitedUsers" to invitedUsers
-            ))
-        } catch (e: Exception) {
-            logger.severe("Error inviting users: ${e.message}")
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse("ERROR", "Failed to invite users: ${e.message}"))
-        }
+        return ResponseEntity.ok(mapOf(
+            "message" to "Users invited successfully",
+            "invitedCount" to invitedUsers.size,
+            "invitedUsers" to invitedUsers
+        ))
     }
 
     /**
-     * Accept an event invitation
+     * Accepts an event invitation.
+     *
+     * Changes the user's status from INVITED to ACCEPTED. Only the invited
+     * user can accept their own invitation. For paid events, payment must
+     * be processed before calling this endpoint.
+     *
+     * @param eventUserId The EventUser relationship ID (not the event ID)
+     * @return Success message with the event ID
+     * @throws ForbiddenException if user is not the invitation recipient
      */
     @PostMapping("/{eventUserId}/accept")
-    fun acceptInvitation(
-        @PathVariable eventUserId: String
-    ): ResponseEntity<Any> {
-        return try {
-            val currentUserId = SecurityContextHolder.getContext().authentication.principal as? String
-                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
+    fun acceptInvitation(@PathVariable eventUserId: String): ResponseEntity<Map<String, String>> {
+        val currentUserId = getCurrentUserId()
+        val eventId = eventUserService.acceptInvitation(eventUserId, currentUserId)
 
-            val docRef = firestore.collection(EVENT_USERS_COLLECTION).document(eventUserId)
-            val doc = docRef.get().get()
+        logger.info("User $currentUserId accepted invitation to event $eventId")
 
-            if (!doc.exists()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ErrorResponse("NOT_FOUND", "Invitation not found"))
-            }
-
-            val eventUser = doc.toObject(EventUser::class.java)
-            if (eventUser?.userId != currentUserId) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ErrorResponse("FORBIDDEN", "You can only respond to your own invitations"))
-            }
-
-            val now = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-            docRef.update(
-                mapOf(
-                    "status" to EventUserStatus.ACCEPTED.name,
-                    "respondedAt" to now
-                )
-            ).get()
-
-            logger.info("User $currentUserId accepted invitation to event ${eventUser.eventId}")
-
-            ResponseEntity.ok(mapOf(
-                "message" to "Invitation accepted",
-                "eventId" to eventUser.eventId
-            ))
-        } catch (e: Exception) {
-            logger.severe("Error accepting invitation: ${e.message}")
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse("ERROR", "Failed to accept invitation: ${e.message}"))
-        }
+        return ResponseEntity.ok(mapOf(
+            "message" to "Invitation accepted",
+            "eventId" to eventId
+        ))
     }
 
     /**
-     * Decline an event invitation
+     * Declines an event invitation.
+     *
+     * Changes the user's status from INVITED to DECLINED. The relationship
+     * record is kept for audit purposes rather than deleted. Only the invited
+     * user can decline their own invitation.
+     *
+     * @param eventUserId The EventUser relationship ID (not the event ID)
+     * @return Success message with the event ID
+     * @throws ForbiddenException if user is not the invitation recipient
      */
     @PostMapping("/{eventUserId}/decline")
-    fun declineInvitation(
-        @PathVariable eventUserId: String
-    ): ResponseEntity<Any> {
-        return try {
-            val currentUserId = SecurityContextHolder.getContext().authentication.principal as? String
-                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
+    fun declineInvitation(@PathVariable eventUserId: String): ResponseEntity<Map<String, String>> {
+        val currentUserId = getCurrentUserId()
+        val eventId = eventUserService.declineInvitation(eventUserId, currentUserId)
 
-            val docRef = firestore.collection(EVENT_USERS_COLLECTION).document(eventUserId)
-            val doc = docRef.get().get()
+        logger.info("User $currentUserId declined invitation to event $eventId")
 
-            if (!doc.exists()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ErrorResponse("NOT_FOUND", "Invitation not found"))
-            }
-
-            val eventUser = doc.toObject(EventUser::class.java)
-            if (eventUser?.userId != currentUserId) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ErrorResponse("FORBIDDEN", "You can only respond to your own invitations"))
-            }
-
-            val now = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-            docRef.update(
-                mapOf(
-                    "status" to EventUserStatus.DECLINED.name,
-                    "respondedAt" to now
-                )
-            ).get()
-
-            logger.info("User $currentUserId declined invitation to event ${eventUser.eventId}")
-
-            ResponseEntity.ok(mapOf(
-                "message" to "Invitation declined",
-                "eventId" to eventUser.eventId
-            ))
-        } catch (e: Exception) {
-            logger.severe("Error declining invitation: ${e.message}")
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse("ERROR", "Failed to decline invitation: ${e.message}"))
-        }
+        return ResponseEntity.ok(mapOf(
+            "message" to "Invitation declined",
+            "eventId" to eventId
+        ))
     }
 
     /**
-     * Get all attendees for an event
+     * Retrieves all attendees for a specific event.
+     *
+     * Returns user information and relationship details for everyone associated
+     * with the event. Optionally filters by status (INVITED, ACCEPTED, DECLINED, CREATOR).
+     *
+     * @param eventId The event to retrieve attendees for
+     * @param status Optional status filter (e.g., "ACCEPTED" for confirmed attendees only)
+     * @return List of attendees with their user info and event relationship details
      */
     @GetMapping("/event/{eventId}")
     fun getEventAttendees(
         @PathVariable eventId: String,
         @RequestParam(required = false) status: String?
-    ): ResponseEntity<Any> {
-        return try {
-            SecurityContextHolder.getContext().authentication.principal as? String
-                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
+    ): ResponseEntity<List<EventUserResponse>> {
+        getCurrentUserId() // Verify authentication
+        val eventUsers = eventUserService.getEventAttendees(eventId, status)
 
-            var query = firestore.collection(EVENT_USERS_COLLECTION)
-                .whereEqualTo("eventId", eventId)
-
-            // Filter by status if provided
-            if (status != null) {
-                query = query.whereEqualTo("status", status.uppercase())
-            }
-
-            val result = query.get().get()
-            val eventUsers = result.documents.mapNotNull { doc ->
-                val eventUser = doc.toObject(EventUser::class.java)
-                // Convert to EventUserResponse with Firestore document ID
-                eventUser?.let { EventUserResponse.from(it, doc.id) }
-            }
-
-            ResponseEntity.ok(eventUsers)
-        } catch (e: Exception) {
-            logger.severe("Error getting event attendees: ${e.message}")
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse("ERROR", "Failed to get attendees: ${e.message}"))
-        }
+        return ResponseEntity.ok(eventUsers)
     }
 
     /**
-     * Get all events for current user
+     * Retrieves all events the authenticated user is associated with.
+     *
+     * Returns events where the user has any relationship (INVITED, ACCEPTED, CREATOR).
+     * Optionally filters by status to show only specific event types.
+     * Each event includes the full event data plus user's status and role.
+     *
+     * @param status Optional status filter (e.g., "INVITED" for pending invitations only)
+     * @return List of events with user relationship details
      */
     @GetMapping("/my-events")
-    fun getMyEvents(
-        @RequestParam(required = false) status: String?
-    ): ResponseEntity<Any> {
-        return try {
-            val currentUserId = SecurityContextHolder.getContext().authentication.principal as? String
-                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
+    fun getMyEvents(@RequestParam(required = false) status: String?): ResponseEntity<List<Map<String, Any?>>> {
+        val currentUserId = getCurrentUserId()
+        val events = eventUserService.getMyEvents(currentUserId, status)
 
-            var query = firestore.collection(EVENT_USERS_COLLECTION)
-                .whereEqualTo("userId", currentUserId)
+        return ResponseEntity.ok(events)
+    }
 
-            // Filter by status if provided
-            if (status != null) {
-                query = query.whereEqualTo("status", status.uppercase())
-            }
-
-            val result = query.get().get()
-            val eventUsers = result.documents.mapNotNull { doc ->
-                doc.toObject(EventUser::class.java)
-            }
-
-            // Fetch the actual event details for each
-            val events = eventUsers.mapNotNull { eventUser ->
-                try {
-                    val eventDoc = firestore.collection(EVENTS_COLLECTION)
-                        .document(eventUser.eventId)
-                        .get()
-                        .get()
-
-                    if (eventDoc.exists()) {
-                        val event = eventDoc.toObject(Event::class.java)
-                        mapOf(
-                            "id" to eventDoc.id,
-                            "event" to event,
-                            "userStatus" to eventUser.status,
-                            "userRole" to eventUser.role
-                        )
-                    } else null
-                } catch (e: Exception) {
-                    logger.warning("Failed to fetch event ${eventUser.eventId}: ${e.message}")
-                    null
-                }
-            }
-
-            ResponseEntity.ok(events)
-        } catch (e: Exception) {
-            logger.severe("Error getting user events: ${e.message}")
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse("ERROR", "Failed to get events: ${e.message}"))
-        }
+    /**
+     * Extracts the Firebase UID from the SecurityContext.
+     *
+     * The UID is placed in the SecurityContext by [FirebaseTokenFilter]
+     * after successfully validating the JWT token.
+     *
+     * @return Firebase UID of the authenticated user
+     * @throws UnauthorizedException if no valid authentication exists
+     * @see no.ntnu.prog2007.ihostapi.security.filter.FirebaseTokenFilter
+     */
+    private fun getCurrentUserId(): String {
+        return SecurityContextHolder.getContext().authentication.principal as? String
+            ?: throw UnauthorizedException("Token is invalid or missing")
     }
 }
 
 /**
- * Request to invite users to an event
+ * Request payload for inviting users to an event.
+ *
+ * @property eventId The Firestore document ID of the event
+ * @property userIds List of Firebase UIDs of users to invite
  */
 data class InviteUsersRequest(
     val eventId: String,

@@ -1,232 +1,132 @@
 package no.ntnu.prog2007.ihostapi.controller
 
-import com.google.cloud.firestore.Firestore
-import no.ntnu.prog2007.ihostapi.model.ErrorResponse
-import no.ntnu.prog2007.ihostapi.service.CloudinaryService
+import no.ntnu.prog2007.ihostapi.exception.UnauthorizedException
+import no.ntnu.prog2007.ihostapi.service.ImageService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.logging.Logger
 
 /**
- * Controller for handling image uploads to Cloudinary
- * Stores image metadata in Firestore collection: event_images
+ * REST controller for handling image upload operations.
+ *
+ * Manages image uploads for events and user profiles using Cloudinary as the storage backend.
+ * Cloudinary provides:
+ * - Automatic image optimization and transformation
+ * - Global CDN for fast delivery
+ * - URL-based image manipulation
+ *
+ * Uploaded images are stored in Cloudinary and their metadata (URL, eventId, etc.)
+ * is persisted in Firestore for easy retrieval.
+ *
+ * @property imageService Business logic service for image operations
+ * @see no.ntnu.prog2007.ihostapi.service.ImageService for upload implementation
+ * @see no.ntnu.prog2007.ihostapi.config.CloudinaryConfig for Cloudinary configuration
  */
 @RestController
 @RequestMapping("/api/images")
 class ImageUploadController(
-    private val cloudinaryService: CloudinaryService,
-    private val firestore: Firestore
+    private val imageService: ImageService
 ) {
     private val logger = Logger.getLogger(ImageUploadController::class.java.name)
 
-    companion object {
-        const val EVENT_IMAGES_COLLECTION = "event_images"
-    }
-
     /**
-     * Upload an image to Cloudinary and store metadata in Firestore
-     * Requires valid Firebase JWT token in Authorization header
+     * Uploads an event image to Cloudinary.
      *
-     * @param file The image file to upload
-     * @param eventId Optional event ID to associate with the image
-     * @return Response with image URL and metadata
+     * Accepts a multipart file upload, stores it in Cloudinary, and saves
+     * the image URL and metadata to Firestore. The image is associated with
+     * a specific event for gallery/display purposes.
+     *
+     * @param file The image file to upload (MultipartFile from form data)
+     * @param eventId The Firestore document ID of the event
+     * @return Image metadata including Cloudinary URL and document ID (HTTP 201)
      */
     @PostMapping("/upload")
-    fun uploadImage(
+    fun uploadEventImage(
         @RequestParam("file") file: MultipartFile,
         @RequestParam("eventId") eventId: String
-    ): ResponseEntity<Any> {
-        return try {
-            if (SecurityContextHolder.getContext().authentication.principal !is String) return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
+    ): ResponseEntity<Map<String, String>> {
+        getCurrentUserId() // Verify authentication
+        val result = imageService.uploadEventImage(file, eventId)
 
-            logger.info("Uploading image for event: $eventId")
-
-            // Upload to Cloudinary
-            val imageUrl = cloudinaryService.uploadImage(file)
-
-            // Create metadata document with only required fields
-            val now = LocalDateTime.now()
-            val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
-            val timestamp = now.format(formatter)
-
-            val imageMetadata = mapOf(
-                "path" to imageUrl,
-                "eventId" to eventId,
-                "createdAt" to timestamp
-            )
-
-            // Store in Firestore
-            val docRef = firestore.collection(EVENT_IMAGES_COLLECTION)
-                .document()
-
-            docRef.set(imageMetadata).get()
-
-            logger.info("Image uploaded and metadata stored for event: $eventId")
-
-            ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(mapOf(
-                    "message" to "Image uploaded successfully",
-                    "imageUrl" to imageUrl,
-                    "eventId" to eventId
-                ))
-        } catch (e: IllegalArgumentException) {
-            logger.warning("Invalid image upload request: ${e.message}")
-            ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ErrorResponse("INVALID_FILE", e.message ?: "Invalid file"))
-        } catch (e: Exception) {
-            logger.severe("Error uploading image: ${e.message}")
-            ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse("UPLOAD_FAILED", e.message ?: "Failed to upload image"))
-        }
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(result)
     }
 
     /**
-     * Get all images for a specific event
+     * Retrieves all images associated with an event.
      *
-     * @param eventId The event ID to get images for
-     * @return List of image metadata
+     * Returns a list of image metadata including Cloudinary URLs, upload timestamps,
+     * and document IDs. Images can be displayed in an event gallery or slideshow.
+     *
+     * @param eventId The Firestore document ID of the event
+     * @return List of image metadata objects
      */
     @GetMapping("/event/{eventId}")
-    fun getEventImages(
-        @PathVariable eventId: String
-    ): ResponseEntity<Any> {
-        return try {
-            SecurityContextHolder.getContext().authentication.principal as? String
-                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
+    fun getEventImages(@PathVariable eventId: String): ResponseEntity<List<Map<String, Any?>?>> {
+        getCurrentUserId() // Verify authentication
+        val images = imageService.getEventImages(eventId)
 
-            val query = firestore.collection(EVENT_IMAGES_COLLECTION)
-                .whereEqualTo("eventId", eventId)
-                .get()
-                .get()
-
-            val images = query.documents.map { doc ->
-                doc.data
-            }
-
-            logger.info("Retrieved ${images.size} images for event: $eventId")
-            ResponseEntity.ok(images)
-        } catch (e: Exception) {
-            logger.warning("Error getting images for event $eventId: ${e.message}")
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse("ERROR", "Could not retrieve images"))
-        }
+        logger.info("Retrieved ${images.size} images for event: $eventId")
+        return ResponseEntity.ok(images)
     }
 
     /**
-     * Upload a profile photo to Cloudinary and update user document
-     * Uploads image to Cloudinary and then updates the photoUrl field in user's Firestore document
+     * Uploads a user profile photo to Cloudinary.
      *
-     * @param file The profile photo file to upload
-     * @return Response with photo URL
+     * Uploads the image and updates the authenticated user's Firestore document
+     * with the new photo URL. Replaces any existing profile photo (old image
+     * remains in Cloudinary but is no longer referenced).
+     *
+     * @param file The profile photo to upload (MultipartFile from form data)
+     * @return Success message with the Cloudinary photo URL (HTTP 201)
      */
     @PostMapping("/upload-profile")
-    fun uploadProfilePhoto(
-        @RequestParam("file") file: MultipartFile
-    ): ResponseEntity<Any> {
-        return try {
-            // Verify authentication
-            val uid = SecurityContextHolder.getContext().authentication.principal as? String
-                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
+    fun uploadProfilePhoto(@RequestParam("file") file: MultipartFile): ResponseEntity<Map<String, String>> {
+        val uid = getCurrentUserId()
+        val photoUrl = imageService.uploadProfilePhoto(file, uid)
 
-            logger.info("Uploading profile photo for user: $uid")
-
-            // Upload to Cloudinary in user_images folder
-            val photoUrl = cloudinaryService.uploadImage(file, folder = "user_images")
-
-            logger.info("Profile photo uploaded to Cloudinary: $photoUrl")
-
-            // Update user document with new photoUrl
-            val userDocRef = firestore.collection("users").document(uid)
-            val userDoc = userDocRef.get().get()
-
-            if (!userDoc.exists()) {
-                logger.warning("User document not found for UID: $uid")
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ErrorResponse("NOT_FOUND", "User not found"))
-            }
-
-            // Update photoUrl field
-            userDocRef.update("photoUrl", photoUrl).get()
-
-            logger.info("User document updated with new photoUrl for user: $uid")
-
-            ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(mapOf(
-                    "message" to "Profile photo uploaded successfully",
-                    "photoUrl" to photoUrl
-                ))
-        } catch (e: IllegalArgumentException) {
-            logger.warning("Invalid profile photo upload request: ${e.message}")
-            ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ErrorResponse("INVALID_FILE", e.message ?: "Invalid file"))
-        } catch (e: Exception) {
-            logger.severe("Error uploading profile photo: ${e.message}")
-            ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse("UPLOAD_FAILED", e.message ?: "Failed to upload profile photo"))
-        }
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(mapOf(
+                "message" to "Profile photo uploaded successfully",
+                "photoUrl" to photoUrl
+            ))
     }
 
     /**
-     * Delete an image from both Cloudinary and Firestore
-     * Only the uploader can delete the image
+     * Deletes an image from both Cloudinary and Firestore.
+     *
+     * Removes the image file from Cloudinary storage and deletes the metadata
+     * document from Firestore. This is a permanent deletion and cannot be undone.
      *
      * @param documentId The Firestore document ID of the image metadata
      * @return Success message
      */
     @DeleteMapping("/{documentId}")
-    fun deleteImage(
-        @PathVariable documentId: String
-    ): ResponseEntity<Any> {
-        return try {
-            SecurityContextHolder.getContext().authentication.principal as? String
-                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ErrorResponse("UNAUTHORIZED", "Token is invalid or missing"))
+    fun deleteImage(@PathVariable documentId: String): ResponseEntity<Map<String, String>> {
+        getCurrentUserId() // Verify authentication
+        imageService.deleteImage(documentId)
 
-            val imageDoc = firestore.collection(EVENT_IMAGES_COLLECTION)
-                .document(documentId)
-                .get()
-                .get()
+        logger.info("Image deleted: $documentId")
+        return ResponseEntity.ok(mapOf("message" to "Image deleted successfully"))
+    }
 
-            if (!imageDoc.exists()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ErrorResponse("NOT_FOUND", "Image not found"))
-            }
-
-            // Extract public ID from Cloudinary URL to delete from Cloudinary
-            val imageUrl = imageDoc.getString("path")
-            if (imageUrl != null) {
-                // Extract public ID from URL (format: .../folder/publicId.extension)
-                val publicId = imageUrl.substringAfterLast("/").substringBeforeLast(".")
-                val folder = "event_images"
-                cloudinaryService.deleteImage("$folder/$publicId")
-            }
-
-            // Delete from Firestore
-            firestore.collection(EVENT_IMAGES_COLLECTION)
-                .document(documentId)
-                .delete()
-                .get()
-
-            logger.info("Image deleted: $documentId")
-            ResponseEntity.ok(mapOf("message" to "Image deleted successfully"))
-        } catch (e: Exception) {
-            logger.warning("Error deleting image $documentId: ${e.message}")
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse("ERROR", "Could not delete image"))
-        }
+    /**
+     * Extracts the Firebase UID from the SecurityContext.
+     *
+     * The UID is placed in the SecurityContext by [FirebaseTokenFilter]
+     * after successfully validating the JWT token.
+     *
+     * @return Firebase UID of the authenticated user
+     * @throws UnauthorizedException if no valid authentication exists
+     * @see no.ntnu.prog2007.ihostapi.security.filter.FirebaseTokenFilter
+     */
+    private fun getCurrentUserId(): String {
+        return SecurityContextHolder.getContext().authentication.principal as? String
+            ?: throw UnauthorizedException("Token is invalid or missing")
     }
 }
