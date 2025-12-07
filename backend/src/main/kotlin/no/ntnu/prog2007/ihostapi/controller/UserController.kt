@@ -14,6 +14,19 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import java.util.logging.Logger
 
+/**
+ * REST controller for user management operations.
+ *
+ * Handles user profile operations including:
+ * - User registration (creating Firestore profile after Firebase Auth signup)
+ * - Profile retrieval and updates
+ * - Username and email availability checks
+ *
+ *
+ * @property userService Business logic service for user operations
+ * @see no.ntnu.prog2007.ihostapi.service.UserService for business logic
+ * @see no.ntnu.prog2007.ihostapi.model.entity.User for user data model
+ */
 @RestController
 @RequestMapping("/api/users")
 class UserController(
@@ -23,7 +36,13 @@ class UserController(
 
 
     /**
-     * Get all users (for inviting users to events)
+     * Retrieves all user profiles.
+     *
+     * Used primarily for the "invite users to event" feature where the current
+     * user needs to browse and select other users to invite. Does not include
+     * sensitive data like email addresses in the response.
+     *
+     * @return List of all users with basic profile information
      */
     @GetMapping
     fun getAllUsers(): ResponseEntity<List<UserResponse>> {
@@ -35,7 +54,14 @@ class UserController(
     }
 
     /**
-     * Get user by UID (public endpoint)
+     * Retrieves a specific user's profile by Firebase UID.
+     *
+     * Returns public profile information for any user. This is used when
+     * displaying user details in event participant lists, friend lists, etc.
+     *
+     * @param uid The Firebase UID of the user to retrieve
+     * @return User profile information
+     * @throws IllegalArgumentException if user with the given UID doesn't exist
      */
     @GetMapping("/{uid}")
     fun getUserByUid(@PathVariable uid: String): ResponseEntity<UserResponse> {
@@ -47,7 +73,18 @@ class UserController(
     }
 
     /**
-     * Create user profile in Firestore after Firebase Auth registration
+     * Creates a user profile in Firestore after Firebase Auth registration.
+     *
+     * This is a public endpoint (no authentication required) called immediately after
+     * the mobile app creates a Firebase Auth account. It creates the corresponding
+     * user document in Firestore with profile details.
+     *
+     * The request must include the Firebase UID obtained from Firebase Auth signup.
+     * Username and email uniqueness are validated before creation.
+     *
+     * @param request User profile data including UID, email, username, and display name
+     * @return Success response with user details (HTTP 201)
+     * @throws IllegalArgumentException if username/email already exists
      */
     @PostMapping("/register")
     fun registerUser(@Valid @RequestBody request: CreateUserRequest): ResponseEntity<AuthResponse> {
@@ -68,7 +105,16 @@ class UserController(
     }
 
     /**
-     * Update user profile (only the user can update their own profile)
+     * Updates a user's profile information.
+     *
+     * Users can only update their own profile. The service enforces this by
+     * comparing the path UID with the authenticated user's UID. Partial updates
+     * are supported (only provided fields are updated).
+     *
+     * @param uid The Firebase UID of the user to update (must match authenticated user)
+     * @param request Updated profile data (username, displayName, bio, etc.)
+     * @return Updated user profile
+     * @throws ForbiddenException if user attempts to update someone else's profile
      */
     @PutMapping("/{uid}")
     fun updateUserProfile(
@@ -89,7 +135,14 @@ class UserController(
     }
 
     /**
-     * Check if a username is available
+     * Checks if a username is available for registration.
+     *
+     * This is a public endpoint used during signup to validate usernames
+     * in real-time as the user types. Returns true if the username is
+     * not already taken by another user.
+     *
+     * @param username The username to check
+     * @return Map with "available" boolean indicating if username is free
      */
     @GetMapping("/username-available/{username}")
     fun isUsernameAvailable(@PathVariable username: String): ResponseEntity<Map<String, Boolean>> {
@@ -98,7 +151,14 @@ class UserController(
     }
 
     /**
-     * Check if an email is available
+     * Checks if an email address is available for registration.
+     *
+     * This is a public endpoint used during signup to validate email addresses
+     * in real-time. Returns true if the email is not already registered in
+     * Firestore (note: Firebase Auth has its own email uniqueness check).
+     *
+     * @param email The email address to check
+     * @return Map with "available" boolean indicating if email is free
      */
     @GetMapping("/email-available/{email}")
     fun isEmailAvailable(@PathVariable email: String): ResponseEntity<Map<String, Boolean>> {
@@ -108,7 +168,14 @@ class UserController(
     }
 
     /**
-     * Helper function to get current authenticated user ID
+     * Extracts the Firebase UID from the SecurityContext.
+     *
+     * The UID is placed in the SecurityContext by [FirebaseTokenFilter]
+     * after successfully validating the JWT token.
+     *
+     * @return Firebase UID of the authenticated user
+     * @throws UnauthorizedException if no valid authentication exists
+     * @see no.ntnu.prog2007.ihostapi.security.filter.FirebaseTokenFilter
      */
     private fun getCurrentUserId(): String {
         return SecurityContextHolder.getContext().authentication.principal as? String
