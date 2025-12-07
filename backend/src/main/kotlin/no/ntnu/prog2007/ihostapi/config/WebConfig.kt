@@ -5,14 +5,30 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 /**
- * Web configuration
- * Configures CORS (Cross-Origin Resource Sharing) for API access from mobile/frontend clients
+ * Web MVC configuration for cross-origin request handling.
+ *
+ * Configures CORS (Cross-Origin Resource Sharing) to allow the API to be accessed
+ * from different origins. This is necessary because:
+ * - Mobile apps may run on different domains/ports during development
+ * - The Android emulator uses a different origin than the backend server
+ *
+ * **Security Note**: The current configuration allows all origins (`*`) for development
+ * flexibility. In production, this should be restricted to known client origins
+ * to prevent unauthorized cross-origin access.
  */
 @Configuration
 class WebConfig : WebMvcConfigurer {
+
     /**
-     * Configure CORS mappings to allow requests from all origins
-     * Allow common HTTP methods and all headers for flexibility
+     * Registers CORS mappings for all API endpoints.
+     *
+     * Configuration details:
+     * - `/**`: Applies to all paths in the application
+     * - `allowedOrigins("*")`: Permits requests from any origin
+     * - `allowedMethods`: Restricts to standard REST methods (no PATCH/OPTIONS explicitly)
+     * - `allowedHeaders("*")`: Accepts all headers including Authorization for JWT tokens
+     *
+     * @param registry The CORS registry to configure
      */
     override fun addCorsMappings(registry: CorsRegistry) {
         registry.addMapping("/**")
