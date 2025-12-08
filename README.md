@@ -2,6 +2,21 @@
 
 An Android application for organizing and managing social events with friends. Create events, invite friends, share details, and coordinate gatherings all in one place.
 
+
+## How to deploy and test iHost
+1. Create a local directory and clone the repository.
+```
+mkdir iHost
+cd iHost
+git clone https://git.gvk.idi.ntnu.no/course/prog2007/prog2007-2025-workspace/ervin/ihost.git
+```
+2. Download Android Studios from https://developer.android.com/studio
+3. Open the FRONTEND folder in Android Studios and let the gradle project sync.
+4. Open the local.properties under Gradle Scripts
+5. Enter BASE_URL=http://10.212.169.33:8080/ in local.properties
+6. Select Device Manager on the right hand side, click "+", select "Create a Virtual Device", select f.ex "Medium Phone".
+7. Select the Device and run "app" to start iHost.
+
 ## Features
 
 - 🎉 **Event Management** - Create, edit, and delete events with details (title, description, date, time, location)
