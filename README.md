@@ -17,7 +17,8 @@ git clone https://git.gvk.idi.ntnu.no/course/prog2007/prog2007-2025-workspace/er
 5. Open the FRONTEND folder in Android Studios and let the gradle project sync.
 6. Open the local.properties under Gradle Scripts
 ![local.properties](docs/frontEndLocalProps.png)
-7. Enter BASE_URL=http://10.212.169.33:8080/ in local.properties
+7. Enter BASE_URL=http://10.212.169.33:8080/ in local.properties like seen below:
+![localProperties](docs/localproperties.png)
 8. Select Device Manager on the right hand side, click "+", select "Create a Virtual Device", select f.ex "Medium Phone".
 9. Select the Device and run "app" to start iHost. <br>
 ![Run App](docs/RunApp.png)
