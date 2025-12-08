@@ -23,6 +23,9 @@ git clone https://git.gvk.idi.ntnu.no/course/prog2007/prog2007-2025-workspace/er
 9. Select the Device and run "app" to start iHost. <br>
 ![Run App](docs/RunApp.png)
 
+
+#### Please note: You MUST be on a NTNU Network or connected to NTNU VPN for the app to work.
+
 ## Features
 
 - 🎉 **Event Management** - Create, edit, and delete events with details (title, description, date, time, location)
