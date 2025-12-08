@@ -12,7 +12,7 @@ git clone https://git.gvk.idi.ntnu.no/course/prog2007/prog2007-2025-workspace/er
 ```
 2. Open the paste.iik.ntnu link found under our repository link in our Inspera delivery. (Encrypted and paassword protected, password is with the link in Inspera)
 3. Download the google-services.json file from the paste.iik.ntnu link and place it under the frontend/app/ directory in the iHost directory as seen below:
-![googleServicesLocation](docs/googleserviceslocation.png)
+![googleServicesLocation](docs/googleserviceslocation.png) <br>
 If theres any issues with getting the json file, contact skjalgct@stud.ntnu.no.
 4. Download Android Studios from https://developer.android.com/studio
 5. Open the FRONTEND folder in Android Studios and let the gradle project sync.
