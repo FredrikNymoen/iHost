@@ -528,21 +528,62 @@ Generates unique event share codes (format: `IH-XXXXX`):
 ## Testing
 
 ### Backend Tests
+
+**Location:** `backend/src/test/kotlin/no/ntnu/prog2007/ihostapi/`
+
 ```bash
 cd backend
 ./gradlew test
 ```
 
-**Test coverage:**
-- `EventServiceImplTest` - Event creation, update, deletion
-- `UserServiceImplTest` - User registration, profile updates
-- `EventUserServiceImplTest` - Invitation management
-- `FriendshipServiceImplTest` - Friend request flows
+**Test files:**
+- `IHostApiApplicationTests.kt` - Spring Boot context loading test
+- `service/impl/EventServiceImplTest.kt` - Event service unit tests
+- `service/impl/UserServiceImplTest.kt` - User service unit tests
+- `service/impl/EventUserServiceImplTest.kt` - Event-user relationship tests
+- `service/impl/FriendshipServiceImplTest.kt` - Friendship service tests
+
+**Key test coverage:**
+- **EventServiceImpl**: Share code generation (format `IH-XXXXX`), event creation with CREATOR status, authorization checks (only creator can update/delete), partial updates, event lookup by share code
+- **UserServiceImpl**: Username validation (4-12 characters, uniqueness), email availability checks, boundary testing
+- **EventUserServiceImpl**: Invitation workflows, status transitions (PENDING → ACCEPTED/DECLINED)
+- **FriendshipServiceImpl**: Friend request creation, accept/decline logic, friendship deletion
 
 **Testing tools:**
-- MockK for mocking dependencies
-- JUnit 5 for test framework
-- AssertJ for fluent assertions
+- **MockK** for mocking Firestore repositories
+- **JUnit 5** with `@Nested` and `@DisplayName` for organized test structure
+- **AAA Pattern** (Arrange, Act, Assert) for test clarity
+
+### Frontend Tests
+
+**Location:** `frontend/app/src/androidTest/` (instrumented tests), `frontend/app/src/test/` (unit tests)
+
+```bash
+cd frontend
+./gradlew test                    # Unit tests (local JVM)
+./gradlew connectedAndroidTest    # Instrumented tests (requires Android emulator/device)
+./gradlew check                   # Run all tests
+```
+
+**Test files:**
+- `ExampleUnitTest.kt` - Basic unit test example
+- `ui/screens/auth/login/LoginScreenTest.kt` - Login screen instrumented UI tests (10 tests)
+- `ui/screens/auth/signup/SignUpScreenTest.kt` - Sign-up screen instrumented UI tests (11 tests)
+- `ui/screens/addevent/AddEventScreenTest.kt` - Add event screen instrumented UI tests (9 tests)
+- `ui/screens/profile/main/ProfileScreenTest.kt` - Profile screen instrumented UI tests (17 tests)
+
+**Key test coverage:**
+- **LoginScreen**: Button enable/disable validation, email/password input, ViewModel `signIn()` calls, navigation callbacks
+- **SignUpScreen**: Password matching validation, form field validation, loading states with disabled fields, error messages
+- **AddEventScreen**: Create button logic (title required), form validation, optional fields handling, ViewModel `createEvent()` calls
+- **ProfileScreen**: Login states, profile loading, user info display (name, username, email), event statistics, edit dialogs (name, avatar), friends section, navigation flows
+
+**Testing tools:**
+- **Jetpack Compose Testing** with `createComposeRule()` for instrumented tests
+- **MockK** for mocking ViewModels and Firebase
+- **Semantic testing** using `onNodeWithTag()` and `onNodeWithText()`
+- **MutableStateFlow** for fake UI state management
+- **AAA Pattern** for test structure
 
 ## Security Features
 
