@@ -554,14 +554,6 @@ cd backend
 - ✅ **CORS Configuration** - Controlled cross-origin access
 - ✅ **No SQL Injection** - Firestore NoSQL (parameterized queries)
 
-## Performance Optimizations
-
-- 📦 **Image Optimization** - 70-80% size reduction via Cloudinary
-- 🔄 **Caching** - In-memory event cache to reduce API calls
-- ⚡ **Lazy Loading** - Images loaded on-demand with Coil
-- 🌊 **StateFlow Efficiency** - Only emits when state actually changes
-- 🏗️ **Serverless Backend** - Firebase Firestore scales automatically
-
 ## Future Improvements
 
 - [ ] Push notifications for event updates and invitations
